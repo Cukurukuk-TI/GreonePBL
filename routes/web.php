@@ -40,6 +40,6 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     // Route::view('/produk', 'produk');
     Route::view('/artikel', 'artikel');
-    Route::view('/tentang', 'tentang');
+    Route::view('/tentang', 'user.aboutus');
     Route::view('/kontak', 'kontak');
 });

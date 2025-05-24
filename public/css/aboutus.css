@@ -1,0 +1,174 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  background: #fff;
+  color: #222;
+}
+
+/* --- HEADER STYLING DIHAPUS SESUAI PERMINTAAN --- */
+/* 
+header {
+  background-color: #006400;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+
+nav ul li {
+  cursor: pointer;
+  font-size: 16px;
+}
+
+nav ul li.active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.icons {
+  display: flex;
+  gap: 20px;
+  font-size: 18px;
+}
+*/
+
+/* Slider/Carousel Styles */
+.hero-slider {
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+  left: 0; /* tambahkan */
+  top: 0; /* tambahkan */
+  margin: 0 /* optional: center kalau ada container */
+}
+
+
+
+
+.slider-container {
+  display: flex;
+  height: 100%;
+  transition: transform 0.5s ease;
+}
+
+.slide {
+  min-width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slide-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.slide-content h1 {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.slide-content p {
+  font-size: 16px;
+}
+
+.slider-nav {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.slider-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.slider-dot.active {
+  background: white;
+}
+
+.slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  font-size: 20px;
+}
+
+.prev {
+  left: 20px;
+}
+
+.next {
+  right: 20px;
+}
+
+.content {
+  padding: 50px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.content h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #006400;
+}
+
+.section {
+  margin-bottom: 60px;
+}
+
+.section p {
+  line-height: 1.6;
+  margin-bottom: 15px;
+}

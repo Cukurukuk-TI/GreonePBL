@@ -1,10 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.aboutus')
 
 @section('title', 'Tentang Kami')
-
-@section('content')
-  <!-- Hero Slider -->
-  <div class="hero-slider">
+ <!-- Hero Slider -->
+  <div class="hero-slider  w-full absolute top-0 left-0">
     <div class="slider-container" id="slider">
       <div class="slide">
         <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=1200&q=80" alt="Bgd Hydrofarm">
@@ -16,7 +14,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="https://images.unsplash.com/photo-1595470534683-c9e99c1e1a01?auto=format&fit=crop&w=1200&q=80" alt="Pertanian Hidroponik">
+        <img src="{{asset('img/sttkm.jpg')}}" alt="Pertanian Hidroponik">
         <div class="slide-content">
           <div>
             <h1>Teknologi Modern</h1>
@@ -44,6 +42,9 @@
     <div class="slider-arrow prev" id="prev">&#10094;</div>
     <div class="slider-arrow next" id="next">&#10095;</div>
   </div>
+
+
+@section('content')
 
   <!-- Content -->
   <section class="content">
@@ -109,4 +110,3 @@
   });
 </script>
 @endsection
-
