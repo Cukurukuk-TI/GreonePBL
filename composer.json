@@ -15,6 +15,7 @@
         "league/commonmark": "^2.7",
         "livewire/livewire": "^3.6",
         "midtrans/midtrans-php": "^2.6",
+        "spatie/laravel-analytics": "^5.6",
         "spatie/laravel-medialibrary": "^11.13",
         "spatie/laravel-permission": "^6.18"
     },
