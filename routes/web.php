@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\KategoriController;
 
 // Halaman umum yang bisa diakses SEMUA ORANG (termasuk guest)
 Route::get('/', fn() => view('home'));
@@ -38,8 +39,26 @@ Route::middleware('auth')->group(function () {
 
 // Halaman umum yang hanya bisa diakses setelah login
 Route::middleware('auth')->group(function () {
+    // Route::get('/produk', [ProdukController::class, 'showToUser'])->name('produk.user');
     // Route::view('/produk', 'produk');
+    Route::get('/produk', [ProdukController::class, 'showToUser'])->name('produk.user');
+    //untuk menampilkan produk dalam bentuk char yang nantinya akan dilihat oleh user
+    Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
+    //untuk menampilakn halaman detail produk
     Route::view('/artikel', 'artikel');
     Route::view('/tentang', 'user.aboutus');
     Route::view('/kontak', 'kontak');
 });
+
+
+//admin
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
+
+    Route::resource('produks', ProdukController::class);
+    Route::resource('kategoris', KategoriController::class);
+});
+
+

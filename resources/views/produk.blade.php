@@ -1,58 +1,25 @@
-@extends('layouts.app')
+@extends('layouts.app') {{-- atau 'layouts.app' jika file-nya ada di resources/views/layouts --}}
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
+    <div class="py-8 px-4">
+        <h2 class="text-2xl font-bold mb-4">Daftar Produk</h2>
 
-    {{-- Kategori: Sayur --}}
-    <section class="mb-12">
-        <h2 class="text-2xl font-semibold mb-4">Sayuran Hidroponik</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            @foreach ($sayur as $item)
-            <div class="bg-white shadow rounded p-4 text-center">
-                <img src="{{ asset('storage/' . $item->gambar_url) }}" alt="{{ $item->nama_produk }}" class="h-32 w-full object-cover mb-3 rounded">
-                <div class="font-semibold">{{ $item->nama_produk }}</div>
-                <div class="text-orange-500 font-bold">Rp{{ number_format($item->harga, 0, ',', '.') }}</div>
-                <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
-                    Tambah Keranjang
-                </button>
+        @if($produks->count())
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                @foreach($produks as $produk)
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <img src="{{ asset('storage/' . $produk->gambar_produk) }}" alt="{{ $produk->nama_produk }}"
+                            class="w-full h-40 object-cover rounded mb-3">
+                        <h3 class="text-lg font-semibold">{{ $produk->nama_produk }}</h3>
+                        <p class="text-red-600 font-bold">Rp {{ number_format($produk->harga_produk, 0, ',', '.') }}</p>
+                        <div class="mt-3">
+                            <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Beli Sekarang</button>
+                        </div>
+                    </div>
+                @endforeach
             </div>
-            @endforeach
-        </div>
-    </section>
-
-    {{-- Kategori: Pupuk --}}
-    <section class="mb-12">
-        <h2 class="text-2xl font-semibold mb-4">Pupuk</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            @foreach ($pupuk as $item)
-            <div class="bg-white shadow rounded p-4 text-center">
-                <img src="{{ asset('storage/' . $item->gambar_url) }}" alt="{{ $item->nama_produk }}" class="h-32 w-full object-cover mb-3 rounded">
-                <div class="font-semibold">{{ $item->nama_produk }}</div>
-                <div class="text-orange-500 font-bold">Rp{{ number_format($item->harga, 0, ',', '.') }}</div>
-                <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
-                    Tambah Keranjang
-                </button>
-            </div>
-            @endforeach
-        </div>
-    </section>
-
-    {{-- Kategori: Kebun --}}
-    <section class="mb-12">
-        <h2 class="text-2xl font-semibold mb-4">Instalasi Kebun Hidroponik</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            @foreach ($kebun as $item)
-            <div class="bg-white shadow rounded p-4 text-center">
-                <img src="{{ asset('storage/' . $item->gambar_url) }}" alt="{{ $item->nama_produk }}" class="h-32 w-full object-cover mb-3 rounded">
-                <div class="font-semibold">{{ $item->nama_produk }}</div>
-                <div class="text-orange-500 font-bold">Rp{{ number_format($item->harga, 0, ',', '.') }}</div>
-                <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
-                    Tambah Keranjang
-                </button>
-            </div>
-            @endforeach
-        </div>
-    </section>
-
-</div>
+        @else
+            <p class="text-gray-500">Belum ada produk yang tersedia.</p>
+        @endif
+    </div>
 @endsection
