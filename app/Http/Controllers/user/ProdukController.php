@@ -9,7 +9,18 @@ use Illuminate\Support\Facades\Auth;
 
 class ProdukController extends Controller
 {
-    public function index(Request $request)
+public function index(Request $request)
+{
+    $kategoriSlugs = ['sayur', 'pupuk', 'kebun'];
+    $produkByKategori = [];
+
+    foreach ($kategoriSlugs as $slug) {
+        $produkByKategori[$slug] = Produk::whereHas('kategori', fn ($q) => $q->where('slug', $slug))->get();
+    }
+
+    return view('produk', $produkByKategori);
+}
+```public function index(Request $request)
     {
         $sayur = Produk::whereHas('kategori', fn ($q) => $q->where('slug', 'sayur'))->get();
         $pupuk = Produk::whereHas('kategori', fn ($q) => $q->where('slug', 'pupuk'))->get();

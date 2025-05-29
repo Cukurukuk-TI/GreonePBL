@@ -53,25 +53,13 @@ Route::middleware('auth')->group(function () {
 
 
 //admin
-// Route::prefix('admin')->name('admin.')->group(function () {
-//     Route::get('/dashboard', function () {
-//         return view('admin.dashboard');
-//     })->name('dashboard');
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
 
-//     Route::resource('produks', ProdukController::class);
-//     Route::resource('kategoris', KategoriController::class);
-// });
+    Route::resource('produks', ProdukController::class);
+    Route::resource('kategoris', KategoriController::class);
+});
 
-
-
-// Admin route - hanya bisa diakses oleh user yang sudah login dan punya role 'admin'
-Route::prefix('admin')
-    ->name('admin.')
-    ->middleware(['auth', 'admin'])
-    ->group(function () {
-        Route::get('/dashboard', fn() => view('admin.dashboard'))->name('dashboard');
-
-        Route::resource('produks', ProdukController::class);
-        Route::resource('kategoris', KategoriController::class);
-    });
 

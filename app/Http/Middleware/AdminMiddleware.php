@@ -4,18 +4,17 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; 
-use Symfony\Component\HttpFoundation\Response;
-use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class AdminMiddleware
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->isAdmin() ) {
+        if (Auth::check() && Auth::user()->role === 'admin') {
             return $next($request);
         }
 
-        abort(403, 'Unauthorized');
+        // Jika bukan admin, redirect ke beranda atau tampilkan 403
+        return abort(403, 'Akses ditolak. Halaman ini hanya untuk admin.');
     }
 }
