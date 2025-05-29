@@ -97,6 +97,7 @@ class ProdukController extends Controller
         return redirect()->route('admin.produks.index')->with('success', 'Produk berhasil dihapus.');
     }
 
+   //untuk menampilkan halaman produk yang nantinya akan diakses oleh user dalam bentuk chart
     public function showToUser()
     {
         $produks = Produk::with('kategori')->latest()->get();
@@ -105,10 +106,11 @@ class ProdukController extends Controller
         return view('user.produk', compact('produks', 'kategoris'));
     }
 
+    //unutk menampilkan halaman detail produk 
     public function show($id)
     {
         $produk = Produk::with('kategori')->findOrFail($id);
-        return view('user.produk', compact('produk'));
+        return view('user.deskripsiproduk', compact('produk'));
     }
 
 }

@@ -43,7 +43,7 @@ Route::middleware('auth')->group(function () {
     // Route::view('/produk', 'produk');
     Route::get('/produk', [ProdukController::class, 'showToUser'])->name('produk.user');
     //untuk menampilkan produk dalam bentuk char yang nantinya akan dilihat oleh user
-    Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
+    Route::get('/deskripsi-produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
     //untuk menampilakn halaman detail produk
     Route::view('/artikel', 'artikel');
     Route::view('/tentang', 'user.aboutus');
