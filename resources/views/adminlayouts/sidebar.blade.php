@@ -1,4 +1,4 @@
-<aside class="w-64 bg-white border-r min-h-screen p-4 pt-20">
+<aside class="w-58 bg-white border-r min-h-screen p-4 pt-20">
     <nav class="space-y-2">
 
         <a href="{{ route('admin.dashboard') }}"

@@ -5,6 +5,7 @@
             <button>
                 <i class="fas fa-bell"></i>
             </button>
+            <a class="nav-link" href="/profil"><i class="fas fa-user"></i></a>
             <img src="https://via.placeholder.com/32" alt="Avatar" class="w-8 h-8 rounded-full">
         </div>
     </div>

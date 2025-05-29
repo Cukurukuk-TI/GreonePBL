@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto p-6">
-    <h2 class="text-3xl font-bold mb-6">Detail Produk</h2>
+    <h2 class="text-3xl font-bold mb-6 text-start">Detail Produk</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
         <!-- Gambar Produk -->
@@ -18,9 +18,6 @@
                 {{ $produk->kategori->nama_kategori }}
             </span>
 
-            <!-- Stok di bawah kategori -->
-            <p class="text-sm text-gray-700 mb-4">Stok: <span class="font-semibold">{{ $produk->stok }}</span></p>
-
             <!-- Nama Produk -->
             <h3 class="text-2xl font-bold">{{ $produk->nama_produk }}</h3>
 
@@ -31,6 +28,9 @@
             <p class="text-gray-600 mt-4 leading-relaxed">
                 {{ $produk->deskripsi_produk }}
             </p>
+
+            <!-- Stok di bawah kategori -->
+            <p class="text-sm text-gray-500 mt-1">Stok: <span class="font-semibold">{{ $produk->stok_produk }}</span></p>
 
             <!-- Jumlah dan Tombol -->
             <div class="mt-6 flex items-center gap-4">
