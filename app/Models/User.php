@@ -15,6 +15,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',  // jangan lupa tambahkan ini agar bisa diisi mass assignable
+        'jenis_kelamin',
+        'tanggal_lahir',
+        'foto',
     ];
 
     protected $hidden = [
