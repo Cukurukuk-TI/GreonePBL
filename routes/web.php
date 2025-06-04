@@ -9,6 +9,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AlamatController;
+use App\Http\Controllers\PromoController;
 
 // Halaman umum yang bisa diakses SEMUA ORANG (termasuk guest)
 Route::get('/', fn() => view('home'));
@@ -28,14 +29,14 @@ Route::middleware('auth')->group(function () {
     // Halaman profil khusus user yang login
     Route::get('/profil', function () {
         if (!Auth::check()) {
-        return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
-    }
-    return view('profil', ['user' => Auth::user()]);
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
+        }
+        return view('profil', ['user' => Auth::user()]);
     });
 
     // Halaman chart (contoh halaman khusus logged in user)
     Route::get('/chart', fn() => view('chart'));
-    
+
     // Logout
     Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
 });
@@ -75,6 +76,18 @@ Route::prefix('admin')
 
         Route::resource('produks', ProdukController::class);
         Route::resource('kategoris', KategoriController::class);
+        // Get active promos
+        // Route::get('promos/active', [App\Http\Controllers\PromoController::class, 'getActivePromos'])
+        //     ->name('promos.active');
+
+        // // Check promo validity
+        // Route::post('promos/check', [App\Http\Controllers\PromoController::class, 'checkPromo'])
+        //     ->name('promos.check');
+        Route::resource('promos', App\Http\Controllers\PromoController::class);
+        Route::patch('promos/{promo}/toggle-status', [App\Http\Controllers\PromoController::class, 'toggleStatus'])
+            ->name('promos.toggle-status');
+
+
     });
 
 Route::middleware('auth')->group(function () {
@@ -85,4 +98,19 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('alamat', AlamatController::class);
+});
+
+
+
+// // Promo Routes - Admin
+// Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+//     // Promo Management
+//     Route::resource('promos', App\Http\Controllers\Admin\PromoController::class);
+//     Route::patch('promos/{promo}/toggle-status', [App\Http\Controllers\Admin\PromoController::class, 'toggleStatus'])
+//         ->name('promos.toggle-status');
+// });
+
+// Jika ingin menambahkan API routes untuk promo
+Route::prefix('api')->name('api.')->group(function () {
+    ;
 });
