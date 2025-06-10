@@ -77,4 +77,21 @@ class Promo extends Model
             ->where('tanggal_mulai', '<=', $now)
             ->where('tanggal_selesai', '>=', $now);
     }
+
+    // Method untuk mendapatkan promo aktif
+    public static function getActivePromos()
+    {
+        return self::where('is_active', true)
+            ->where('tanggal_mulai', '<=', now())
+            ->where('tanggal_selesai', '>=', now())
+            ->get();
+    }
+
+    public function calculateDiscount($subtotal)
+    {
+        if ($subtotal >= $this->minimum_belanja) {
+            return ($subtotal * $this->besaran_potongan) / 100;
+        }
+        return 0;
+    }
 }

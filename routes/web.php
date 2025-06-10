@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AlamatController;
 use App\Http\Controllers\PromoController;
+use App\Http\Controllers\PesananController;
 
 // Halaman umum yang bisa diakses SEMUA ORANG (termasuk guest)
 Route::get('/', fn() => view('home'));
@@ -113,4 +114,17 @@ Route::middleware(['auth'])->group(function () {
 // Jika ingin menambahkan API routes untuk promo
 Route::prefix('api')->name('api.')->group(function () {
     ;
+});
+
+// Routes untuk pesanan (user)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/pesanan/create/{produk}', [PesananController::class, 'create'])->name('pesanans.create');
+    Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
+    Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
+});
+
+// Routes untuk admin
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/pesanans', [PesananController::class, 'index'])->name('pesanans.index');
+    Route::patch('/pesanans/{id}/status', [PesananController::class, 'updateStatus'])->name('pesanans.update-status');
 });

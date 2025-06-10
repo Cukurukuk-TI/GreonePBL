@@ -51,9 +51,13 @@
 
                 <!-- Tombol Aksi -->
                 <div class="mt-6 flex gap-4">
-                    <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded shadow">
+                    {{-- <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded shadow">
                         Beli Sekarang
-                    </button>
+                    </button> --}}
+                    <a href="{{ route('pesanans.create', $produk->id) }}"
+                                class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded">
+                                Beli Sekarang
+                            </a>
                     <button
                         class="border border-green-500 text-green-500 hover:bg-green-100 font-bold py-2 px-4 rounded shadow">
                         Tambah ke Keranjang
