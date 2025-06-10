@@ -23,11 +23,11 @@
         </p>
         
         <div class="space-x-4">
-            <a href="{{ route('dashboard') }}" 
+            <a href="{{ route('produk.user') }}" 
                 class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
                 Kembali ke Dashboard
             </a>
-            <a href="{{ route('produk.index') }}" 
+            <a href="{{ route('produk.user') }}" 
                 class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded">
                 Belanja Lagi
             </a>
