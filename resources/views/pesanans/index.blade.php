@@ -17,6 +17,7 @@
                     <th class="border px-3 py-2">ID Pesanan</th>
                     <th class="border px-3 py-2">Nama Pelanggan</th>
                     <th class="border px-3 py-2">Nama Produk</th>
+                    <th class="border px-3 py-2">Jumlah Pesanan</th>
                     <th class="border px-3 py-2">Tanggal Pesanan</th>
                     <th class="border px-3 py-2">Total Harga</th>
                     <th class="border px-3 py-2">Status</th>
@@ -28,7 +29,8 @@
                     <tr class="hover:bg-gray-50">
                         <td class="border px-3 py-2 font-mono">{{ $pesanan->kode_pesanan }}</td>
                         <td class="border px-3 py-2">{{ $pesanan->user->name }}</td>
-                        <td class="border px-3 py-2">{{ $pesanan->produk->nama_produk }} ({{ $pesanan->jumlah }}x)</td>
+                        <td class="border px-3 py-2">{{ $pesanan->produk->nama_produk }}</td>
+                        <td class="border px-3 py-2 text-center">{{ $pesanan->jumlah }}x</td>
                         <td class="border px-3 py-2">{{ $pesanan->tanggal_pesanan }}</td>
                         <td class="border px-3 py-2">{{ $pesanan->formatted_total_harga }}</td>
                         <td class="border px-3 py-2">
@@ -44,8 +46,8 @@
                             <form action="{{ route('admin.pesanans.update-status', $pesanan->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('PATCH')
-                                <select name="status" onchange="this.form.submit()" 
-                                    class="text-xs border border-gray-300 rounded px-2 py-1">
+                                <select name="status" onchange="this.form.submit()"
+                                     class="text-xs border border-gray-300 rounded px-2 py-1">
                                     <option value="pending" {{ $pesanan->status == 'pending' ? 'selected' : '' }}>Pending</option>
                                     <option value="proses" {{ $pesanan->status == 'proses' ? 'selected' : '' }}>Proses</option>
                                     <option value="complete" {{ $pesanan->status == 'complete' ? 'selected' : '' }}>Complete</option>
@@ -55,7 +57,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center text-gray-500 py-4">Belum ada pesanan.</td>
+                        <td colspan="8" class="text-center text-gray-500 py-4">Belum ada pesanan.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -75,7 +75,11 @@ Route::prefix('admin')
     ->name('admin.')
     ->middleware(['auth', 'admin'])
     ->group(function () {
-        Route::get('/dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+        // Update dashboard route to use AdminController method
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        
+        // Route untuk AJAX produk terlaris
+        Route::get('/produk-terlaris', [AdminController::class, 'getProdukTerlaris'])->name('produk-terlaris');
 
         Route::resource('produks', ProdukController::class);
         Route::resource('kategoris', KategoriController::class);
@@ -151,5 +155,3 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout', [KeranjangController::class, 'checkout'])->name('keranjang.checkout');
     Route::post('/checkout', [KeranjangController::class, 'processCheckout'])->name('keranjang.process');
 });
-
-
