@@ -22,13 +22,34 @@
                 <!-- Alamat Pengiriman -->
                 <div class="bg-white p-4 rounded-lg border">
                     <h3 class="font-semibold mb-2">Alamat Pengiriman</h3>
-                    <textarea name="alamat_pengiriman" rows="3" 
-                        placeholder="Masukkan alamat lengkap pengiriman..."
-                        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-400 @error('alamat_pengiriman') border-red-500 @enderror">{{ old('alamat_pengiriman', 'Pasar Ambacang, Kec. Kuranji, Kota Padang 25176') }}</textarea>
+                    
+                    @if($alamats->count() > 0)
+                        <!-- Dropdown pilihan alamat -->
+                        <select id="alamat-select" class="w-full border border-gray-300 rounded px-3 py-2 mb-3 focus:outline-none focus:border-blue-400">
+                            <option value="">-- Pilih Alamat --</option>
+                            @foreach($alamats as $alamat)
+                                <option value="{{ $alamat->detail_alamat }}, {{ $alamat->kota }}, {{ $alamat->provinsi }}" 
+                                    data-label="{{ $alamat->label }}" 
+                                    data-nama="{{ $alamat->nama_penerima }}">
+                                    {{ $alamat->label }} - {{ $alamat->nama_penerima }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
+                    
+                    <textarea name="alamat_pengiriman" id="alamat-textarea" rows="3" 
+                        placeholder="@if($alamats->count() > 0)Pilih alamat dari dropdown...@else Belum ada alamat yang ditambahkan. Masukkan alamat lengkap pengiriman...@endif"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-400 @error('alamat_pengiriman') border-red-500 @enderror" 
+                        @if($alamats->count() > 0) readonly @endif>{{ old('alamat_pengiriman') }}</textarea>
                     @error('alamat_pengiriman')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
-                    <button type="button" class="text-green-600 text-sm mt-2">Ubah Alamat Pengiriman</button>
+                    
+                    @if($alamats->count() > 0)
+                        <a href="{{ route('alamat.index') }}" class="text-green-600 text-sm mt-2 inline-block">Kelola Alamat</a>
+                    @else
+                        <a href="{{ route('alamat.create') }}" class="text-green-600 text-sm mt-2 inline-block">+ Tambah Alamat Baru</a>
+                    @endif
                 </div>
 
                 <!-- Metode Pengiriman -->
@@ -56,7 +77,7 @@
                     @else
                         <p class="text-gray-500">Tidak ada promo yang tersedia</p>
                     @endif
-                    <button type="button" class="text-green-600 text-sm mt-2">Ubah Promo</button>
+                    {{-- <button type="button" class="text-green-600 text-sm mt-2">Ubah Promo</button> --}}
                 </div>
 
                 <!-- Metode Pembayaran -->
@@ -133,8 +154,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     const jumlahInput = document.getElementById('jumlah-input');
     const promoSelect = document.querySelector('select[name="promo_id"]');
+    const alamatSelect = document.getElementById('alamat-select');
+    const alamatTextarea = document.getElementById('alamat-textarea');
     const hargaSatuan = {{ $produk->harga_produk }};
     const ongkir = 10000;
+
+    // Handle alamat selection
+    if (alamatSelect) {
+        alamatSelect.addEventListener('change', function() {
+            if (this.value !== '') {
+                alamatTextarea.value = this.value;
+            } else {
+                alamatTextarea.value = '';
+            }
+        });
+    }
 
     function updateHarga() {
         const jumlah = parseInt(jumlahInput.value) || 1;
@@ -161,7 +195,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     jumlahInput.addEventListener('input', updateHarga);
-    promoSelect.addEventListener('change', updateHarga);
+    if (promoSelect) {
+        promoSelect.addEventListener('change', updateHarga);
+    }
 });
 </script>
 @endsection

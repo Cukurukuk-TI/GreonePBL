@@ -56,4 +56,10 @@ class User extends Authenticatable
     {
         return $this->keranjangs()->sum('subtotal');
     }
+
+    // app/Models/User.php
+    public function alamats()
+    {
+        return $this->hasMany(Alamat::class);
+    }
 }

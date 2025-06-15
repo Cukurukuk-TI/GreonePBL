@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pesanan;
 use App\Models\Produk;
 use App\Models\Promo;
+use App\Models\Alamat; // Tambahkan import ini
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,10 @@ class PesananController extends Controller
         $produk = Produk::findOrFail($produkId);
         $promos = Promo::getActivePromos();
         
-        return view('pesanans.create', compact('produk', 'promos'));
+        // Ambil alamat user yang sedang login
+        $alamats = Alamat::where('user_id', Auth::id())->get();
+        
+        return view('pesanans.create', compact('produk', 'promos', 'alamats'));
     }
 
     // Proses simpan pesanan
@@ -26,7 +30,8 @@ class PesananController extends Controller
         $request->validate([
             'produk_id' => 'required|exists:produks,id',
             'jumlah' => 'required|integer|min:1',
-            'alamat_pengiriman' => 'required|string|max:500',
+            'alamat_id' => 'nullable|exists:alamats,id', // Validasi alamat_id
+            'alamat_pengiriman_custom' => 'nullable|string|max:500', // Alamat custom jika tidak pilih dari list
             'promo_id' => 'nullable|exists:promos,id'
         ]);
 
@@ -38,6 +43,17 @@ class PesananController extends Controller
             // Cek stok
             if ($produk->stok_produk < $request->jumlah) {
                 return back()->with('error', 'Stok produk tidak mencukupi');
+            }
+
+            // Tentukan alamat pengiriman
+            $alamat_pengiriman = '';
+            if ($request->alamat_id) {
+                // Jika pilih dari alamat yang sudah ada
+                $alamat = Alamat::find($request->alamat_id);
+                $alamat_pengiriman = $alamat->detail_alamat . ', ' . $alamat->kota . ', ' . $alamat->provinsi;
+            } else {
+                // Jika input alamat custom
+                $alamat_pengiriman = $request->alamat_pengiriman_custom ?: 'Alamat belum ditentukan';
             }
 
             // Hitung subtotal
@@ -73,7 +89,7 @@ class PesananController extends Controller
                 'ongkos_kirim' => $ongkos_kirim,
                 'pajak' => $pajak,
                 'total_harga' => $total_harga,
-                'alamat_pengiriman' => $request->alamat_pengiriman,
+                'alamat_pengiriman' => $alamat_pengiriman,
                 'metode_pembayaran' => 'BNI Virtual Account',
                 'metode_pengiriman' => 'SiCepat Ultimate',
                 'status' => 'pending'
