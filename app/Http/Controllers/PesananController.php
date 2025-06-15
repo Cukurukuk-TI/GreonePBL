@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class PesananController extends Controller
 {
     // Halaman buat pesanan (untuk user)
-    public function create($produkId)
+    public function create(Request $request, $produkId)
     {
         $produk = Produk::findOrFail($produkId);
         $promos = Promo::getActivePromos();
@@ -21,7 +21,15 @@ class PesananController extends Controller
         // Ambil alamat user yang sedang login
         $alamats = Alamat::where('user_id', Auth::id())->get();
         
-        return view('pesanans.create', compact('produk', 'promos', 'alamats'));
+        // Ambil jumlah dari parameter URL jika ada
+        $defaultJumlah = $request->get('jumlah', 1);
+        
+        // Validasi jumlah tidak melebihi stok
+        if ($defaultJumlah > $produk->stok_produk) {
+            $defaultJumlah = $produk->stok_produk;
+        }
+        
+        return view('pesanans.create', compact('produk', 'promos', 'alamats', 'defaultJumlah'));
     }
 
     // Proses simpan pesanan

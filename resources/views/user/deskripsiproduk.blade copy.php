@@ -43,7 +43,7 @@
                     <label class="font-semibold text-lg">Jumlah:</label>
                     <div class="flex items-center border rounded px-2 py-1 gap-2">
                         <button type="button" class="text-lg font-bold px-2" onclick="kurangiJumlah()">−</button>
-                        <input id="jumlah" type="number" name="jumlah" value="1" min="1" max="{{ $produk->stok_produk }}"
+                        <input id="jumlah" type="number" name="jumlah" value="1" min="1"
                             class="w-12 text-center appearance-none border-none bg-transparent focus:outline-none focus:ring-0" />
                         <button type="button" class="text-lg font-bold px-2" onclick="tambahJumlah()">+</button>
                     </div>
@@ -51,10 +51,13 @@
 
                 <!-- Tombol Aksi -->
                 <div class="mt-6 flex gap-4">
-                    <button onclick="beliSekarang()" 
+                    {{-- <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded shadow">
+                        Beli Sekarang
+                    </button> --}}
+                    <a href="{{ route('pesanans.create', $produk->id) }}"
                         class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded">
                         Beli Sekarang
-                    </button>
+                    </a>
                     <form method="POST" action="{{ route('keranjang.store') }}" class="inline">
                         @csrf
                         <input type="hidden" name="produk_id" value="{{ $produk->id }}">
@@ -64,6 +67,12 @@
                             Tambah ke Keranjang
                         </button>
                     </form>
+
+                    {{-- <button
+                        class="border border-green-500 text-green-500 hover:bg-green-100 font-bold py-2 px-4 rounded shadow">
+                        Tambah ke Keranjang
+                    </button> --}}
+
                 </div>
             </div>
         </div>
@@ -71,18 +80,25 @@
 
     <!-- Script jumlah dan penyesuaian tinggi deskripsi -->
     <script>
-        function tambahJumlah() {
-            const input = document.getElementById('jumlah');
-            const hiddenInput = document.getElementById('jumlah-keranjang');
-            const stokMaksimal = {{ $produk->stok_produk }};
-            const currentValue = parseInt(input.value || 1);
-            
-            if (currentValue < stokMaksimal) {
-                const newValue = currentValue + 1;
+        // function tambahJumlah() {
+        //     const input = document.getElementById('jumlah');
+        //     input.value = parseInt(input.value || 1) + 1;
+        // }
+
+        // function kurangiJumlah() {
+        //     const input = document.getElementById('jumlah');
+        //     if (parseInt(input.value) > 1) {
+        //         input.value = parseInt(input.value) - 1;
+        //     }
+        // }
+
+            function tambahJumlah() {
+                const input = document.getElementById('jumlah');
+                const hiddenInput = document.getElementById('jumlah-keranjang');
+                const newValue = parseInt(input.value || 1) + 1;
                 input.value = newValue;
                 hiddenInput.value = newValue;
             }
-        }
 
         function kurangiJumlah() {
             const input = document.getElementById('jumlah');
@@ -96,24 +112,29 @@
 
         // Sinkronisasi saat input berubah manual
         document.getElementById('jumlah').addEventListener('input', function() {
-            const stokMaksimal = {{ $produk->stok_produk }};
-            let value = parseInt(this.value) || 1;
-            
-            // Validasi batas minimum dan maksimum
-            if (value < 1) value = 1;
-            if (value > stokMaksimal) value = stokMaksimal;
-            
-            this.value = value;
-            document.getElementById('jumlah-keranjang').value = value;
+            document.getElementById('jumlah-keranjang').value = this.value;
         });
 
-        // Fungsi untuk beli sekarang dengan jumlah
-        function beliSekarang() {
-            const jumlah = document.getElementById('jumlah').value;
-            const produkId = {{ $produk->id }};
-            
-            // Redirect ke halaman create pesanan dengan parameter jumlah
-            window.location.href = "{{ route('pesanans.create', $produk->id) }}" + "?jumlah=" + jumlah;
-        }
+
+    // Fungsi untuk menyamakan tinggi div deskripsi dengan gambar
+    // function setDeskripsiHeight() {
+    // const img = document.getElementById('img-produk');
+    // const deskripsi = document.getElementById('deskripsi-produk');
+
+    // if (img && deskripsi) {
+    // // Tunggu gambar selesai load untuk dapat tinggi sebenarnya
+    // if (img.complete) {
+    // deskripsi.style.maxHeight = img.clientHeight + 'px';
+    // } else {
+    // img.onload = () => {
+    // deskripsi.style.maxHeight = img.clientHeight + 'px';
+    // };
+    // }
+    // }
+    // }
+
+    // // Jalankan saat load dan saat jendela diresize
+    // window.addEventListener('load', setDeskripsiHeight);
+    // window.addEventListener('resize', setDeskripsiHeight);
     </script>
 @endsection
