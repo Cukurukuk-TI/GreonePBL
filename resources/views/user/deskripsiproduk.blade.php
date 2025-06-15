@@ -55,13 +55,24 @@
                         Beli Sekarang
                     </button> --}}
                     <a href="{{ route('pesanans.create', $produk->id) }}"
-                                class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded">
-                                Beli Sekarang
-                            </a>
-                    <button
+                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded">
+                        Beli Sekarang
+                    </a>
+                    <form method="POST" action="{{ route('keranjang.store') }}" class="inline">
+                        @csrf
+                        <input type="hidden" name="produk_id" value="{{ $produk->id }}">
+                        <input type="hidden" name="jumlah" id="jumlah-keranjang" value="1">
+                        <button type="submit"
+                            class="border border-green-500 text-green-500 hover:bg-green-100 font-bold py-2 px-4 rounded shadow">
+                            Tambah ke Keranjang
+                        </button>
+                    </form>
+
+                    {{-- <button
                         class="border border-green-500 text-green-500 hover:bg-green-100 font-bold py-2 px-4 rounded shadow">
                         Tambah ke Keranjang
-                    </button>
+                    </button> --}}
+
                 </div>
             </div>
         </div>
@@ -69,37 +80,61 @@
 
     <!-- Script jumlah dan penyesuaian tinggi deskripsi -->
     <script>
-        function tambahJumlah() {
-            const input = document.getElementById('jumlah');
-            input.value = parseInt(input.value || 1) + 1;
-        }
+        // function tambahJumlah() {
+        //     const input = document.getElementById('jumlah');
+        //     input.value = parseInt(input.value || 1) + 1;
+        // }
 
-        function kurangiJumlah() {
-            const input = document.getElementById('jumlah');
-            if (parseInt(input.value) > 1) {
-                input.value = parseInt(input.value) - 1;
-            }
-        }
-
-        // Fungsi untuk menyamakan tinggi div deskripsi dengan gambar
-        // function setDeskripsiHeight() {
-        //     const img = document.getElementById('img-produk');
-        //     const deskripsi = document.getElementById('deskripsi-produk');
-
-        //     if (img && deskripsi) {
-        //         // Tunggu gambar selesai load untuk dapat tinggi sebenarnya
-        //         if (img.complete) {
-        //             deskripsi.style.maxHeight = img.clientHeight + 'px';
-        //         } else {
-        //             img.onload = () => {
-        //                 deskripsi.style.maxHeight = img.clientHeight + 'px';
-        //             };
-        //         }
+        // function kurangiJumlah() {
+        //     const input = document.getElementById('jumlah');
+        //     if (parseInt(input.value) > 1) {
+        //         input.value = parseInt(input.value) - 1;
         //     }
         // }
 
-        // // Jalankan saat load dan saat jendela diresize
-        // window.addEventListener('load', setDeskripsiHeight);
-        // window.addEventListener('resize', setDeskripsiHeight);
+            function tambahJumlah() {
+                const input = document.getElementById('jumlah');
+                const hiddenInput = document.getElementById('jumlah-keranjang');
+                const newValue = parseInt(input.value || 1) + 1;
+                input.value = newValue;
+                hiddenInput.value = newValue;
+            }
+
+        function kurangiJumlah() {
+            const input = document.getElementById('jumlah');
+            const hiddenInput = document.getElementById('jumlah-keranjang');
+            if (parseInt(input.value) > 1) {
+                const newValue = parseInt(input.value) - 1;
+                input.value = newValue;
+                hiddenInput.value = newValue;
+            }
+        }
+
+        // Sinkronisasi saat input berubah manual
+        document.getElementById('jumlah').addEventListener('input', function() {
+            document.getElementById('jumlah-keranjang').value = this.value;
+        });
+
+
+    // Fungsi untuk menyamakan tinggi div deskripsi dengan gambar
+    // function setDeskripsiHeight() {
+    // const img = document.getElementById('img-produk');
+    // const deskripsi = document.getElementById('deskripsi-produk');
+
+    // if (img && deskripsi) {
+    // // Tunggu gambar selesai load untuk dapat tinggi sebenarnya
+    // if (img.complete) {
+    // deskripsi.style.maxHeight = img.clientHeight + 'px';
+    // } else {
+    // img.onload = () => {
+    // deskripsi.style.maxHeight = img.clientHeight + 'px';
+    // };
+    // }
+    // }
+    // }
+
+    // // Jalankan saat load dan saat jendela diresize
+    // window.addEventListener('load', setDeskripsiHeight);
+    // window.addEventListener('resize', setDeskripsiHeight);
     </script>
 @endsection

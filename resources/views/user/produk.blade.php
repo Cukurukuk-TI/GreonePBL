@@ -34,17 +34,16 @@
                         </p>
 
                         <!-- Tombol aksi -->
-                        <div
-                            class="absolute bottom-4 left-4 right-4 flex justify-between space-x-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white bg-opacity-90 p-2 rounded">
-                            {{-- <a href="{{ route('pesanan.create') }}"> --}}
-                            {{-- <button class="bg-green-600 text-white py-1 rounded hover:bg-green-700 w-full">
+                        <div class="absolute bottom-4 left-4 right-4 flex justify-between space-x-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white bg-opacity-90 p-2 rounded">
+                            {{-- <a href="{{ route('pesanans.create', $produk->id) }}"> 
+                            <button class="bg-green-600 text-white py-1 rounded hover:bg-green-700 w-full">
                                     Beli Sekarang
-                                </button> --}}
-                            {{-- </a> --}}
-                            <a href="{{ route('pesanans.create', $produk->id) }}"
+                                </button> 
+                            </a> --}}
+                            {{-- <a href="{{ route('pesanans.create', $produk->id) }}"
                                 class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded">
                                 Beli Sekarang
-                            </a>
+                            </a> --}}
                             <button class="bg-yellow-500 text-white py-1 rounded hover:bg-yellow-600 w-full">
                                 Masukkan Keranjang
                             </button>

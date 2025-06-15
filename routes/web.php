@@ -11,6 +11,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AlamatController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PesananController;
+use App\Http\Controllers\KeranjangController;
+
 
 // Halaman umum yang bisa diakses SEMUA ORANG (termasuk guest)
 Route::get('/', fn() => view('home'));
@@ -128,3 +130,26 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/pesanans', [PesananController::class, 'index'])->name('pesanans.index');
     Route::patch('/pesanans/{id}/status', [PesananController::class, 'updateStatus'])->name('pesanans.update-status');
 });
+
+// Routes untuk Keranjang (harus login)
+// Route::middleware(['auth'])->group(function () {
+//     Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang.index');
+//     Route::post('/keranjang', [KeranjangController::class, 'store'])->name('keranjang.store');
+//     Route::put('/keranjang/{id}', [KeranjangController::class, 'update'])->name('keranjang.update');
+//     Route::delete('/keranjang/{id}', [KeranjangController::class, 'destroy'])->name('keranjang.destroy');
+//     Route::delete('/keranjang', [KeranjangController::class, 'clear'])->name('keranjang.clear');
+// });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang.index');
+    Route::post('/keranjang', [KeranjangController::class, 'store'])->name('keranjang.store');
+    Route::put('/keranjang/{id}', [KeranjangController::class, 'update'])->name('keranjang.update');
+    Route::delete('/keranjang/{id}', [KeranjangController::class, 'destroy'])->name('keranjang.destroy');
+    Route::delete('/keranjang', [KeranjangController::class, 'clear'])->name('keranjang.clear');
+    
+    // Route untuk checkout dari keranjang
+    Route::get('/checkout', [KeranjangController::class, 'checkout'])->name('keranjang.checkout');
+    Route::post('/checkout', [KeranjangController::class, 'processCheckout'])->name('keranjang.process');
+});
+
+

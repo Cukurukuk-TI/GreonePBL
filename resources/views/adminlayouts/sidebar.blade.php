@@ -19,9 +19,13 @@
         <a href="#" class="flex items-center p-2 rounded hover:bg-green-100">
             <i class="fas fa-shopping-cart w-5"></i><span class="ml-3">Pesanan</span>
         </a>
+        {{-- <a href="{{ route('pesanans.index') }}"
+            class="flex items-center p-2 rounded {{ request()->routeIs('admin.pesanans.*') ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-green-100' }}">
+            <i class="fas fa-shopping-cart w-5"></i><span class="ml-3">Pesanan</span>
+        </a> --}}
 
-        <a href="{{ route('admin.promos.index')}}" 
-        class="flex items-center p-2 rounded {{ request()->routeIs('admin.promo.*') ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-green-100' }}">
+        <a href="{{ route('admin.promos.index') }}"
+            class="flex items-center p-2 rounded {{ request()->routeIs('admin.promo.*') ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-green-100' }}">
             <i class="fas fa-tags w-5"></i><span class="ml-3">Promo</span>
         </a>
 

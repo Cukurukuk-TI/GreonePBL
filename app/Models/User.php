@@ -39,4 +39,21 @@ class User extends Authenticatable
     {
         return $this->role === 'user';
     }
+
+    public function keranjangs()
+    {
+        return $this->hasMany(Keranjang::class);
+    }
+
+    // Method untuk mendapatkan total item di keranjang
+    public function getTotalKeranjangAttribute()
+    {
+        return $this->keranjangs()->sum('jumlah');
+    }
+
+    // Method untuk mendapatkan total harga keranjang
+    public function getTotalHargaKeranjangAttribute()
+    {
+        return $this->keranjangs()->sum('subtotal');
+    }
 }
