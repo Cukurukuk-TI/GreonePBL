@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AlamatController;
+use App\Http\Controllers\PromoController;
+use App\Http\Controllers\PesananController;
+use App\Http\Controllers\KeranjangController;
+
 
 // Halaman umum yang bisa diakses SEMUA ORANG (termasuk guest)
 Route::get('/', fn() => view('home'));
@@ -26,14 +32,14 @@ Route::middleware('auth')->group(function () {
     // Halaman profil khusus user yang login
     Route::get('/profil', function () {
         if (!Auth::check()) {
-        return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
-    }
-    return view('profil', ['user' => Auth::user()]);
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
+        }
+        return view('profil', ['user' => Auth::user()]);
     });
 
     // Halaman chart (contoh halaman khusus logged in user)
     Route::get('/chart', fn() => view('chart'));
-    
+
     // Logout
     Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
 });
@@ -53,13 +59,118 @@ Route::middleware('auth')->group(function () {
 
 
 //admin
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+// Route::prefix('admin')->name('admin.')->group(function () {
+//     Route::get('/dashboard', function () {
+//         return view('admin.dashboard');
+//     })->name('dashboard');
 
-    Route::resource('produks', ProdukController::class);
-    Route::resource('kategoris', KategoriController::class);
+//     Route::resource('produks', ProdukController::class);
+//     Route::resource('kategoris', KategoriController::class);
+// });
+
+
+
+// Admin route - hanya bisa diakses oleh user yang sudah login dan punya role 'admin'
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth', 'admin'])
+    ->group(function () {
+        // Update dashboard route to use AdminController method
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+        // Route untuk AJAX produk terlaris
+        Route::get('/produk-terlaris', [AdminController::class, 'getProdukTerlaris'])->name('produk-terlaris');
+
+        Route::resource('produks', ProdukController::class);
+        Route::resource('kategoris', KategoriController::class);
+        // Get active promos
+        // Route::get('promos/active', [App\Http\Controllers\PromoController::class, 'getActivePromos'])
+        //     ->name('promos.active');
+    
+        // // Check promo validity
+        // Route::post('promos/check', [App\Http\Controllers\PromoController::class, 'checkPromo'])
+        //     ->name('promos.check');
+        Route::resource('promos', App\Http\Controllers\PromoController::class);
+        Route::patch('promos/{promo}/toggle-status', [App\Http\Controllers\PromoController::class, 'toggleStatus'])
+            ->name('promos.toggle-status');
+
+
+    });
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('alamat', AlamatController::class);
 });
 
 
+
+// // Promo Routes - Admin
+// Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+//     // Promo Management
+//     Route::resource('promos', App\Http\Controllers\Admin\PromoController::class);
+//     Route::patch('promos/{promo}/toggle-status', [App\Http\Controllers\Admin\PromoController::class, 'toggleStatus'])
+//         ->name('promos.toggle-status');
+// });
+
+// Jika ingin menambahkan API routes untuk promo
+Route::prefix('api')->name('api.')->group(function () {
+    ;
+});
+
+// Routes untuk pesanan (user)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/pesanan/create/{produk}', [PesananController::class, 'create'])->name('pesanans.create');
+    Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
+    Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
+});
+
+// Routes untuk admin
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/pesanans', [PesananController::class, 'index'])->name('pesanans.index');
+    Route::patch('/pesanans/{id}/status', [PesananController::class, 'updateStatus'])->name('pesanans.update-status');
+    Route::get('/admin/pesanans/cancelled', [AdminController::class, 'cancelledPesanans'])->name('admin.pesanans.cancelled');
+    // Route::get('/admin/pesanans/cancelled', [AdminController::class, 'cancelledPesanans'])->name('admin.pesanans.cancelled');
+    Route::patch('/admin/pesanans/{id}/restore', [AdminController::class, 'restorePesanan'])->name('admin.pesanans.restore');
+    Route::delete('/admin/pesanans/{id}/force-delete', [AdminController::class, 'forceDeletePesanan'])->name('admin.pesanans.force-delete');
+});
+
+// Routes untuk Keranjang (harus login)
+// Route::middleware(['auth'])->group(function () {
+//     Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang.index');
+//     Route::post('/keranjang', [KeranjangController::class, 'store'])->name('keranjang.store');
+//     Route::put('/keranjang/{id}', [KeranjangController::class, 'update'])->name('keranjang.update');
+//     Route::delete('/keranjang/{id}', [KeranjangController::class, 'destroy'])->name('keranjang.destroy');
+//     Route::delete('/keranjang', [KeranjangController::class, 'clear'])->name('keranjang.clear');
+// });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang.index');
+    Route::post('/keranjang', [KeranjangController::class, 'store'])->name('keranjang.store');
+    Route::put('/keranjang/{id}', [KeranjangController::class, 'update'])->name('keranjang.update');
+    Route::delete('/keranjang/{id}', [KeranjangController::class, 'destroy'])->name('keranjang.destroy');
+    Route::delete('/keranjang', [KeranjangController::class, 'clear'])->name('keranjang.clear');
+
+    // Route untuk checkout dari keranjang
+    Route::get('/checkout', [KeranjangController::class, 'checkout'])->name('keranjang.checkout');
+    Route::post('/checkout', [KeranjangController::class, 'processCheckout'])->name('keranjang.process');
+});
+
+// Grup admin dengan prefix 'admin'
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/pesanans', [PesananController::class, 'index'])->name('pesanans.index'); // admin.pesanans.index
+    Route::patch('/pesanans/{id}/status', [PesananController::class, 'updateStatus'])->name('pesanans.update-status'); // admin.pesanans.update-status
+});
+
+// Grup untuk pesanan cancelled tanpa prefix admin tapi tetap middleware admin
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/pesanans/cancelled', [PesananController::class, 'cancelled'])->name('pesanans.cancelled');
+    Route::patch('/pesanans/{id}/restore', [PesananController::class, 'restore'])->name('pesanans.restore');
+    Route::delete('/pesanans/{id}/force-delete', [PesananController::class, 'forceDelete'])->name('pesanans.force-delete');
+});
+
+Route::get('/admin/pesanans/cancelled', [PesananController::class, 'cancelled'])->name('admin.pesanans.cancelled');

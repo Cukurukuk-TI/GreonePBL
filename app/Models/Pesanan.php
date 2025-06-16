@@ -84,4 +84,20 @@ class Pesanan extends Model
         
         return $kode;
     }
+
+    public function scopeCancelled($query)
+    {
+        return $query->where('status', 'cancelled');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeComplete($query)
+    {
+        return $query->where('status', 'complete');
+    }
+    
 }

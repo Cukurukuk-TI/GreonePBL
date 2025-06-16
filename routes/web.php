@@ -77,7 +77,7 @@ Route::prefix('admin')
     ->group(function () {
         // Update dashboard route to use AdminController method
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-        
+
         // Route untuk AJAX produk terlaris
         Route::get('/produk-terlaris', [AdminController::class, 'getProdukTerlaris'])->name('produk-terlaris');
 
@@ -86,7 +86,7 @@ Route::prefix('admin')
         // Get active promos
         // Route::get('promos/active', [App\Http\Controllers\PromoController::class, 'getActivePromos'])
         //     ->name('promos.active');
-
+    
         // // Check promo validity
         // Route::post('promos/check', [App\Http\Controllers\PromoController::class, 'checkPromo'])
         //     ->name('promos.check');
@@ -133,6 +133,26 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/pesanans', [PesananController::class, 'index'])->name('pesanans.index');
     Route::patch('/pesanans/{id}/status', [PesananController::class, 'updateStatus'])->name('pesanans.update-status');
+    Route::get('/admin/pesanans/cancelled', [AdminController::class, 'cancelledPesanans'])->name('admin.pesanans.cancelled');
+    // Route::get('/admin/pesanans/cancelled', [AdminController::class, 'cancelledPesanans'])->name('admin.pesanans.cancelled');
+    Route::patch('/admin/pesanans/{id}/restore', [AdminController::class, 'restorePesanan'])->name('admin.pesanans.restore');
+    Route::delete('/admin/pesanans/{id}/force-delete', [AdminController::class, 'forceDeletePesanan'])->name('admin.pesanans.force-delete');
+      Route::get('/pesanans', [PesananController::class, 'index'])->name('pesanans.index');
+    
+    // Route untuk pesanan yang dibatalkan
+    Route::get('/pesanans/cancelled', [PesananController::class, 'cancelled'])->name('pesanans.cancelled');
+    
+    // Route untuk update status pesanan
+    Route::patch('/pesanans/{pesanan}/status', [PesananController::class, 'updateStatus'])->name('pesanans.update-status');
+    
+    // Route untuk restore pesanan yang dibatalkan
+    Route::patch('/pesanans/{pesanan}/restore', [PesananController::class, 'restore'])->name('pesanans.restore');
+    
+    // Route untuk hapus permanent pesanan
+    Route::delete('/pesanans/{pesanan}/force-delete', [PesananController::class, 'forceDelete'])->name('pesanans.force-delete');
+    
+    // Route untuk detail pesanan
+    Route::get('/pesanans/{pesanan}', [PesananController::class, 'show'])->name('pesanans.show');
 });
 
 // Routes untuk Keranjang (harus login)
@@ -150,8 +170,23 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/keranjang/{id}', [KeranjangController::class, 'update'])->name('keranjang.update');
     Route::delete('/keranjang/{id}', [KeranjangController::class, 'destroy'])->name('keranjang.destroy');
     Route::delete('/keranjang', [KeranjangController::class, 'clear'])->name('keranjang.clear');
-    
+
     // Route untuk checkout dari keranjang
     Route::get('/checkout', [KeranjangController::class, 'checkout'])->name('keranjang.checkout');
     Route::post('/checkout', [KeranjangController::class, 'processCheckout'])->name('keranjang.process');
 });
+
+// Grup admin dengan prefix 'admin'
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/pesanans', [PesananController::class, 'index'])->name('pesanans.index'); // admin.pesanans.index
+    Route::patch('/pesanans/{id}/status', [PesananController::class, 'updateStatus'])->name('pesanans.update-status'); // admin.pesanans.update-status
+});
+
+// Grup untuk pesanan cancelled tanpa prefix admin tapi tetap middleware admin
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/pesanans/cancelled', [PesananController::class, 'cancelled'])->name('pesanans.cancelled');
+    Route::patch('/pesanans/{id}/restore', [PesananController::class, 'restore'])->name('pesanans.restore');
+    Route::delete('/pesanans/{id}/force-delete', [PesananController::class, 'forceDelete'])->name('pesanans.force-delete');
+});
+
+Route::get('/admin/pesanans/cancelled', [PesananController::class, 'cancelled'])->name('admin.pesanans.cancelled');

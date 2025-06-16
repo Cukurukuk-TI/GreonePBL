@@ -16,7 +16,11 @@
             <i class="fas fa-list w-5"></i><span class="ml-3">Kategori</span>
         </a>
 
-        <a href="#" class="flex items-center p-2 rounded hover:bg-green-100">
+        {{-- <a href="#" class="flex items-center p-2 rounded hover:bg-green-100">
+            <i class="fas fa-shopping-cart w-5"></i><span class="ml-3">Pesanan</span>
+        </a> --}}
+        <a href="{{ route('admin.pesanans.index') }}"
+            class="flex items-center p-2 rounded {{ request()->routeIs('admin.pesanans.*') ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-green-100' }}">
             <i class="fas fa-shopping-cart w-5"></i><span class="ml-3">Pesanan</span>
         </a>
         {{-- <a href="{{ route('pesanans.index') }}"
