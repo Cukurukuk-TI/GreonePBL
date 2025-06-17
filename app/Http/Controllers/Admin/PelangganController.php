@@ -13,9 +13,11 @@ class PelangganController extends Controller
      */
     public function index()
     {
-        // Ambil semua data dengan role 'user'
+        $totalPelangganAktif = User::where('role', 'user')->count();
+        $totalPelangganDihapus = User::onlyTrashed()->where('role', 'user')->count(); // Jika Anda menggunakan Soft Deletes
+
         $pelanggan = User::where('role', 'user')->latest()->paginate(10);
-        return view('admin.pelanggan.index', compact('pelanggan'));
+        return view('admin.pelanggan.index', compact('pelanggan', 'totalPelangganAktif', 'totalPelangganDihapus'));
     }
 
     /**
