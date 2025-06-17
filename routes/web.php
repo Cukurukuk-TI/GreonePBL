@@ -67,7 +67,7 @@ Route::middleware('auth')->group(function () {
 });
 
 //   Admin route
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin', 'admin.timeout'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/produk-terlaris', [AdminController::class, 'getProdukTerlaris'])->name('produk-terlaris');
 
