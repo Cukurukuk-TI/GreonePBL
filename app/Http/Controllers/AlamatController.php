@@ -38,17 +38,18 @@ class AlamatController extends Controller
             'provinsi' => 'required|string|max:255',
             'kota' => 'required|string|max:255',
             'detail_alamat' => 'required|string|max:1000',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
-        Alamat::create([
-            'user_id' => auth()->id(),
-            'label' => $request->label,
-            'nama_penerima' => $request->nama_penerima,
-            'nomor_hp' => $request->nomor_hp,
-            'provinsi' => $request->provinsi,
-            'kota' => $request->kota,
-            'detail_alamat' => $request->detail_alamat,
-        ]);
+        // Mengambil semua data dari form
+        $data = $request->all();
+
+        // Menambahkan user_id dari user yang sedang login ke dalam data
+        $data['user_id'] = auth()->id();
+
+        // Simpan semua data ke database
+        Alamat::create($data);
 
         return redirect()->route('alamat.index')->with('success', 'Alamat berhasil ditambahkan.');
     }
@@ -73,16 +74,15 @@ class AlamatController extends Controller
             'provinsi' => 'required|string|max:255',
             'kota' => 'required|string|max:255',
             'detail_alamat' => 'required|string|max:1000',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
-        $alamat->update([
-            'label' => $request->label,
-            'nama_penerima' => $request->nama_penerima,
-            'nomor_hp' => $request->nomor_hp,
-            'provinsi' => $request->provinsi,
-            'kota' => $request->kota,
-            'detail_alamat' => $request->detail_alamat,
-        ]);
+        // Mengambil semua data dari request
+        $data = $request->all();
+
+        // Tidak perlu menambahkan user_id karena kita hanya meng-update data yang sudah ada
+        $alamat->update($data);
 
         return redirect()->route('alamat.index')->with('success', 'Alamat berhasil diperbarui.');
     }

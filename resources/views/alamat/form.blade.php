@@ -30,3 +30,11 @@
 {{-- Detail alamat --}}
 <textarea name="detail_alamat" placeholder="Detail Alamat"
     class="w-full border px-3 py-2 mb-2 rounded">{{ old('detail_alamat', $alamat->detail_alamat) }}</textarea>
+
+<div class="mt-3">
+    <label class="block font-semibold mb-1">Pilih Lokasi di Peta</label>
+    <div id="map" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+</div>
+
+<input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $alamat->latitude) }}">
+<input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $alamat->longitude) }}">

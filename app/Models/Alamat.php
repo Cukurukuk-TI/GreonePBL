@@ -19,6 +19,8 @@ class Alamat extends Model
         'provinsi',
         'kota',
         'detail_alamat',
+        'latitude',
+        'longitude', 
     ];
 
     /**
