@@ -20,7 +20,7 @@ class Alamat extends Model
         'kota',
         'detail_alamat',
         'latitude',
-        'longitude', 
+        'longitude',
     ];
 
     /**

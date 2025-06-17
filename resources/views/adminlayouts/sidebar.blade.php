@@ -6,14 +6,14 @@
             <i class="fas fa-home w-5"></i><span class="ml-3">Dashboard</span>
         </a>
 
-        <a href="{{ route('admin.produks.index') }}"
-            class="flex items-center p-2 rounded {{ request()->routeIs('admin.produks.*') ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-green-100' }}">
-            <i class="fas fa-box w-5"></i><span class="ml-3">Produk</span>
-        </a>
-
         <a href="{{ route('admin.kategoris.index') }}"
             class="flex items-center p-2 rounded {{ request()->routeIs('admin.kategoris.*') ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-green-100' }}">
             <i class="fas fa-list w-5"></i><span class="ml-3">Kategori</span>
+        </a>
+
+        <a href="{{ route('admin.produks.index') }}"
+            class="flex items-center p-2 rounded {{ request()->routeIs('admin.produks.*') ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-green-100' }}">
+            <i class="fas fa-box w-5"></i><span class="ml-3">Produk</span>
         </a>
 
         {{-- <a href="#" class="flex items-center p-2 rounded hover:bg-green-100">

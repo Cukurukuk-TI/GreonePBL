@@ -4,9 +4,6 @@
 <div class="max-w-6xl mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-800">Keranjang Belanja</h1>
-        <a href="{{ url('/') }}" class="text-blue-600 hover:text-blue-800 font-medium">
-            ← Lanjut Belanja
-        </a>
     </div>
 
     @if(session('success'))

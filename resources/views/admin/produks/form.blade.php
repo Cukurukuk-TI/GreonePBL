@@ -56,24 +56,30 @@
                     placeholder="Contoh : 100"
                     class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-400" />
             </div>
+
+                        {{-- upload gambar --}}
             <div class="mb-4">
-                <label for="gambar_produk" class="block font-semibold mb-1">Gambar</label>
-                <div class="border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center h-32 mb-2 relative">
-                    <input type="file" id="gambar_produk" name="gambar_produk"
-                        class="absolute w-full h-full opacity-0 cursor-pointer" />
-                    <div class="flex flex-col items-center pointer-events-none">
-                        <svg class="w-8 h-8 text-green-500 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        <span class="text-gray-400">Drop your images here!</span>
-                    </div>
+                <label for="gambar_produk" class="block font-semibold mb-1">Gambar Produk</label>
+
+                <div class="w-full border border-gray-300 rounded px-3 py-2 flex items-center justify-between">
+                    <label for="gambar_produk"
+                        class="cursor-pointer inline-block bg-blue-500 hover:bg-blue-600 text-sm text-white font-semibold py-2 px-4 rounded">
+                        Pilih Gambar
+                    </label>
+
+                    <span id="file-name" class="text-sm text-gray-600 truncate ml-4">Belum ada file dipilih</span>
                 </div>
-                @if(isset($produk) && $produk->gambar_produk)
-                    <img src="{{ asset('storage/' . $produk->gambar_produk) }}" class="h-16 w-auto rounded border border-gray-300" />
-                @endif
+
+                <input type="file" id="gambar_produk" name="gambar_produk" accept="image/*"
+                    class="hidden">
+
+                <img id="preview-image"
+                    src="{{ isset($produk) && $produk->gambar_produk ? asset('storage/' . $produk->gambar_produk) : '' }}"
+                    class="mt-4 h-24 w-auto rounded border border-gray-300 {{ isset($produk) && $produk->gambar_produk ? '' : 'hidden' }}">
             </div>
         </div>
     </div>
+
 
     <div class="flex justify-end mt-4">
         <button type="submit" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold px-12 py-2 rounded">
@@ -81,3 +87,29 @@
         </button>
     </div>
 </form>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('gambar_produk');
+        const preview = document.getElementById('preview-image');
+        const fileName = document.getElementById('file-name');
+
+        input.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+
+            if (file) {
+                fileName.textContent = file.name;
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    preview.src = event.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                fileName.textContent = 'Belum ada file dipilih';
+                preview.src = '';
+                preview.classList.add('hidden');
+            }
+        });
+    });
+</script>

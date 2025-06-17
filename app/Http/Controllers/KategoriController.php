@@ -8,6 +8,12 @@ use Illuminate\Support\Facades\Storage;
 
 class KategoriController extends Controller
 {
+
+    public function indexUser()
+    {
+        $kategoris = Kategori::withCount('produks')->get();
+        return view('home', compact('kategoris'));
+    }
     public function index()
     {
         $kategoris = Kategori::withCount('produks')->get();

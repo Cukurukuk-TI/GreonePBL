@@ -71,7 +71,9 @@
                         <p class="text-xs text-gray-500">{{ $currentMonth ?? 'Bulan ini' }}</p>
                     </div>
                     <div class="h-24 flex items-end justify-center space-x-1">
-                        <!-- Placeholder bars -->
+
+                        {{-- ini harusnya pake js biar bisa bikin statistik --}}
+                        {{-- <!-- Placeholder bars -->
                         <div class="bg-green-200 w-3 h-6"></div>
                         <div class="bg-green-300 w-3 h-9"></div>
                         <div class="bg-green-400 w-3 h-4"></div>
@@ -83,7 +85,7 @@
                         <div class="bg-green-400 w-3 h-9"></div>
                         <div class="bg-green-700 w-3 h-18"></div>
                         <div class="bg-green-600 w-3 h-16"></div>
-                        <div class="bg-green-500 w-3 h-12"></div>
+                        <div class="bg-green-500 w-3 h-12"></div> --}}
                     </div>
                 </div>
             </td>

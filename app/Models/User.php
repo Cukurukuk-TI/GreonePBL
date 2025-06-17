@@ -10,9 +10,11 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $table = 'users';
     protected $fillable = [
         'name',
         'email',
+        'alamat',
         'password',
         'role',  // jangan lupa tambahkan ini agar bisa diisi mass assignable
         'jenis_kelamin',
@@ -62,4 +64,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(Alamat::class);
     }
+
 }
