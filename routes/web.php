@@ -66,10 +66,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
 });
 
-//   Admin route tetap sama
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+//   Admin route
+Route::middleware(['auth', 'admin', 'admin.timeout'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/produk-terlaris', [AdminController::class, 'getProdukTerlaris'])->name('produk-terlaris');
+
+    // Profile Admin
+    Route::get('/profile', [ProfileController::class, 'adminIndex'])->name('admin.profile');
 
     Route::resource('produks', ProdukController::class);
     Route::resource('kategoris', KategoriController::class);

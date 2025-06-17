@@ -22,24 +22,24 @@
     <form action="{{ route('pesanans.store') }}" method="POST" id="form-pesanan">
         @csrf
         <input type="hidden" name="produk_id" value="{{ $produk->id }}">
-        
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Kolom Kiri -->
             <div class="space-y-4">
                 <!-- Alamat Pengiriman -->
                 <div class="bg-white p-4 rounded-lg border">
                     <h3 class="font-semibold mb-2">Alamat Pengiriman</h3>
-                    
+
                     @if($alamats->count() > 0)
                         <!-- Dropdown alamat -->
                         <div class="mb-3">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Alamat:</label>
-                            <select name="alamat_id" 
-                                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-400 @error('alamat_id') border-red-500 @enderror {{ $produk->stok_produk <= 0 ? 'bg-gray-100' : '' }}" 
+                            <select name="alamat_id"
+                                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-400 @error('alamat_id') border-red-500 @enderror {{ $produk->stok_produk <= 0 ? 'bg-gray-100' : '' }}"
                                 id="alamat-select" {{ $produk->stok_produk <= 0 ? 'disabled' : '' }}>
                                 <option value="">-- Pilih Alamat --</option>
                                 @foreach($alamats as $alamat)
-                                    <option value="{{ $alamat->id }}" 
+                                    <option value="{{ $alamat->id }}"
                                         {{ old('alamat_id') == $alamat->id ? 'selected' : '' }}
                                         data-label="{{ $alamat->label }}"
                                         data-nama="{{ $alamat->nama_penerima }}"
@@ -65,16 +65,16 @@
                         <!-- Jika belum ada alamat -->
                         <div class="text-center py-4">
                             <p class="text-gray-500 mb-3">Belum ada alamat yang ditambahkan</p>
-                            <a href="{{ route('alamat.create') }}" 
+                            <a href="{{ route('alamat.create') }}"
                                 class="inline-flex items-center px-4 py-2 bg-green-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-600 focus:bg-green-600 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 + Tambah Alamat
                             </a>
                         </div>
-                        
+
                         <!-- Input alamat manual jika belum ada alamat -->
                         <div class="mt-3">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Atau masukkan alamat manual:</label>
-                            <textarea name="alamat_pengiriman_custom" rows="3" 
+                            <textarea name="alamat_pengiriman_custom" rows="3"
                                 placeholder="Masukkan alamat lengkap pengiriman..."
                                 class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-400 @error('alamat_pengiriman_custom') border-red-500 @enderror {{ $produk->stok_produk <= 0 ? 'bg-gray-100' : '' }}"
                                 {{ $produk->stok_produk <= 0 ? 'disabled' : '' }}>{{ old('alamat_pengiriman_custom') }}</textarea>
@@ -83,7 +83,7 @@
                             @enderror
                         </div>
                     @endif
-                    
+
                     @if($alamats->count() > 0)
                         <a href="{{ route('alamat.index') }}" class="text-green-600 text-sm mt-2 inline-block">+ Tambah Alamat Baru</a>
                     @endif
@@ -91,21 +91,55 @@
 
                 <!-- Metode Pengiriman -->
                 <div class="bg-white p-4 rounded-lg border">
-                    <h3 class="font-semibold mb-2">Metode Pengiriman</h3>
-                    <p class="text-gray-600">SiCepat Ultimate</p>
-                    <button type="button" class="text-green-600 text-sm mt-2" {{ $produk->stok_produk <= 0 ? 'disabled' : '' }}>Ubah Metode Pengiriman</button>
+                    <h3 class="font-semibold mb-4 text-lg">Metode Pengiriman</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Option: Jemput -->
+                        <label class="cursor-pointer">
+                            <input type="radio" name="metode_pengiriman" value="jemput" class="sr-only peer"
+                                {{ old('metode_pengiriman') == 'jemput' ? 'checked' : '' }}>
+                            <div class="flex items-center p-4 border rounded-lg shadow-sm peer-checked:border-green-500 peer-checked:ring-2 peer-checked:ring-green-200 transition">
+                                <div class="bg-green-100 text-green-600 p-2 rounded-full mr-4">
+                                    <i class="fas fa-store text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Jemput di Lokasi</h4>
+                                    <p class="text-sm text-gray-500">Ambil produk langsung di toko.</p>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Option: Antar -->
+                        <label class="cursor-pointer">
+                            <input type="radio" name="metode_pengiriman" value="antar" class="sr-only peer"
+                                {{ old('metode_pengiriman') == 'antar' ? 'checked' : '' }}>
+                            <div class="flex items-center p-4 border rounded-lg shadow-sm peer-checked:border-green-500 peer-checked:ring-2 peer-checked:ring-green-200 transition">
+                                <div class="bg-green-100 text-green-600 p-2 rounded-full mr-4">
+                                    <i class="fas fa-truck text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Diantar ke Alamat</h4>
+                                    <p class="text-sm text-gray-500">Produk akan dikirim ke lokasi Anda.</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    @if($produk->stok_produk <= 0)
+                        <p class="text-red-500 text-sm mt-3">Stok habis. Pengiriman tidak tersedia.</p>
+                    @endif
                 </div>
 
                 <!-- Promo -->
                 <div class="bg-white p-4 rounded-lg border">
                     <h3 class="font-semibold mb-2">Promo</h3>
                     @if($promos->count() > 0)
-                        <select name="promo_id" 
+                        <select name="promo_id"
                             class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-400 {{ $produk->stok_produk <= 0 ? 'bg-gray-100' : '' }}"
                             {{ $produk->stok_produk <= 0 ? 'disabled' : '' }}>
                             <option value="">-- Pilih Promo --</option>
                             @foreach($promos as $promo)
-                                <option value="{{ $promo->id }}" 
+                                <option value="{{ $promo->id }}"
                                     data-discount="{{ $promo->besaran_potongan }}"
                                     data-minimum="{{ $promo->minimum_belanja }}">
                                     {{ $promo->nama_promo }} - {{ $promo->besaran_potongan }}% (Min. Rp{{ number_format($promo->minimum_belanja, 0, ',', '.') }})
@@ -118,12 +152,52 @@
                     @endif
                 </div>
 
-                <!-- Metode Pembayaran -->
-                <div class="bg-white p-4 rounded-lg border">
-                    <h3 class="font-semibold mb-2">Metode Pembayaran</h3>
-                    <p class="text-gray-600">BNI Virtual Account</p>
-                    <button type="button" class="text-green-600 text-sm mt-2" {{ $produk->stok_produk <= 0 ? 'disabled' : '' }}>Ubah Metode Pembayaran</button>
+            <!-- Metode Pembayaran -->
+            <div class="bg-white p-4 rounded-lg border">
+                <h3 class="font-semibold mb-4 text-lg">Metode Pembayaran</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Option: COD -->
+                    <label class="cursor-pointer">
+                        <input type="radio" name="metode_pembayaran" value="cod" class="sr-only peer"
+                            {{ old('metode_pembayaran') == 'cod' ? 'checked' : '' }}>
+                        <div class="flex items-center p-4 border rounded-lg shadow-sm peer-checked:border-green-500 peer-checked:ring-2 peer-checked:ring-green-200 transition">
+                            <div class="bg-green-100 text-green-600 p-2 rounded-full mr-4">
+                                <i class="fas fa-money-bill-wave text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">COD (Bayar di Tempat)</h4>
+                                <p class="text-sm text-gray-500">Bayar saat produk sampai di tangan Anda.</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Option: Transfer Bank -->
+                    <label class="cursor-pointer">
+                        <input type="radio" name="metode_pembayaran" value="transfer" class="sr-only peer"
+                            {{ old('metode_pembayaran') == 'transfer' ? 'checked' : '' }}>
+                        <div class="flex items-center p-4 border rounded-lg shadow-sm peer-checked:border-green-500 peer-checked:ring-2 peer-checked:ring-green-200 transition">
+                            <div class="bg-green-100 text-green-600 p-2 rounded-full mr-4">
+                                <i class="fas fa-university text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Transfer Bank</h4>
+                                <p class="text-sm text-gray-500">Lakukan pembayaran via rekening bank.</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Option: Virtual Account -->
+                    <label class="cursor-pointer md:col-span-2">
+                        <input type="radio" name="metode_pembayaran" value="va_bni" class="sr-only peer"
+                            {{ old('metode_pembayaran') == 'va_bni' ? 'checked' : '' }}>
+                    </label>
                 </div>
+
+                @if($produk->stok_produk <= 0)
+                    <p class="text-red-500 text-sm mt-3">Stok habis. Pembayaran tidak tersedia.</p>
+                @endif
+            </div>
             </div>
 
             <!-- Kolom Kanan -->
@@ -132,7 +206,7 @@
                 <div class="bg-white p-4 rounded-lg border mb-4">
                     <div class="flex items-center space-x-4">
                         @if($produk->gambar_produk)
-                            <img src="{{ asset('storage/' . $produk->gambar_produk) }}" 
+                            <img src="{{ asset('storage/' . $produk->gambar_produk) }}"
                                 class="w-20 h-20 object-cover rounded">
                         @else
                             <div class="w-20 h-20 bg-gray-200 rounded flex items-center justify-center">
@@ -141,7 +215,7 @@
                         @endif
                         <div class="flex-1">
                             <h3 class="font-semibold">{{ $produk->nama_produk }}</h3>
-                            
+
                             <!-- Status Stok -->
                             <div class="mt-1">
                                 @if($produk->stok_produk <= 0)
@@ -152,11 +226,11 @@
                                     <span class="text-green-500 text-sm font-medium">Stok: {{ $produk->stok_produk }}</span>
                                 @endif
                             </div>
-                            
+
                             <div class="flex items-center space-x-2 mt-2">
                                 <span class="text-lg font-semibold">Rp{{ number_format($produk->harga_produk, 0, ',', '.') }}</span>
                                 <span class="text-gray-500">x</span>
-                                <input type="number" name="jumlah" value="{{ old('jumlah', $defaultJumlah) }}" 
+                                <input type="number" name="jumlah" value="{{ old('jumlah', $defaultJumlah) }}"
                                     min="1" max="{{ $produk->stok_produk }}"
                                     class="w-16 border border-gray-300 rounded px-2 py-1 text-center @error('jumlah') border-red-500 @enderror {{ $produk->stok_produk <= 0 ? 'bg-gray-100' : '' }}"
                                     id="jumlah-input" {{ $produk->stok_produk <= 0 ? 'disabled' : '' }}>
@@ -196,7 +270,7 @@
                             Stok Habis - Tidak Dapat Dipesan
                         </button>
                     @else
-                        <button type="submit" 
+                        <button type="submit"
                             class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded mt-4">
                             Bayar Sekarang
                         </button>
@@ -218,13 +292,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const hargaSatuan = {{ $produk->harga_produk }};
     const stokTersedia = {{ $produk->stok_produk }};
     const ongkir = 10000;
-    
+
     // Cek stok saat halaman dimuat
     if (stokTersedia <= 0) {
         showStockAlert('Produk ini sedang kehabisan stok dan tidak dapat dipesan.');
         return;
     }
-    
+
     // Hitung harga awal berdasarkan default jumlah
     updateHarga();
 
@@ -232,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (alamatSelect) {
         alamatSelect.addEventListener('change', function() {
             const selectedValue = this.value;
-            
+
             if (selectedValue === 'custom') {
                 // Tampilkan input alamat custom
                 alamatDetail.style.display = 'none';
@@ -245,11 +319,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const kota = selectedOption.dataset.kota;
                 const provinsi = selectedOption.dataset.provinsi;
                 const hp = selectedOption.dataset.hp;
-                
+
                 document.getElementById('detail-nama').textContent = nama;
                 document.getElementById('detail-alamat').textContent = `${detail}, ${kota}, ${provinsi}`;
                 document.getElementById('detail-hp').textContent = hp;
-                
+
                 alamatDetail.style.display = 'block';
                 if (alamatCustomInput) alamatCustomInput.style.display = 'none';
             } else {
@@ -258,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (alamatCustomInput) alamatCustomInput.style.display = 'none';
             }
         });
-        
+
         // Trigger change event jika ada value yang sudah dipilih sebelumnya
         if (alamatSelect.value) {
             alamatSelect.dispatchEvent(new Event('change'));
@@ -269,33 +343,33 @@ document.addEventListener('DOMContentLoaded', function() {
     if (jumlahInput) {
         jumlahInput.addEventListener('input', function() {
             const jumlah = parseInt(this.value) || 1;
-            
+
             // Validasi batas minimum dan maksimum
             if (jumlah < 1) {
                 this.value = 1;
                 showStockAlert('Jumlah minimal pembelian adalah 1.');
                 return;
             }
-            
+
             if (jumlah > stokTersedia) {
                 this.value = stokTersedia;
                 showStockAlert(`Jumlah maksimal yang dapat dipesan adalah ${stokTersedia} sesuai stok yang tersedia.`);
                 return;
             }
-            
+
             updateHarga();
         });
 
         // Validasi saat form disubmit
         formPesanan.addEventListener('submit', function(e) {
             const jumlah = parseInt(jumlahInput.value) || 1;
-            
+
             if (stokTersedia <= 0) {
                 e.preventDefault();
                 showStockAlert('Produk ini sedang kehabisan stok dan tidak dapat dipesan.');
                 return;
             }
-            
+
             if (jumlah > stokTersedia) {
                 e.preventDefault();
                 showStockAlert(`Jumlah yang dipesan (${jumlah}) melebihi stok yang tersedia (${stokTersedia}).`);
@@ -303,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateHarga();
                 return;
             }
-            
+
             if (jumlah < 1) {
                 e.preventDefault();
                 showStockAlert('Jumlah minimal pembelian adalah 1.');
@@ -317,21 +391,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateHarga() {
         const jumlah = parseInt(jumlahInput.value) || 1;
         const subtotal = hargaSatuan * jumlah;
-        
+
         // Hitung diskon
         let diskon = 0;
         if (promoSelect && promoSelect.value) {
             const selectedOption = promoSelect.options[promoSelect.selectedIndex];
             const discountPercent = parseInt(selectedOption.dataset.discount) || 0;
             const minimum = parseInt(selectedOption.dataset.minimum) || 0;
-            
+
             if (subtotal >= minimum) {
                 diskon = (subtotal * discountPercent) / 100;
             }
         }
-        
+
         const grandTotal = subtotal - diskon + ongkir;
-        
+
         // Update tampilan
         document.getElementById('subtotal').textContent = 'Rp' + subtotal.toLocaleString('id-ID');
         document.getElementById('diskon').textContent = 'Rp' + diskon.toLocaleString('id-ID');
@@ -344,16 +418,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (existingAlert) {
             existingAlert.remove();
         }
-        
+
         // Buat alert baru
         const alertDiv = document.createElement('div');
         alertDiv.className = 'stock-alert bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
         alertDiv.innerHTML = `<strong>Peringatan!</strong> ${message}`;
-        
+
         // Masukkan alert di bagian atas form
         const form = document.getElementById('form-pesanan');
         form.parentNode.insertBefore(alertDiv, form);
-        
+
         // Auto-hide alert setelah 5 detik
         setTimeout(function() {
             if (alertDiv.parentNode) {

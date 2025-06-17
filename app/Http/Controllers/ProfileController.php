@@ -13,38 +13,47 @@ use Illuminate\Support\Facades\Storage;
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Menampilkan halaman profil.
      */
+    public function adminIndex(): View {
+    return view('admin.profile.content', [
+        'user' => auth()->user()->isAdmin()
+    ]);
+    }
+
     public function index(Request $request): View
     {
         return view('profile.content', [
             'user' => $request->user(),
-        ]);
-    }
-
-    public function edit(Request $request): View
-    {
-        return view('profile.edit', [
-            'user' => $request->user(),
+            // Refactor: bisa eager load relasi jika dibutuhkan → $request->user()->load('alamat')
         ]);
     }
 
     /**
-     * Update the user's profile information.
+     * Menampilkan form edit profil.
+     */
+    public function edit(Request $request): View
+    {
+        return view('profile.edit', [
+            'user' => $request->user(),
+            // Refactor: jika form menampilkan alamat, gunakan eager loading → $request->user()->load('alamat')
+        ]);
+    }
+
+    /**
+     * Memperbarui informasi profil pengguna.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-        
         $data = $request->validated();
-        
-        // Handle file upload
+
+        // Refactor: logika upload file bisa dipisah ke metode terpisah
         if ($request->hasFile('foto')) {
-            // Delete old file if exists
             if ($user->foto) {
-                Storage::delete('public/'.$user->foto);
+                Storage::delete('public/' . $user->foto); // delete foto lama jika ada
             }
-            
+
             $path = $request->file('foto')->store('profile-photos', 'public');
             $data['foto'] = $path;
         }
@@ -61,7 +70,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Menghapus akun pengguna.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -71,13 +80,11 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        // Delete profile photo if exists
         if ($user->foto) {
-            Storage::delete('public/'.$user->foto);
+            Storage::delete('public/' . $user->foto);
         }
 
         Auth::logout();
-
         $user->delete();
 
         $request->session()->invalidate();
@@ -85,4 +92,7 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    // Refactor: Tambahkan method privat untuk mengelola upload file agar tidak duplikatif
+    // private function handleProfilePhotoUpload(Request $request, User $user): ?string { ... }
 }
