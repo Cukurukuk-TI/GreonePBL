@@ -1,40 +1,71 @@
-{{-- resources/views/alamat/form.blade.php --}}
 @php
     $alamat = $alamat ?? new \App\Models\Alamat;
 @endphp
 
-{{-- Pilihan label enum --}}
-<select name="label" class="w-full border px-3 py-2 mb-2 rounded">
-    <option value="">-- Pilih Label Alamat --</option>
-    <option value="rumah" {{ old('label', $alamat->label) == 'rumah' ? 'selected' : '' }}>Rumah</option>
-    <option value="kantor" {{ old('label', $alamat->label) == 'kantor' ? 'selected' : '' }}>Kantor</option>
-    <option value="other" {{ old('label', $alamat->label) == 'other' ? 'selected' : '' }}>Lainnya</option>
-</select>
+<div class="space-y-4">
 
-{{-- Nama penerima --}}
-<input name="nama_penerima" placeholder="Nama Penerima" class="w-full border px-3 py-2 mb-2 rounded"
-    value="{{ old('nama_penerima', $alamat->nama_penerima) }}">
+    {{-- Label Alamat --}}
+    <div>
+        <label for="label" class="block text-sm font-medium text-gray-700 mb-1">Label Alamat</label>
+        <select name="label" id="label"
+            class="w-full border border-gray-300 px-4 py-2 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            <option value="">-- Pilih Label Alamat --</option>
+            <option value="rumah" {{ old('label', $alamat->label) == 'rumah' ? 'selected' : '' }}>Rumah</option>
+            <option value="kantor" {{ old('label', $alamat->label) == 'kantor' ? 'selected' : '' }}>Kantor</option>
+            <option value="other" {{ old('label', $alamat->label) == 'other' ? 'selected' : '' }}>Lainnya</option>
+        </select>
+    </div>
 
-{{-- Nomor HP --}}
-<input name="nomor_hp" placeholder="Nomor HP" class="w-full border px-3 py-2 mb-2 rounded"
-    value="{{ old('nomor_hp', $alamat->nomor_hp) }}">
+    {{-- Nama Penerima --}}
+    <div>
+        <label for="nama_penerima" class="block text-sm font-medium text-gray-700 mb-1">Nama Penerima</label>
+        <input type="text" name="nama_penerima" id="nama_penerima"
+            class="w-full border border-gray-300 px-4 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            placeholder="Nama Penerima"
+            value="{{ old('nama_penerima', $alamat->nama_penerima) }}">
+    </div>
 
-{{-- Provinsi --}}
-<input name="provinsi" placeholder="Provinsi" class="w-full border px-3 py-2 mb-2 rounded"
-    value="{{ old('provinsi', $alamat->provinsi) }}">
+    {{-- Nomor HP --}}
+    <div>
+        <label for="nomor_hp" class="block text-sm font-medium text-gray-700 mb-1">Nomor HP</label>
+        <input type="text" name="nomor_hp" id="nomor_hp"
+            class="w-full border border-gray-300 px-4 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            placeholder="08xxxxxxxxxx"
+            value="{{ old('nomor_hp', $alamat->nomor_hp) }}">
+    </div>
 
-{{-- Kota --}}
-<input name="kota" placeholder="Kota" class="w-full border px-3 py-2 mb-2 rounded"
-    value="{{ old('kota', $alamat->kota) }}">
+    {{-- Provinsi --}}
+    <div>
+        <label for="provinsi" class="block text-sm font-medium text-gray-700 mb-1">Provinsi</label>
+        <input type="text" name="provinsi" id="provinsi"
+            class="w-full border border-gray-300 px-4 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            placeholder="Contoh: Jawa Barat"
+            value="{{ old('provinsi', $alamat->provinsi) }}">
+    </div>
 
-{{-- Detail alamat --}}
-<textarea name="detail_alamat" placeholder="Detail Alamat"
-    class="w-full border px-3 py-2 mb-2 rounded">{{ old('detail_alamat', $alamat->detail_alamat) }}</textarea>
+    {{-- Kota --}}
+    <div>
+        <label for="kota" class="block text-sm font-medium text-gray-700 mb-1">Kota</label>
+        <input type="text" name="kota" id="kota"
+            class="w-full border border-gray-300 px-4 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            placeholder="Contoh: Bandung"
+            value="{{ old('kota', $alamat->kota) }}">
+    </div>
 
-<div class="mt-3">
-    <label class="block font-semibold mb-1">Pilih Lokasi di Peta</label>
-    <div id="map" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+    {{-- Detail Alamat --}}
+    <div>
+        <label for="detail_alamat" class="block text-sm font-medium text-gray-700 mb-1">Detail Alamat</label>
+        <textarea name="detail_alamat" id="detail_alamat"
+            class="w-full border border-gray-300 px-4 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            placeholder="Masukkan alamat lengkap">{{ old('detail_alamat', $alamat->detail_alamat) }}</textarea>
+    </div>
+
+    <div class="mt-3">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Lokasi di Peta</label>
+        <div id="map" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+    </div>
+
+    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $alamat->latitude) }}">
+    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $alamat->longitude) }}">
+
 </div>
-
-<input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $alamat->latitude) }}">
-<input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $alamat->longitude) }}">
