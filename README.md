@@ -21,7 +21,7 @@ Selamat datang di repository project kami!
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/FailHy/greone
+git clone https://github.com/Cukurukuk-TI/GreonePBL.git
 ```
 
 ### 2. Buat DB di .env
