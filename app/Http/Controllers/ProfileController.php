@@ -15,6 +15,12 @@ class ProfileController extends Controller
     /**
      * Menampilkan halaman profil.
      */
+    public function adminIndex(): View {
+    return view('admin.profile.content', [
+        'user' => auth()->user()->isAdmin()
+    ]);
+    }
+
     public function index(Request $request): View
     {
         return view('profile.content', [
