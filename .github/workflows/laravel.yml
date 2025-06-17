@@ -1,0 +1,53 @@
+# Nama workflow yang akan muncul di tab "Actions" GitHub
+name: Laravel CI
+
+# Kapan workflow ini dijalankan
+on:
+  push:
+    branches: [ "testing3" ] # Jalankan saat ada push ke main atau develop
+  pull_request:
+    branches: [ "testing3" ] # Jalankan saat ada Pull Request ke main atau develop
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest # Jalankan di mesin virtual Ubuntu terbaru
+
+    steps:
+    # Langkah 1: Checkout kode dari repository
+    - uses: actions/checkout@v3
+
+    # Langkah 2: Setup PHP dengan versi yang sesuai
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2' # Sesuaikan dengan versi PHP proyek kalian
+
+    # Langkah 3: Install dependensi Composer
+    - name: Install Composer Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+    # Langkah 4: Siapkan file .env
+    - name: Prepare Environment File
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+    # Langkah 5: Generate key aplikasi
+    - name: Generate key
+      run: php artisan key:generate
+
+    # Langkah 6: Jalankan migrasi database (menggunakan SQLite in-memory untuk kecepatan) dan seeding
+    - name: Directory Permissions
+      run: chmod -R 777 storage bootstrap/cache
+    - name: Run Database Migrations and Seeder
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: ':memory:'
+      run: |
+        php artisan migrate
+        php artisan db:seed
+
+    # Langkah 7 (Opsional, tapi sangat direkomendasikan): Jalankan test
+    - name: Execute tests (Unit and Feature tests) via PHPUnit
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: ':memory:'
+      run: php artisan test
