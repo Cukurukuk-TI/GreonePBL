@@ -91,9 +91,43 @@
 
                 <!-- Metode Pengiriman -->
                 <div class="bg-white p-4 rounded-lg border">
-                    <h3 class="font-semibold mb-2">Metode Pengiriman</h3>
-                    <p class="text-gray-600">SiCepat Ultimate</p>
-                    <button type="button" class="text-green-600 text-sm mt-2" {{ $produk->stok_produk <= 0 ? 'disabled' : '' }}>Ubah Metode Pengiriman</button>
+                    <h3 class="font-semibold mb-4 text-lg">Metode Pengiriman</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Option: Jemput -->
+                        <label class="cursor-pointer">
+                            <input type="radio" name="metode_pengiriman" value="jemput" class="sr-only peer"
+                                {{ old('metode_pengiriman') == 'jemput' ? 'checked' : '' }}>
+                            <div class="flex items-center p-4 border rounded-lg shadow-sm peer-checked:border-green-500 peer-checked:ring-2 peer-checked:ring-green-200 transition">
+                                <div class="bg-green-100 text-green-600 p-2 rounded-full mr-4">
+                                    <i class="fas fa-store text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Jemput di Lokasi</h4>
+                                    <p class="text-sm text-gray-500">Ambil produk langsung di toko.</p>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Option: Antar -->
+                        <label class="cursor-pointer">
+                            <input type="radio" name="metode_pengiriman" value="antar" class="sr-only peer"
+                                {{ old('metode_pengiriman') == 'antar' ? 'checked' : '' }}>
+                            <div class="flex items-center p-4 border rounded-lg shadow-sm peer-checked:border-green-500 peer-checked:ring-2 peer-checked:ring-green-200 transition">
+                                <div class="bg-green-100 text-green-600 p-2 rounded-full mr-4">
+                                    <i class="fas fa-truck text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Diantar ke Alamat</h4>
+                                    <p class="text-sm text-gray-500">Produk akan dikirim ke lokasi Anda.</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    @if($produk->stok_produk <= 0)
+                        <p class="text-red-500 text-sm mt-3">Stok habis. Pengiriman tidak tersedia.</p>
+                    @endif
                 </div>
 
                 <!-- Promo -->
@@ -118,12 +152,52 @@
                     @endif
                 </div>
 
-                <!-- Metode Pembayaran -->
-                <div class="bg-white p-4 rounded-lg border">
-                    <h3 class="font-semibold mb-2">Metode Pembayaran</h3>
-                    <p class="text-gray-600">BNI Virtual Account</p>
-                    <button type="button" class="text-green-600 text-sm mt-2" {{ $produk->stok_produk <= 0 ? 'disabled' : '' }}>Ubah Metode Pembayaran</button>
+            <!-- Metode Pembayaran -->
+            <div class="bg-white p-4 rounded-lg border">
+                <h3 class="font-semibold mb-4 text-lg">Metode Pembayaran</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Option: COD -->
+                    <label class="cursor-pointer">
+                        <input type="radio" name="metode_pembayaran" value="cod" class="sr-only peer"
+                            {{ old('metode_pembayaran') == 'cod' ? 'checked' : '' }}>
+                        <div class="flex items-center p-4 border rounded-lg shadow-sm peer-checked:border-green-500 peer-checked:ring-2 peer-checked:ring-green-200 transition">
+                            <div class="bg-green-100 text-green-600 p-2 rounded-full mr-4">
+                                <i class="fas fa-money-bill-wave text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">COD (Bayar di Tempat)</h4>
+                                <p class="text-sm text-gray-500">Bayar saat produk sampai di tangan Anda.</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Option: Transfer Bank -->
+                    <label class="cursor-pointer">
+                        <input type="radio" name="metode_pembayaran" value="transfer" class="sr-only peer"
+                            {{ old('metode_pembayaran') == 'transfer' ? 'checked' : '' }}>
+                        <div class="flex items-center p-4 border rounded-lg shadow-sm peer-checked:border-green-500 peer-checked:ring-2 peer-checked:ring-green-200 transition">
+                            <div class="bg-green-100 text-green-600 p-2 rounded-full mr-4">
+                                <i class="fas fa-university text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Transfer Bank</h4>
+                                <p class="text-sm text-gray-500">Lakukan pembayaran via rekening bank.</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Option: Virtual Account -->
+                    <label class="cursor-pointer md:col-span-2">
+                        <input type="radio" name="metode_pembayaran" value="va_bni" class="sr-only peer"
+                            {{ old('metode_pembayaran') == 'va_bni' ? 'checked' : '' }}>
+                    </label>
                 </div>
+
+                @if($produk->stok_produk <= 0)
+                    <p class="text-red-500 text-sm mt-3">Stok habis. Pembayaran tidak tersedia.</p>
+                @endif
+            </div>
             </div>
 
             <!-- Kolom Kanan -->
