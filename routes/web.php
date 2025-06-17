@@ -12,6 +12,7 @@ use App\Http\Controllers\AlamatController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\Admin\PelangganController;
 
 //   Home (Boleh Diakses Guest)
 Route::get('/', [KategoriController::class, 'indexUser'])->name('home');
@@ -86,4 +87,9 @@ Route::middleware(['auth', 'admin', 'admin.timeout'])->prefix('admin')->name('ad
     Route::patch('/pesanans/{pesanan}/restore', [PesananController::class, 'restore'])->name('pesanans.restore');
     Route::delete('/pesanans/{pesanan}/force-delete', [PesananController::class, 'forceDelete'])->name('pesanans.force-delete');
     Route::get('/pesanans/{pesanan}', [PesananController::class, 'show'])->name('pesanans.show');
+
+    // Pelanggan Admin
+    Route::resource('pelanggan', PelangganController::class);
+
 });
+

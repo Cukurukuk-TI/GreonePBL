@@ -39,8 +39,9 @@
         <a href="#" class="flex items-center p-2 rounded hover:bg-green-100">
             <i class="fas fa-comment-dots w-5"></i><span class="ml-3">Testimoni</span>
         </a>
-        <a href="#" class="flex items-center p-2 rounded hover:bg-green-100">
-            <i class="fas fa-user-friends w-5"></i><span class="ml-3">Daftar Pelanggan</span>
+        <a href="{{ route('admin.pelanggan.index') }}" class="flex items-center p-2 rounded hover:bg-green-100">
+            <i class="fas fa-fw fa-users"></i>
+            <span class="ml-3">Daftar Pelanggan</span>
         </a>
         <a href="#" class="flex items-center p-2 rounded hover:bg-green-100">
             <i class="fas fa-user-shield w-5"></i><span class="ml-3">Role Pengguna</span>
