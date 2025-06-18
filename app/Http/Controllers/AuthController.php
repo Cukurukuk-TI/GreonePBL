@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 
 class AuthController extends Controller
 {
@@ -59,18 +60,25 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:6|confirmed',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'user' // tiap register auto jadi user
+            'role' => 'user',
         ]);
 
-        return redirect('/login')->with('success', 'Akun berhasil dibuat. Silakan login!');
+        // Memicu event untuk mengirim email verifikasi
+        event(new Registered($user));
+
+        // Langsung login-kan user
+        Auth::login($user);
+
+        // Arahkan ke halaman pemberitahuan verifikasi
+        return redirect()->route('verification.notice');
     }
 
     // Halaman profil setelah login
