@@ -1,0 +1,48 @@
+name: Laravel CI / CD
+
+on:
+  push:
+    branches: [ "main", "testing3" ]
+  pull_request:
+    branches: [ "main", "testing3" ]
+
+jobs:
+  laravel-tests:
+    name: Run Laravel Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2' # Sesuaikan dengan versi PHP Anda
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Prepare Environment File
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+      - name: Generate Application Key
+        run: php artisan key:generate
+
+      # Langkah yang Diperbaiki: Setup Database dan Jalankan Migrasi
+      - name: Setup Database and Run Migrations
+        # Kita set environment agar menggunakan SQLite berbasis file
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+          php artisan migrate --seed # Jalankan migrasi dan seeder ke file SQLite
+
+      # Langkah yang Diperbaiki: Jalankan Test
+      - name: Execute tests (PHPUnit)
+        # Pastikan test juga menggunakan koneksi dan file database yang sama
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan test
