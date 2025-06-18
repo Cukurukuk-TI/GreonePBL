@@ -95,19 +95,28 @@
     </div>
 </form>
 <script>
-    function previewImage(event) {
-        const input = event.target;
-        const preview = document.getElementById('preview-gambar-kategori');
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('gambar_produk');
+        const preview = document.getElementById('preview-image');
+        const fileName = document.getElementById('file-name');
 
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
+        input.addEventListener('change', function (e) {
+            const file = e.target.files[0];
 
-            reader.onload = function (e) {
-                preview.src = e.target.result;
-                preview.classList.remove('hidden');
+            if (file) {
+                fileName.textContent = file.name;
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    preview.src = event.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                fileName.textContent = 'Belum ada file dipilih';
+                preview.src = '';
+                preview.classList.add('hidden');
             }
-
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
+        });
+    });
 </script>
