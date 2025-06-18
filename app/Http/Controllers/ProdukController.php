@@ -6,6 +6,7 @@ use App\Models\Produk;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Testimoni; // Import model Testimoni
 
 class ProdukController extends Controller
 {
@@ -97,7 +98,7 @@ class ProdukController extends Controller
         return redirect()->route('admin.produks.index')->with('success', 'Produk berhasil dihapus.');
     }
 
-   //untuk menampilkan halaman produk yang nantinya akan diakses oleh user dalam bentuk chart
+    //untuk menampilkan halaman produk yang nantinya akan diakses oleh user dalam bentuk chart
     public function showToUser()
     {
         $produks = Produk::with('kategori')->latest()->get();
@@ -109,8 +110,7 @@ class ProdukController extends Controller
     //unutk menampilkan halaman detail produk 
     public function show($id)
     {
-        $produk = Produk::with('kategori')->findOrFail($id);
+        $produk = Produk::with(['kategori', 'testimonis.user'])->findOrFail($id); // Load testimonis beserta user-nya
         return view('user.deskripsiproduk', compact('produk'));
     }
-
 }

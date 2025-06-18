@@ -23,7 +23,6 @@
         </div>
     @endif
 
-    <!-- Filter Status -->
     <div class="bg-white rounded-lg shadow mb-6 p-4">
         <div class="flex flex-wrap gap-2">
             <a href="{{ request()->fullUrlWithQuery(['status' => '']) }}" 
@@ -53,7 +52,6 @@
         </div>
     </div>
 
-    <!-- Tabel Pesanan -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -79,10 +77,8 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($pesanans as $pesanan)
                         <tr class="hover:bg-gray-50">
-                            <!-- Kolom Pesanan (Gambar + Info) -->
                             <td class="px-6 py-4">
                                 <div class="flex items-center space-x-4">
-                                    <!-- Gambar Produk -->
                                     <div class="flex-shrink-0">
                                         @if($pesanan->produk->gambar_produk)
                                             <img src="{{ asset('storage/' . $pesanan->produk->gambar_produk) }}" 
@@ -96,7 +92,6 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <!-- Info Produk -->
                                     <div class="flex-1 min-w-0">
                                         <div class="text-sm font-medium text-gray-900 truncate">
                                             {{ $pesanan->produk->nama_produk }}
@@ -114,7 +109,6 @@
                                 </div>
                             </td>
 
-                            <!-- Kolom Harga -->
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">
                                     Rp{{ number_format($pesanan->total_harga, 0, ',', '.') }}
@@ -124,7 +118,6 @@
                                 </div>
                             </td>
 
-                            <!-- Kolom Status -->
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @switch($pesanan->status)
                                     @case('pending')
@@ -163,7 +156,7 @@
                                     @case('cancelled')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
                                             </svg>
                                             Dibatalkan
                                         </span>
@@ -171,24 +164,36 @@
                                 @endswitch
                             </td>
 
-                            <!-- Kolom Tanggal -->
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <div>{{ \Carbon\Carbon::parse($pesanan->created_at)->format('d/m/Y') }}</div>
                                 <div class="text-xs">{{ \Carbon\Carbon::parse($pesanan->created_at)->format('H:i') }}</div>
                             </td>
 
-                            <!-- Kolom Aksi -->
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex flex-col space-y-2">
-                                    <!-- Tombol Testimoni -->
                                     @if($pesanan->status === 'complete')
-                                        <a href="{{ route('home') }}" 
-                                           class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition duration-200">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Testimoni
-                                        </a>
+                                        @php
+                                            $hasGivenTestimoni = \App\Models\Testimoni::where('user_id', Auth::id())
+                                                                ->where('produk_id', $pesanan->produk_id)
+                                                                ->exists();
+                                        @endphp
+
+                                        @if($hasGivenTestimoni)
+                                            <span class="inline-flex items-center px-3 py-1.5 bg-gray-300 text-gray-500 text-xs font-medium rounded-md cursor-not-allowed">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                Sudah Testimoni
+                                            </span>
+                                        @else
+                                            <button type="button" onclick="showTestimoniModal('{{ route('testimoni.create', $pesanan->id) }}')"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition duration-200">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                Testimoni
+                                            </button>
+                                        @endif
                                     @else
                                         <span class="inline-flex items-center px-3 py-1.5 bg-gray-300 text-gray-500 text-xs font-medium rounded-md cursor-not-allowed">
                                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -198,7 +203,6 @@
                                         </span>
                                     @endif
 
-                                    <!-- Tombol Detail (opsional) -->
                                     <button onclick="showOrderDetail('{{ $pesanan->id }}')" 
                                             class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition duration-200">
                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -235,7 +239,6 @@
         </div>
     </div>
 
-    <!-- Pagination -->
     @if(method_exists($pesanans, 'hasPages') && $pesanans->hasPages())
         <div class="mt-6">
             {{ $pesanans->appends(request()->query())->links() }}
@@ -243,7 +246,8 @@
     @endif
 </div>
 
-<!-- Modal Detail Pesanan -->
+<div id="testimoniModalContainer"></div>
+
 <div id="orderDetailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <div class="flex justify-between items-center mb-4">
@@ -255,19 +259,16 @@
             </button>
         </div>
         <div id="orderDetailContent">
-            <!-- Detail akan dimuat di sini -->
-        </div>
+            </div>
     </div>
 </div>
 
 <script>
+// Fungsi untuk menampilkan detail pesanan
 function showOrderDetail(orderId) {
-    // Implementasi untuk menampilkan detail pesanan
-    // Bisa menggunakan AJAX atau data yang sudah ada
     const modal = document.getElementById('orderDetailModal');
     const content = document.getElementById('orderDetailContent');
     
-    // Contoh konten statis, bisa diganti dengan AJAX call
     content.innerHTML = `
         <div class="space-y-3">
             <div>
@@ -293,17 +294,125 @@ function showOrderDetail(orderId) {
     modal.classList.add('flex');
 }
 
+// Fungsi untuk menutup modal detail pesanan
 function closeOrderDetail() {
     const modal = document.getElementById('orderDetailModal');
     modal.classList.add('hidden');
     modal.classList.remove('flex');
 }
 
-// Close modal when clicking outside
+// Menutup modal detail pesanan ketika mengklik di luar area modal
 document.getElementById('orderDetailModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeOrderDetail();
     }
 });
+
+// Fungsi inisialisasi bintang (akan dipanggil setelah modal testimoni dimuat)
+function initializeStarRating() {
+    const stars = document.querySelectorAll('#star-rating .star');
+    const ratingValueInput = document.getElementById('rating-value');
+
+    stars.forEach(star => {
+        // Hapus event listener lama jika ada, untuk mencegah duplikasi
+        star.removeEventListener('click', starClickHandler);
+        star.removeEventListener('mouseover', starMouseOverHandler);
+        star.removeEventListener('mouseout', starMouseOutHandler);
+
+        // Tambahkan event listener baru
+        star.addEventListener('click', starClickHandler);
+        star.addEventListener('mouseover', starMouseOverHandler);
+        star.addEventListener('mouseout', starMouseOutHandler);
+    });
+
+    // Panggil sekali untuk memastikan tampilan awal sesuai ratingValueInput jika ada old value
+    if (ratingValueInput.value > 0) {
+        updateStarRating(ratingValueInput.value);
+    }
+
+    function starClickHandler() {
+        const rating = this.dataset.rating;
+        ratingValueInput.value = rating;
+        updateStarRating(rating);
+    }
+
+    function starMouseOverHandler() {
+        const rating = this.dataset.rating;
+        highlightStars(rating);
+    }
+
+    function starMouseOutHandler() {
+        updateStarRating(ratingValueInput.value);
+    }
+
+    function updateStarRating(rating) {
+        stars.forEach(star => {
+            if (star.dataset.rating <= rating) {
+                star.classList.remove('text-gray-300');
+                star.classList.add('text-yellow-400');
+            } else {
+                star.classList.remove('text-yellow-400');
+                star.classList.add('text-gray-300');
+            }
+        });
+    }
+
+    function highlightStars(rating) {
+        stars.forEach(star => {
+            if (star.dataset.rating <= rating) {
+                star.classList.remove('text-gray-300');
+                star.classList.add('text-yellow-300'); // Warna saat hover
+            } else {
+                star.classList.remove('text-yellow-300');
+                star.classList.add('text-gray-300');
+            }
+        });
+    }
+}
+
+// Logic for Testimoni Modal
+function showTestimoniModal(testimoniCreateUrl) {
+    fetch(testimoniCreateUrl)
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Halaman testimoni tidak ditemukan. Periksa rute Anda.');
+                }
+                if (response.status === 403) {
+                    throw new Error('Anda tidak memiliki izin untuk mengakses halaman ini.');
+                }
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.text();
+        })
+        .then(html => {
+            const container = document.getElementById('testimoniModalContainer');
+            container.innerHTML = html;
+            // Panggil fungsi inisialisasi bintang setelah modal dimuat
+            initializeStarRating();
+
+            // Tambahkan event listener untuk menutup modal ketika mengklik di luar area modal
+            const testimoniModal = document.getElementById('testimoniModal');
+            if (testimoniModal) {
+                testimoniModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeTestimoniModal();
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading testimoni form:', error);
+            alert('Gagal memuat formulir testimoni: ' + error.message);
+        });
+}
+
+// Pastikan fungsi closeTestimoniModal tersedia secara global
+function closeTestimoniModal() {
+    const modal = document.getElementById('testimoniModal');
+    if (modal) {
+        modal.remove(); // Menghapus modal dari DOM
+    }
+}
 </script>
 @endsection

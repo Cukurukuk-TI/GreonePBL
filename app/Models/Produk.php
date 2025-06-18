@@ -29,4 +29,10 @@ class Produk extends Model
     {
         return $this->hasMany(Keranjang::class);
     }
+    
+    // Tambahkan relasi testimoni
+    public function testimonis()
+    {
+        return $this->hasMany(Testimoni::class);
+    }
 }
