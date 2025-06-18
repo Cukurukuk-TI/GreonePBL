@@ -15,7 +15,7 @@ use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\Admin\PelangganController;
-
+use App\Http\Controllers\Auth\PasswordController;
 //   Home (Boleh Diakses Guest)
 Route::get('/', [KategoriController::class, 'indexUser'])->name('home');
 
@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit'); // form edit profil
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
 
     // Alamat
