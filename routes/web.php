@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan/create/{produk}', [PesananController::class, 'create'])->name('pesanans.create');
     Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
     Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
+    Route::get('/pesananuser', [PesananController::class, 'pesanan'])->name('user.pesanan');
 });
 
 //   Admin route
@@ -86,4 +87,7 @@ Route::middleware(['auth', 'admin', 'admin.timeout'])->prefix('admin')->name('ad
     Route::patch('/pesanans/{pesanan}/restore', [PesananController::class, 'restore'])->name('pesanans.restore');
     Route::delete('/pesanans/{pesanan}/force-delete', [PesananController::class, 'forceDelete'])->name('pesanans.force-delete');
     Route::get('/pesanans/{pesanan}', [PesananController::class, 'show'])->name('pesanans.show');
+    
 });
+
+

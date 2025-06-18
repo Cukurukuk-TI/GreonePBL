@@ -1,9 +1,12 @@
 @extends('layouts.appnoslider')
 
 @section('content')
-<div class="max-w-6xl mx-auto p-6">
+<div class="max-w-6xl mx-auto p-6 pb-32">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-800">Keranjang Belanja</h1>
+        {{-- <a href="{{ url('/') }}" class="text-blue-600 hover:text-blue-800 font-medium">
+            ← Lanjut Belanja
+        </a> --}}
     </div>
 
     @if(session('success'))
@@ -99,34 +102,39 @@
                 </table>
             </div>
 
-            <!-- Total dan Aksi -->
+            <!-- Tombol Kosongkan Keranjang -->
             <div class="bg-gray-50 px-6 py-4">
+                <form method="POST" action="{{ route('keranjang.clear') }}" 
+                      onsubmit="return confirm('Yakin ingin mengosongkan keranjang?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                        Kosongkan Keranjang
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Total Fixed Bottom -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">
+            <div class="max-w-6xl mx-auto px-6 py-4">
                 <div class="flex justify-between items-center">
-                    <div class="flex gap-4">
-                        <form method="POST" action="{{ route('keranjang.clear') }}" 
-                              onsubmit="return confirm('Yakin ingin mengosongkan keranjang?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
-                                Kosongkan Keranjang
-                            </button>
-                        </form>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-sm text-gray-600">Total Belanja:</div>
+                    <div class="text-left">
+                        <div class="text-lg font-bold text-green-600">Total</div>
                         <div class="text-2xl font-bold text-green-600">
-                            Rp {{ number_format($totalHarga, 0, ',', '.') }}
+                            Rp{{ number_format($totalHarga, 0, ',', '.') }}
                         </div>
-                        <div class="mt-4">
-                            <a href="{{ route('keranjang.checkout') }}" 
-                               class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded">
-                                Checkout Sekarang
-                            </a>
-                        </div>
+                    </div>
+                    <div>
+                        <a href="{{ route('keranjang.checkout') }}" 
+                           class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-lg">
+                            Beli
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
+
     @else
         <!-- Keranjang Kosong -->
         <div class="text-center py-12">
