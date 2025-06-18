@@ -89,6 +89,10 @@ Route::middleware(['auth', 'admin', 'admin.timeout'])->prefix('admin')->name('ad
     Route::get('/pesanans/{pesanan}', [PesananController::class, 'show'])->name('pesanans.show');
 
     // Pelanggan Admin
+    Route::get('pelanggan/trash', [App\Http\Controllers\Admin\PelangganController::class, 'trash'])->name('pelanggan.trash');
+    Route::patch('pelanggan/{id}/restore', [App\Http\Controllers\Admin\PelangganController::class, 'restore'])->name('pelanggan.restore');
+    Route::delete('pelanggan/{id}/force-delete', [App\Http\Controllers\Admin\PelangganController::class, 'forceDelete'])->name('pelanggan.forceDelete');
+
     Route::resource('pelanggan', PelangganController::class);
 
 });

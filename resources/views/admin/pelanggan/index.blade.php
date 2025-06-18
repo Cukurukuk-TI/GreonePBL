@@ -38,6 +38,11 @@
     <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
         <h2 class="text-xl font-semibold text-gray-700 mb-4">Daftar Pelanggan Aktif</h2>
 
+                <a href="{{ route('admin.pelanggan.trash') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg text-sm flex items-center">
+            <i class="fas fa-archive mr-2"></i>
+            Lihat Arsip
+        </a>
+
         @if (session('success'))
             <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
                 {{ session('success') }}

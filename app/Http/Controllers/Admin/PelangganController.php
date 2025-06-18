@@ -75,4 +75,35 @@ class PelangganController extends Controller
         return redirect()->route('admin.pelanggan.index')->with('success', 'Pelanggan berhasil dihapus.');
     }
 
+        /**
+     * Menampilkan daftar pelanggan yang sudah di-soft delete.
+     */
+    public function trash()
+    {
+        $pelanggan = User::onlyTrashed()->where('role', 'user')->latest()->paginate(10);
+        return view('admin.pelanggan.trash', compact('pelanggan'));
+    }
+
+    /**
+     * Memulihkan pelanggan yang sudah di-soft delete.
+     */
+    public function restore($id)
+    {
+        $pelanggan = User::onlyTrashed()->where('role', 'user')->findOrFail($id);
+        $pelanggan->restore();
+
+        return redirect()->route('admin.pelanggan.trash')->with('success', 'Pelanggan berhasil dipulihkan.');
+    }
+
+    /**
+     * Menghapus pelanggan secara permanen dari database.
+     */
+    public function forceDelete($id)
+    {
+        $pelanggan = User::onlyTrashed()->where('role', 'user')->findOrFail($id);
+        $pelanggan->forceDelete();
+
+        return redirect()->route('admin.pelanggan.trash')->with('success', 'Pelanggan berhasil dihapus secara permanen.');
+    }
+
 }
