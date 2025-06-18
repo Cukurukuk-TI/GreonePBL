@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan/create/{produk}', [PesananController::class, 'create'])->name('pesanans.create');
     Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
     Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
+    Route::get('/pesananuser', [PesananController::class, 'pesanan'])->name('user.pesanan');
 });
 
 //   Admin route
@@ -96,4 +97,3 @@ Route::middleware(['auth', 'admin', 'admin.timeout'])->prefix('admin')->name('ad
     Route::resource('pelanggan', PelangganController::class);
 
 });
-
