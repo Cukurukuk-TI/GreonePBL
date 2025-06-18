@@ -48,12 +48,10 @@ class ProfileController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        // Refactor: logika upload file bisa dipisah ke metode terpisah
         if ($request->hasFile('foto')) {
             if ($user->foto) {
-                Storage::delete('public/' . $user->foto); // delete foto lama jika ada
+                Storage::disk('public')->delete($user->foto);
             }
-
             $path = $request->file('foto')->store('profile-photos', 'public');
             $data['foto'] = $path;
         }
@@ -65,6 +63,9 @@ class ProfileController extends Controller
         }
 
         $user->save();
+        if ($user->email_verified_at === null) {
+            $user->sendEmailVerificationNotification();
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
