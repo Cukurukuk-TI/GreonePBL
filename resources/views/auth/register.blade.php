@@ -17,11 +17,11 @@
             {{-- Nama --}}
             <div>
                 <label for="name" class="block font-semibold mb-1">Nama</label>
-                <input 
-                    type="text" 
-                    name="name" 
+                <input
+                    type="text"
+                    name="name"
                     id="name"
-                    value="{{ old('name') }}" 
+                    value="{{ old('name') }}"
                     placeholder="Nama lengkap"
                     required
                     class="w-full border px-3 py-2 rounded @error('name') border-red-500 @enderror focus:outline-none focus:border-blue-400"
@@ -34,11 +34,11 @@
             {{-- Email --}}
             <div>
                 <label for="email" class="block font-semibold mb-1">Email</label>
-                <input 
-                    type="email" 
-                    name="email" 
+                <input
+                    type="email"
+                    name="email"
                     id="email"
-                    value="{{ old('email') }}" 
+                    value="{{ old('email') }}"
                     placeholder="Email aktif"
                     required
                     class="w-full border px-3 py-2 rounded @error('email') border-red-500 @enderror focus:outline-none focus:border-blue-400"
@@ -51,13 +51,13 @@
             {{-- Password --}}
             <div class="relative">
                 <label for="password" class="block font-semibold mb-1">Password</label>
-                <input 
-                    type="password" 
-                    name="password" 
+                <input
+                    type="password"
+                    name="password"
                     id="password"
-                    placeholder="Minimal 8 karakter"
+                    placeholder="Buat password Anda"
                     required
-                    class="w-full border px-3 py-2 rounded pr-10 @error('password') border-red-500 @enderror focus:outline-none focus:border-blue-400"
+                    class="w-full border px-3 py-2 rounded-md pr-10 shadow-sm @error('password') border-red-500 @enderror focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
                 <button type="button" onclick="togglePassword('password', 'toggleIcon1')" class="absolute right-3 top-9 text-gray-500 hover:text-gray-700 focus:outline-none" aria-label="Toggle password visibility">
                     <svg id="toggleIcon1" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -65,6 +65,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
                 </button>
+
+                <p class="text-xs text-gray-500 mt-2">
+                    Minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan simbol.
+                </p>
+
                 @error('password')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -73,13 +78,13 @@
             {{-- Konfirmasi Password --}}
             <div class="relative">
                 <label for="password_confirmation" class="block font-semibold mb-1">Konfirmasi Password</label>
-                <input 
-                    type="password" 
-                    name="password_confirmation" 
+                <input
+                    type="password"
+                    name="password_confirmation"
                     id="password_confirmation"
                     placeholder="Ulangi password"
                     required
-                    class="w-full border px-3 py-2 rounded pr-10 focus:outline-none focus:border-blue-400"
+                    class="w-full border px-3 py-2 rounded-md pr-10 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
                 <button type="button" onclick="togglePassword('password_confirmation', 'toggleIcon2')" class="absolute right-3 top-9 text-gray-500 hover:text-gray-700 focus:outline-none" aria-label="Toggle password visibility">
                     <svg id="toggleIcon2" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
