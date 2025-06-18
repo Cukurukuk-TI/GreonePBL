@@ -20,6 +20,11 @@
                    class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors">
                     Ubah Password
                 </a>
+                <a href="#" @click.prevent="tab = 'delete'"
+                   :class="{ 'border-red-500 text-red-600': tab === 'delete', 'border-transparent text-gray-500 hover:text-gray-700': tab !== 'delete' }"
+                   class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
+                    Hapus Akun
+                </a>
             </nav>
         </div>
 
@@ -29,6 +34,9 @@
             </div>
             <div x-show="tab === 'password'" x-cloak>
                 @include('profile.partials.update-password-form')
+            </div>
+            <div x-show="tab === 'delete'" x-cloak>
+                @include('profile.partials.delete-user-form')
             </div>
         </div>
     </div>
