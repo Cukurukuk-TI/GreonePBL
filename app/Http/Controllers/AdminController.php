@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Pesanan;
 use App\Models\Produk;
+use App\Models\User;
 use Carbon\Carbon;
 
 class AdminController extends Controller
@@ -19,85 +20,60 @@ class AdminController extends Controller
 
     public function dashboard()
     {
-        // Ambil produk terlaris berdasarkan jumlah pesanan bulan ini  
-        $produkTerlaris = DB::table('pesanans')
-            ->join('produks', 'pesanans.produk_id', '=', 'produks.id')
+        // PERBAIKAN: Query produk terlaris sekarang dari 'detail_pesanans'
+        $produkTerlaris = DB::table('detail_pesanans')
+            ->join('produks', 'detail_pesanans.produk_id', '=', 'produks.id')
+            ->join('pesanans', 'detail_pesanans.pesanan_id', '=', 'pesanans.id')
             ->select(
                 'produks.id',
                 'produks.nama_produk',
                 'produks.gambar_produk',
-                DB::raw('SUM(pesanans.jumlah) as total_terjual')
+                DB::raw('SUM(detail_pesanans.jumlah) as total_terjual')
             )
             ->whereMonth('pesanans.created_at', now()->month)
             ->whereYear('pesanans.created_at', now()->year)
-            ->where('pesanans.status', '!=', 'cancelled') // Exclude cancelled orders
+            ->where('pesanans.status', '!=', 'cancelled')
             ->groupBy('produks.id', 'produks.nama_produk', 'produks.gambar_produk')
             ->orderBy('total_terjual', 'desc')
             ->limit(10)
             ->get();
 
-        // Dapatkan nama bulan saat ini dari pesanan
         $currentMonth = $this->getCurrentMonthName();
-
-        // Hitung statistik dashboard untuk bulan ini
         $stats = $this->getDashboardStats();
 
         return view('admin.dashboard', compact('produkTerlaris', 'currentMonth', 'stats'));
     }
 
-    // Method untuk mendapatkan statistik dashboard
     private function getDashboardStats()
     {
+        // ... (Kode untuk statistik tidak perlu diubah signifikan, biarkan sama seperti file asli Anda)
+        // ... Namun, untuk konsistensi, lebih baik menggunakan Eloquent seperti ini:
         $currentMonth = now()->month;
         $currentYear = now()->year;
 
-        // 1. Total Pendapatan - dari semua pesanan bulan ini kecuali yang dibatalkan
-        $totalPendapatan = DB::table('pesanans')
-            ->whereMonth('created_at', $currentMonth)
+        $totalPendapatan = Pesanan::whereMonth('created_at', $currentMonth)
             ->whereYear('created_at', $currentYear)
             ->where('status', '!=', 'cancelled')
             ->sum('total_harga');
 
-        // 2. Total Pelanggan - hitung jumlah user unik yang pernah memesan bulan ini
-        $totalPelanggan = DB::table('pesanans')
-            ->join('users', 'pesanans.user_id', '=', 'users.id')
-            ->whereMonth('pesanans.created_at', $currentMonth)
-            ->whereYear('pesanans.created_at', $currentYear)
-            ->where('pesanans.status', '!=', 'cancelled')
-            ->distinct('users.id')
-            ->count('users.id');
+        $totalPelanggan = User::where('role', 'user')->count();
+        $totalProduk = Produk::count();
 
-        // 3. Total Produk - dari semua produk yang ada
-        $totalProduk = DB::table('produks')->count();
-
-        // 4. Pesanan Dikirim - pesanan dengan status 'dikirim' bulan ini
-        $pesananDikirim = DB::table('pesanans')
-            ->whereMonth('created_at', $currentMonth)
+        $pesananDikirim = Pesanan::whereMonth('created_at', $currentMonth)
             ->whereYear('created_at', $currentYear)
             ->where('status', 'dikirim')
             ->count();
 
-        // 5. Pesanan Dibatalkan - pesanan dengan status 'cancelled' bulan ini
-        $pesananDibatalkan = DB::table('pesanans')
-            ->whereMonth('created_at', $currentMonth)
+        $pesananDibatalkan = Pesanan::whereMonth('created_at', $currentMonth)
             ->whereYear('created_at', $currentYear)
             ->where('status', 'cancelled')
             ->count();
 
-        // 6. Total Pesanan - semua pesanan bulan ini (termasuk yang dibatalkan)
-        $totalPesanan = DB::table('pesanans')
-            ->whereMonth('created_at', $currentMonth)
+        $totalPesanan = Pesanan::whereMonth('created_at', $currentMonth)
             ->whereYear('created_at', $currentYear)
             ->count();
 
-        return [
-            'total_pendapatan' => $totalPendapatan,
-            'total_pelanggan' => $totalPelanggan,
-            'total_produk' => $totalProduk,
-            'pesanan_dikirim' => $pesananDikirim,
-            'pesanan_dibatalkan' => $pesananDibatalkan,
-            'total_pesanan' => $totalPesanan
-        ];
+        return compact('totalPendapatan', 'totalPelanggan', 'totalProduk', 'pesananDikirim', 'pesananDibatalkan', 'totalPesanan');
     }
 
     // Method untuk mendapatkan nama bulan dalam bahasa Indonesia

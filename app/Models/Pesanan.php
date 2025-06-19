@@ -34,10 +34,10 @@ class Pesanan extends Model
     ];
 
     // Relasi
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    // public function user()
+    // {
+    //     return $this->belongsTo(User::class);
+    // }
 
     public function produk()
     {
@@ -105,5 +105,5 @@ class Pesanan extends Model
     {
         return $this->hasMany(DetailPesanan::class, 'pesanan_id');
     }
-    
+
 }

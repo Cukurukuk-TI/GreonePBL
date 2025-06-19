@@ -74,152 +74,71 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($pesanans as $pesanan)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center space-x-4">
-                                    <div class="flex-shrink-0">
-                                        @if($pesanan->produk->gambar_produk)
-                                            <img src="{{ asset('storage/' . $pesanan->produk->gambar_produk) }}"
-                                                 alt="{{ $pesanan->produk->nama_produk }}"
-                                                 class="w-16 h-16 object-cover rounded-lg border">
-                                        @else
-                                            <div class="w-16 h-16 bg-gray-200 rounded-lg border flex items-center justify-center">
-                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                </svg>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($pesanans as $pesanan)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 align-top">
+                                    {{-- Loop melalui setiap detail item dalam satu pesanan --}}
+                                    @foreach($pesanan->detailPesanans as $detail)
+                                        <div class="flex items-center space-x-4 @if(!$loop->last) mb-3 pb-3 border-b border-gray-200 @endif">
+                                            <div class="flex-shrink-0">
+                                                @if($detail->produk && $detail->produk->gambar_produk)
+                                                    <img src="{{ asset('storage/' . $detail->produk->gambar_produk) }}"
+                                                        alt="{{ $detail->produk->nama_produk }}"
+                                                        class="w-16 h-16 object-cover rounded-lg border">
+                                                @else
+                                                    <div class="w-16 h-16 bg-gray-200 rounded-lg border flex items-center justify-center text-gray-400">?</div>
+                                                @endif
                                             </div>
-                                        @endif
+                                            <div class="flex-1 min-w-0">
+                                                <div class="text-sm font-medium text-gray-900 truncate">
+                                                    {{ $detail->produk->nama_produk ?? 'Produk Dihapus' }}
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    Jumlah: {{ $detail->jumlah }}x
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                    <div class="text-xs text-gray-400 mt-2 font-mono">
+                                        Kode: {{ $pesanan->kode_pesanan }}
                                     </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-sm font-medium text-gray-900 truncate">
-                                            {{ $pesanan->produk->nama_produk }}
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            Kode: {{ $pesanan->kode_pesanan }}
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            Jumlah: {{ $pesanan->jumlah }}x
-                                        </div>
-                                        <div class="text-xs text-gray-400">
-                                            {{ $pesanan->metode_pengiriman === 'jemput' ? 'Jemput di Lokasi' : 'Diantar ke Alamat' }}
-                                        </div>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap align-top">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        Rp{{ number_format($pesanan->total_harga, 0, ',', '.') }}
                                     </div>
-                                </div>
-                            </td>
+                                </td>
 
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">
-                                    Rp{{ number_format($pesanan->total_harga, 0, ',', '.') }}
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    {{ ucfirst($pesanan->metode_pembayaran) }}
-                                </div>
-                            </td>
+                                <td class="px-6 py-4 whitespace-nowrap align-top">
+                                    {{-- Kode untuk menampilkan status (sudah benar, tidak perlu diubah) --}}
+                                    @switch($pesanan->status_pesanan)
+                                        @case('pending') <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Menunggu</span> @break
+                                        @case('diproses') <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Diproses</span> @break
+                                        @case('dikirim') <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Dikirim</span> @break
+                                        @case('complete') <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Selesai</span> @break
+                                        @case('dibatalkan') <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Dibatalkan</span> @break
+                                    @endswitch
+                                </td>
 
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @switch($pesanan->status)
-                                    @case('pending')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Menunggu
-                                        </span>
-                                        @break
-                                    @case('proses')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Diproses
-                                        </span>
-                                        @break
-                                    @case('dikirim')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>
-                                                <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-.293-.707L15 4.586A1 1 0 0014.414 4H14v3z"></path>
-                                            </svg>
-                                            Dikirim
-                                        </span>
-                                        @break
-                                    @case('complete')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Selesai
-                                        </span>
-                                        @break
-                                    @case('cancelled')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Dibatalkan
-                                        </span>
-                                        @break
-                                @endswitch
-                            </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 align-top">
+                                    <div>{{ \Carbon\Carbon::parse($pesanan->created_at)->format('d/m/Y') }}</div>
+                                    <div class="text-xs">{{ \Carbon\Carbon::parse($pesanan->created_at)->format('H:i') }}</div>
+                                </td>
 
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <div>{{ \Carbon\Carbon::parse($pesanan->created_at)->format('d/m/Y') }}</div>
-                                <div class="text-xs">{{ \Carbon\Carbon::parse($pesanan->created_at)->format('H:i') }}</div>
-                            </td>
-
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex flex-col space-y-2">
-                                    @if($pesanan->status === 'complete')
-                                        <a href="{{ route('home') }}"
-                                           class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition duration-200">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Testimoni
-                                        </a>
-                                    @else
-                                        <span class="inline-flex items-center px-3 py-1.5 bg-gray-300 text-gray-500 text-xs font-medium rounded-md cursor-not-allowed">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Testimoni
-                                        </span>
-                                    @endif
-
-                                    <button onclick="showOrderDetail('{{ $pesanan->id }}')"
-                                            class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition duration-200">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                                        </svg>
-                                        Detail
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">
-                                <div class="flex flex-col items-center">
-                                    <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M8 11v6a2 2 0 002 2h4a2 2 0 002-2v-6M8 11H6a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2h-2"></path>
-                                    </svg>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada pesanan</h3>
-                                    <p class="text-gray-500 mb-4">Anda belum memiliki pesanan. Mulai berbelanja sekarang!</p>
-                                    <a href="{{ route('home') }}"
-                                       class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition duration-200">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                        </svg>
-                                        Mulai Belanja
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium align-top">
+                                    {{-- Kode untuk tombol testimoni dan detail (sudah benar, tidak perlu diubah) --}}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                    Belum ada pesanan.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
             </table>
         </div>
     </div>

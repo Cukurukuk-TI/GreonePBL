@@ -33,55 +33,41 @@
                     <th class="border px-3 py-2">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($pesanans as $pesanan)
-                    <tr class="hover:bg-red-50">
-                        <td class="border px-3 py-2 font-mono">{{ $pesanan->kode_pesanan }}</td>
-                        <td class="border px-3 py-2">{{ $pesanan->user->name }}</td>
-                        <td class="border px-3 py-2">{{ $pesanan->produk->nama_produk }}</td>
-                        <td class="border px-3 py-2 text-center">{{ $pesanan->jumlah }}x</td>
-                        <td class="border px-3 py-2">{{ \Carbon\Carbon::parse($pesanan->created_at)->format('d/m/Y H:i') }}</td>
-                        <td class="border px-3 py-2">Rp{{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
-                        <td class="border px-3 py-2">
-                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">Dibatalkan</span>
-                        </td>
-                        <td class="border px-3 py-2">{{ \Carbon\Carbon::parse($pesanan->updated_at)->format('d/m/Y H:i') }}</td>
-                        <td class="border px-3 py-2">
-                            <!-- Opsi untuk mengembalikan pesanan ke status pending jika diperlukan -->
-                            <form action="{{ route('admin.pesanans.restore', $pesanan->id) }}" method="POST" class="inline" 
-                                  onsubmit="return confirm('Apakah Anda yakin ingin mengembalikan pesanan ini?')">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="text-xs bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded">
-                                    Pulihkan
-                                </button>
-                            </form>
-                            
-                            <!-- Opsi untuk menghapus permanen -->
-                            <form action="{{ route('admin.pesanans.force-delete', $pesanan->id) }}" method="POST" class="inline ml-1" 
-                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus pesanan ini secara permanen? Tindakan ini tidak dapat dibatalkan!')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">
-                                    Hapus Permanen
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="9" class="text-center text-gray-500 py-8">
-                            <div class="flex flex-col items-center">
-                                <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <p class="text-lg font-medium">Tidak ada pesanan yang dibatalkan</p>
-                                <p class="text-sm text-gray-400">Semua pesanan masih aktif</p>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
+                <tbody>
+                    @forelse($pesanans as $pesanan)
+                        <tr class="hover:bg-gray-50">
+                            <td class="border px-3 py-2 font-mono">{{ $pesanan->kode_pesanan }}</td>
+                            <td class="border px-3 py-2">{{ $pesanan->user->name ?? 'User Dihapus' }}</td>
+                            <td class="border px-3 py-2">
+                                {{-- Loop untuk produk --}}
+                                @foreach($pesanan->detailPesanans as $detail)
+                                    <div>{{ $detail->produk->nama_produk ?? 'Produk Dihapus' }}</div>
+                                @endforeach
+                            </td>
+                            <td class="border px-3 py-2 text-center">{{ $pesanan->detailPesanans->sum('jumlah') }}</td>
+                            <td class="border px-3 py-2">{{ \Carbon\Carbon::parse($pesanan->created_at)->format('d/m/Y H:i') }}</td>
+                            <td class="border px-3 py-2">Rp{{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
+                            <td class="border px-3 py-2">
+                                {{-- Kode untuk status (sudah benar, tidak perlu diubah) --}}
+                                @switch($pesanan->status)
+                                    @case('pending') <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">Menunggu</span> @break
+                                    @case('proses') <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold">Di Proses</span> @break
+                                    @case('dikirim') <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">Di Kirim</span> @break
+                                    @case('complete') <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">Selesai</span> @break
+                                @endswitch
+                            </td>
+                            <td class="border px-3 py-2">
+                                {{-- Kode untuk form update status (sudah benar, tidak perlu diubah) --}}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center text-gray-500 py-8">
+                                Belum ada pesanan aktif.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
         </table>
     </div>
 

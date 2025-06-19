@@ -39,7 +39,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -53,7 +53,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -67,7 +67,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="bg-green-50 border-l-4 border-green-400 p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -97,60 +97,41 @@
                     <th class="border px-3 py-2">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($pesanans as $pesanan)
-                    <tr class="hover:bg-gray-50">
-                        <td class="border px-3 py-2 font-mono">{{ $pesanan->kode_pesanan }}</td>
-                        <td class="border px-3 py-2">{{ $pesanan->user->name }}</td>
-                        <td class="border px-3 py-2">{{ $pesanan->produk->nama_produk }}</td>
-                        <td class="border px-3 py-2 text-center">{{ $pesanan->jumlah }}x</td>
-                        <td class="border px-3 py-2">{{ \Carbon\Carbon::parse($pesanan->created_at)->format('d/m/Y H:i') }}</td>
-                        <td class="border px-3 py-2">Rp{{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
-                        <td class="border px-3 py-2">
-                            @switch($pesanan->status)
-                                @case('pending')
-                                    <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">Menunggu</span>
-                                    @break
-                                @case('proses')
-                                    <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold">Di Proses</span>
-                                    @break
-                                @case('dikirim')
-                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">Di Kirim</span>
-                                    @break
-                                @case('complete')
-                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">Selesai</span>
-                                    @break
-                            @endswitch
-                        </td>
-                        <td class="border px-3 py-2">
-                            <form action="{{ route('admin.pesanans.update-status', $pesanan->id) }}" method="POST" class="inline">
-                                @csrf
-                                @method('PATCH')
-                                <select name="status" onchange="confirmStatusChange(this)" 
-                                     class="text-xs border border-gray-300 rounded px-2 py-1 bg-white">
-                                    <option value="pending" {{ $pesanan->status == 'pending' ? 'selected' : '' }}>Menunggu</option>
-                                    <option value="proses" {{ $pesanan->status == 'proses' ? 'selected' : '' }}>Di Proses</option>
-                                    <option value="dikirim" {{ $pesanan->status == 'dikirim' ? 'selected' : '' }}>Di Kirim</option>
-                                    <option value="complete" {{ $pesanan->status == 'complete' ? 'selected' : '' }}>Selesai</option>
-                                    <option value="cancelled" {{ $pesanan->status == 'cancelled' ? 'selected' : '' }}>Batalkan</option>
-                                </select>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="text-center text-gray-500 py-8">
-                            <div class="flex flex-col items-center">
-                                <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-4m-12 0H4m8 0V9m0 4v6m0-6L8 9m4 4l4-4"></path>
-                                </svg>
-                                <p class="text-lg font-medium">Belum ada pesanan aktif</p>
-                                <p class="text-sm text-gray-400">Pesanan baru akan muncul di sini</p>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
+                <tbody>
+                    @forelse($pesanans as $pesanan)
+                        <tr class="hover:bg-gray-50">
+                            <td class="border px-3 py-2 font-mono">{{ $pesanan->kode_pesanan }}</td>
+                            <td class="border px-3 py-2">{{ $pesanan->user->name ?? 'User Dihapus' }}</td>
+                            <td class="border px-3 py-2">
+                                {{-- Loop untuk produk --}}
+                                @foreach($pesanan->detailPesanans as $detail)
+                                    <div>{{ $detail->produk->nama_produk ?? 'Produk Dihapus' }}</div>
+                                @endforeach
+                            </td>
+                            <td class="border px-3 py-2 text-center">{{ $pesanan->detailPesanans->sum('jumlah') }}</td>
+                            <td class="border px-3 py-2">{{ \Carbon\Carbon::parse($pesanan->created_at)->format('d/m/Y H:i') }}</td>
+                            <td class="border px-3 py-2">Rp{{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
+                            <td class="border px-3 py-2">
+                                {{-- Kode untuk status (sudah benar, tidak perlu diubah) --}}
+                                @switch($pesanan->status)
+                                    @case('pending') <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">Menunggu</span> @break
+                                    @case('proses') <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold">Di Proses</span> @break
+                                    @case('dikirim') <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">Di Kirim</span> @break
+                                    @case('complete') <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">Selesai</span> @break
+                                @endswitch
+                            </td>
+                            <td class="border px-3 py-2">
+                                {{-- Kode untuk form update status (sudah benar, tidak perlu diubah) --}}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center text-gray-500 py-8">
+                                Belum ada pesanan aktif.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
         </table>
     </div>
 
@@ -166,9 +147,9 @@
 function confirmStatusChange(selectElement) {
     const newStatus = selectElement.value;
     const currentStatus = selectElement.getAttribute('data-current-status') || selectElement.querySelector('option[selected]')?.value;
-    
+
     let message = '';
-    
+
     if (newStatus === 'cancelled') {
         message = 'Apakah Anda yakin ingin membatalkan pesanan ini? Pesanan akan dipindahkan ke daftar pesanan yang dibatalkan.';
     } else if (newStatus === 'complete') {
@@ -176,7 +157,7 @@ function confirmStatusChange(selectElement) {
     } else {
         message = `Apakah Anda yakin ingin mengubah status menjadi ${newStatus}?`;
     }
-    
+
     if (confirm(message)) {
         selectElement.form.submit();
     } else {

@@ -6,6 +6,7 @@ use App\Models\Pesanan;
 use App\Models\Produk;
 use App\Models\Promo;
 use App\Models\Alamat;
+use App\Models\DetailPesanan; // Ditambahkan karena kita akan menggunakannya
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,121 +14,39 @@ use App\Models\User;
 
 class PesananController extends Controller
 {
-    // Halaman buat pesanan (untuk user)
+    // ===================================================================================
+    // Alur Pembelian Produk Tunggal (Lama & Dinonaktifkan)
+    // Method create() dan store() sengaja dinonaktifkan untuk menghindari error,
+    // karena alur utama aplikasi sekarang adalah melalui KeranjangController.
+    // Jika ingin diaktifkan kembali, logikanya harus diubah total untuk membuat DetailPesanan.
+    // ===================================================================================
     public function create(Request $request, $produkId)
     {
-        $produk = Produk::findOrFail($produkId);
-        $promos = Promo::getActivePromos();
-
-        // Ambil alamat user yang sedang login
-        $alamats = Alamat::where('user_id', Auth::id())->get();
-
-        // Ambil jumlah dari parameter URL jika ada
-        $defaultJumlah = $request->get('jumlah', 1);
-
-        // Validasi jumlah tidak melebihi stok
-        if ($defaultJumlah > $produk->stok_produk) {
-            $defaultJumlah = $produk->stok_produk;
-        }
-
-        return view('pesanans.create', compact('produk', 'promos', 'alamats', 'defaultJumlah'));
+        return redirect()->route('home')->with('error', 'Fitur ini sedang dinonaktifkan. Silakan gunakan keranjang belanja.');
     }
 
-    // Proses simpan pesanan
     public function store(Request $request)
     {
-        $request->validate([
-            'produk_id' => 'required|exists:produks,id',
-            'jumlah' => 'required|integer|min:1',
-            'alamat_id' => 'nullable|exists:alamats,id',
-            'alamat_pengiriman_custom' => 'nullable|string|max:500',
-            'promo_id' => 'nullable|exists:promos,id'
-        ]);
-
-        try {
-            DB::beginTransaction();
-
-            $produk = Produk::findOrFail($request->produk_id);
-
-            // Cek stok
-            if ($produk->stok_produk < $request->jumlah) {
-                return back()->with('error', 'Stok produk tidak mencukupi');
-            }
-
-            // Tentukan alamat pengiriman
-            $alamat_pengiriman = '';
-            if ($request->alamat_id) {
-                $alamat = Alamat::find($request->alamat_id);
-                $alamat_pengiriman = $alamat->detail_alamat . ', ' . $alamat->kota . ', ' . $alamat->provinsi;
-            } else {
-                $alamat_pengiriman = $request->alamat_pengiriman_custom ?: 'Alamat belum ditentukan';
-            }
-
-            // Hitung subtotal
-            $subtotal = $produk->harga_produk * $request->jumlah;
-
-            // Hitung diskon
-            $diskon = 0;
-            $promo = null;
-            if ($request->promo_id) {
-                $promo = Promo::find($request->promo_id);
-                if ($promo && $promo->isValid()) {
-                    $diskon = $promo->calculateDiscount($subtotal);
-                }
-            }
-
-            // Fixed values
-            $ongkos_kirim = 10000;
-            $pajak = 0;
-
-            // Total harga
-            $total_harga = $subtotal - $diskon + $ongkos_kirim + $pajak;
-
-            // Buat pesanan
-            $pesanan = Pesanan::create([
-                'kode_pesanan' => Pesanan::generateKodePesanan(),
-                'user_id' => Auth::id(),
-                'produk_id' => $request->produk_id,
-                'promo_id' => $request->promo_id,
-                'jumlah' => $request->jumlah,
-                'harga_satuan' => $produk->harga_produk,
-                'subtotal' => $subtotal,
-                'diskon' => $diskon,
-                'ongkos_kirim' => $ongkos_kirim,
-                'pajak' => $pajak,
-                'total_harga' => $total_harga,
-                'alamat_pengiriman' => $alamat_pengiriman,
-                'metode_pembayaran' => 'BNI Virtual Account',
-                'metode_pengiriman' => 'SiCepat Ultimate',
-                'status' => 'pending'
-            ]);
-
-            // Update stok produk
-            $produk->decrement('stok_produk', $request->jumlah);
-
-            DB::commit();
-
-            return redirect()->route('pesanans.success', $pesanan->id)
-                ->with('success', 'Pesanan berhasil dibuat!');
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
+        // Logika di sini sudah tidak valid karena struktur database berubah. Dinonaktifkan.
+        return redirect()->route('home')->with('error', 'Fitur ini sedang dinonaktifkan.');
     }
+    // ===================================================================================
 
-    // Halaman sukses pesanan
+
+    // Halaman sukses pesanan (setelah checkout dari Keranjang)
     public function success($id)
     {
-        $pesanan = Pesanan::with(['produk', 'promo'])->findOrFail($id);
+        // PERBAIKAN: Tidak perlu lagi 'produk' atau 'promo' di sini karena info sudah di detail.
+        $pesanan = Pesanan::findOrFail($id);
         return view('pesanans.success', compact('pesanan'));
     }
 
-    // Index untuk admin (daftar pesanan aktif saja - TIDAK termasuk cancelled)
+    // Index untuk admin (daftar pesanan aktif)
     public function index()
     {
-        $pesanans = Pesanan::with(['user', 'produk'])
-            ->whereNotIn('status', ['cancelled']) // Exclude cancelled orders
+        // PERBAIKAN: Ganti with('produk') menjadi with('detailPesanans.produk')
+        $pesanans = Pesanan::with(['user', 'detailPesanans.produk'])
+            ->whereNotIn('status', ['cancelled'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -137,9 +56,10 @@ class PesananController extends Controller
     // Daftar pesanan yang dibatalkan (untuk admin)
     public function cancelled()
     {
-        $pesanans = Pesanan::with(['user', 'produk'])
+        // PERBAIKAN: Ganti with('produk') menjadi with('detailPesanans.produk')
+        $pesanans = Pesanan::with(['user', 'detailPesanans.produk'])
             ->where('status', 'cancelled')
-            ->orderBy('updated_at', 'desc') // Urutkan berdasarkan waktu dibatalkan
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         return view('pesanans.cancelled', compact('pesanans'));
@@ -155,33 +75,35 @@ class PesananController extends Controller
         try {
             DB::beginTransaction();
 
-            $pesanan = Pesanan::findOrFail($id);
+            // PERBAIKAN: Muat relasi detailPesanans agar bisa diakses untuk manajemen stok
+            $pesanan = Pesanan::with('detailPesanans.produk')->findOrFail($id);
             $statusLama = $pesanan->status;
             $statusBaru = $request->status;
 
-            // Jika status berubah dari non-cancelled ke cancelled, kembalikan stok
+            // PERBAIKAN LOGIKA STOK: Loop melalui setiap detail pesanan
             if ($statusLama !== 'cancelled' && $statusBaru === 'cancelled') {
-                $pesanan->produk->increment('stok_produk', $pesanan->jumlah);
-            }
-
-            // Jika status berubah dari cancelled ke non-cancelled, kurangi stok
-            if ($statusLama === 'cancelled' && $statusBaru !== 'cancelled') {
-                // Cek stok terlebih dahulu
-                if ($pesanan->produk->stok_produk < $pesanan->jumlah) {
-                    return back()->with('error', 'Stok produk tidak mencukupi untuk mengaktifkan kembali pesanan ini!');
+                foreach ($pesanan->detailPesanans as $detail) {
+                    $detail->produk->increment('stok_produk', $detail->jumlah);
                 }
-                $pesanan->produk->decrement('stok_produk', $pesanan->jumlah);
             }
 
-            // Update status
-            $pesanan->update(['status' => $statusBaru]);
+            if ($statusLama === 'cancelled' && $statusBaru !== 'cancelled') {
+                foreach ($pesanan->detailPesanans as $detail) {
+                    if ($detail->produk->stok_produk < $detail->jumlah) {
+                        // Batalkan transaksi jika salah satu stok produk tidak cukup
+                        DB::rollBack();
+                        return back()->with('error', 'Stok produk ' . $detail->produk->nama_produk . ' tidak mencukupi!');
+                    }
+                    $detail->produk->decrement('stok_produk', $detail->jumlah);
+                }
+            }
 
+            $pesanan->update(['status' => $statusBaru]);
             DB::commit();
 
-            // Redirect yang tepat berdasarkan status baru
             if ($statusBaru === 'cancelled') {
                 return redirect()->route('admin.pesanans.index')
-                    ->with('success', 'Pesanan berhasil dibatalkan dan dipindahkan ke daftar pesanan yang dibatalkan!');
+                    ->with('success', 'Pesanan berhasil dibatalkan!');
             } else {
                 return back()->with('success', 'Status pesanan berhasil diupdate!');
             }
@@ -195,31 +117,29 @@ class PesananController extends Controller
     // Method untuk restore pesanan yang dibatalkan
     public function restore($id)
     {
-        $pesanan = Pesanan::findOrFail($id);
+        // PERBAIKAN: Muat relasi detailPesanans
+        $pesanan = Pesanan::with('detailPesanans.produk')->findOrFail($id);
 
-        // Cek apakah pesanan memang dalam status cancelled
         if ($pesanan->status !== 'cancelled') {
             return back()->with('error', 'Pesanan ini tidak dalam status dibatalkan!');
-        }
-
-        // Cek apakah stok produk masih mencukupi
-        $produk = $pesanan->produk;
-        if ($produk->stok_produk < $pesanan->jumlah) {
-            return back()->with('error', 'Stok produk tidak mencukupi untuk mengembalikan pesanan ini!');
         }
 
         try {
             DB::beginTransaction();
 
-            // Update status ke pending
+            // PERBAIKAN LOGIKA STOK: Loop melalui setiap detail pesanan
+            foreach ($pesanan->detailPesanans as $detail) {
+                if ($detail->produk->stok_produk < $detail->jumlah) {
+                    DB::rollBack();
+                    return back()->with('error', 'Stok produk ' . $detail->produk->nama_produk . ' tidak mencukupi untuk memulihkan pesanan ini!');
+                }
+                $detail->produk->decrement('stok_produk', $detail->jumlah);
+            }
+
             $pesanan->update(['status' => 'pending']);
-
-            // Kurangi stok produk kembali
-            $produk->decrement('stok_produk', $pesanan->jumlah);
-
             DB::commit();
 
-            return back()->with('success', 'Pesanan berhasil dipulihkan dan dikembalikan ke status pending!');
+            return back()->with('success', 'Pesanan berhasil dipulihkan!');
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -232,25 +152,26 @@ class PesananController extends Controller
     {
         $pesanan = Pesanan::findOrFail($id);
 
-        // Hanya bisa menghapus pesanan yang statusnya cancelled
         if ($pesanan->status !== 'cancelled') {
             return back()->with('error', 'Hanya pesanan yang dibatalkan yang bisa dihapus permanen!');
         }
 
         try {
-            $pesanan->delete();
+            $pesanan->delete(); // Ini akan otomatis menghapus detail pesanan karena ada onDelete('cascade')
             return back()->with('success', 'Pesanan berhasil dihapus secara permanen!');
 
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-    //
+
+    // Halaman riwayat pesanan untuk USER
     public function pesanan(Request $request)
     {
-        $query = Auth::user()->pesanans()->with('detailPesanans.produk')->latest()->paginate(10);
+        // Query ini sudah benar dari perbaikan kita sebelumnya
+        $query = Auth::user()->pesanans()->with('detailPesanans.produk')->latest();
 
-        if ($request->status) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
