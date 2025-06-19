@@ -14,10 +14,17 @@ use App\Http\Controllers\AlamatController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\PublicArtikelController;
 use App\Http\Controllers\Admin\PelangganController;
+use App\Http\Controllers\Admin\ArtikelController;
+use App\Http\Controllers\Admin\KategoriArtikelController;
 use App\Http\Controllers\Auth\PasswordController;
+
 //   Home (Boleh Diakses Guest)
 Route::get('/', [KategoriController::class, 'indexUser'])->name('home');
+
+Route::get('/artikel', [PublicArtikelController::class, 'index'])->name('artikel.public.index');
+Route::get('/artikel/{artikel:slug}', [PublicArtikelController::class, 'show'])->name('artikel.public.show');
 
 //   Guest-only routes (login/register)
 Route::middleware('guest')->group(function () {
@@ -34,7 +41,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/deskripsi-produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
 
     // Halaman statis
-    Route::view('/artikel', 'artikel');
     Route::view('/tentang', 'user.aboutus');
     Route::view('/kontak', 'kontak');
 
@@ -68,6 +74,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan/create/{produk}', [PesananController::class, 'create'])->name('pesanans.create');
     Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
     Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
+    Route::get('/pesananuser', [PesananController::class, 'pesanan'])->name('user.pesanan');
 });
 
 //   Admin route
@@ -98,6 +105,12 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
 
     Route::resource('pelanggan', PelangganController::class);
 
+    // Artikel Admin
+    Route::get('artikel/trash', [ArtikelController::class, 'trash'])->name('artikel.trash');
+    Route::patch('artikel/{id}/restore', [ArtikelController::class, 'restore'])->name('artikel.restore');
+    Route::delete('artikel/{id}/force-delete', [ArtikelController::class, 'forceDelete'])->name('artikel.forceDelete');
+    Route::resource('artikel', ArtikelController::class);
+    Route::resource('kategori-artikel', KategoriArtikelController::class)->except('show');
 });
 
 // Route untuk Verifikasi Email
