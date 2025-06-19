@@ -88,7 +88,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                <a href="{{ route('admin.artikel.edit', $artikel->id) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                 <a href="#" class="text-red-600 hover:text-red-900 ml-4">Hapus</a>
                             </td>
                         </tr>
@@ -106,43 +106,69 @@
         </div>
 
         <!-- Tabel Daftar Kategori -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold">Daftar Kategori Artikel</h3>
-                <button onclick="openCreateCategoryModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
-                    <i class="fas fa-plus mr-2"></i>Create Kategori
-                </button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white" id="kategori-table">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Kategori</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse ($kategoriArtikels as $kategori)
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $kategori->nama }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $kategori->slug }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                <a href="#" class="text-red-600 hover:text-red-900 ml-4">Hapus</a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr id="no-kategori-row">
-                            <td colspan="3" class="text-center py-4">Belum ada kategori.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-4">
-                {{ $kategoriArtikels->links() }}
-            </div>
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-semibold">Daftar Kategori Artikel</h3>
+        <button onclick="openCreateCategoryModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
+            <i class="fas fa-plus mr-2"></i>Create Kategori
+        </button>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white" id="kategori-table">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Kategori</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                @forelse ($kategoriArtikels as $kategori)
+                <tr id="kategori-row-{{ $kategori->id }}">  {{-- Tambahkan ID unik untuk setiap baris --}}
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 nama-kategori">{{ $kategori->nama }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 slug-kategori">{{ $kategori->slug }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        {{-- Perbarui tombol Edit --}}
+                        <button onclick="openEditCategoryModal({{ $kategori->id }}, '{{ $kategori->nama }}')" class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                        <a href="#" class="text-red-600 hover:text-red-900 ml-4">Hapus</a>
+                    </td>
+                </tr>
+                @empty
+                <tr id="no-kategori-row">
+                    <td colspan="3" class="text-center py-4">Belum ada kategori.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-4">
+        {{ $kategoriArtikels->links() }}
+    </div>
+</div>
+<div id="edit-category-modal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <form id="edit-category-form" onsubmit="handleCategoryUpdate(event)">
+                @csrf
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Kategori</h3>
+                    <div class="mt-4">
+                        <label for="edit-kategori-nama" class="block text-sm font-medium text-gray-700">Nama Kategori</label>
+                        <input type="text" name="nama" id="edit-kategori-nama" required class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <p id="edit-kategori-error" class="text-red-500 text-xs mt-1 hidden"></p>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm">
+                        Update
+                    </button>
+                    <button type="button" onclick="closeEditCategoryModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Batal
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -256,5 +282,85 @@
             errorP.classList.remove('hidden');
         }
     }
+
+    // Fungsi untuk membuka modal EDIT
+    function openEditCategoryModal(id, currentName) {
+        const modal = document.getElementById('edit-category-modal');
+        const form = document.getElementById('edit-category-form');
+        const nameInput = document.getElementById('edit-kategori-nama');
+
+        // Set action form ke URL update yang benar
+        let url = "{{ route('admin.kategori-artikel.update', ':id') }}";
+        url = url.replace(':id', id);
+        form.action = url;
+
+        // Isi form dengan nama saat ini
+        nameInput.value = currentName;
+
+        modal.classList.remove('hidden');
+    }
+
+    // Fungsi untuk menutup modal EDIT
+    function closeEditCategoryModal() {
+        document.getElementById('edit-category-modal').classList.add('hidden');
+        document.getElementById('edit-category-form').reset();
+        document.getElementById('edit-kategori-error').classList.add('hidden');
+    }
+
+    // Fungsi untuk menangani submit form UPDATE kategori via AJAX
+    async function handleCategoryUpdate(event) {
+        event.preventDefault();
+        const form = event.target;
+        const url = form.action; // URL sudah benar dari fungsi openEditCategoryModal
+        const errorP = document.getElementById('edit-kategori-error');
+        const csrfToken = document.querySelector('input[name="_token"]').value;
+        const categoryName = document.getElementById('edit-kategori-nama').value;
+
+        errorP.classList.add('hidden');
+
+        try {
+            const response = await fetch(url, {
+                method: 'PUT', // <-- Perubahan 1: Kita kirim sebagai PUT langsung
+                headers: {
+                    'Content-Type': 'application/json', // <-- Perubahan 2: Tentukan tipe konten adalah JSON
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ // <-- Perubahan 3: Kirim data sebagai string JSON
+                    nama: categoryName
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                // Logika untuk menampilkan error validasi dari server
+                if(result.errors && result.errors.nama) {
+                    errorP.textContent = result.errors.nama[0];
+                    errorP.classList.remove('hidden');
+                } else {
+                    errorP.textContent = 'Terjadi kesalahan saat update.';
+                    errorP.classList.remove('hidden');
+                }
+                throw new Error('Update failed');
+            }
+
+            // --- Logika jika sukses (tetap sama) ---
+            const successAlert = document.getElementById('category-success-alert');
+            successAlert.innerHTML = `<strong>Sukses!</strong> ${result.message} <span class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none';">&times;</span>`;
+            successAlert.classList.remove('hidden');
+
+            const row = document.getElementById(`kategori-row-${result.data.id}`);
+            row.querySelector('.nama-kategori').textContent = result.data.nama;
+            row.querySelector('.slug-kategori').textContent = result.data.slug;
+
+            closeEditCategoryModal();
+
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
 </script>
 @endpush

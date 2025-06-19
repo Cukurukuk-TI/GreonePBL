@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\KategoriArtikel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class KategoriArtikelController extends Controller
 {
@@ -49,8 +50,28 @@ class KategoriArtikelController extends Controller
     public function edit(KategoriArtikel $kategoriArtikel) {
 
     }
-    public function update(Request $request, KategoriArtikel $kategoriArtikel) {
+    public function update(Request $request, KategoriArtikel $kategoriArtikel)
+    {
+        // Validasi, pastikan nama unik kecuali untuk dirinya sendiri
+        $validated = $request->validate([
+            'nama' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('kategori_artikels')->ignore($kategoriArtikel->id),
+            ],
+        ]);
 
+        $kategoriArtikel->update([
+            'nama' => $validated['nama'],
+            'slug' => Str::slug($validated['nama']),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kategori berhasil diperbarui!',
+            'data'    => $kategoriArtikel
+        ]);
     }
     public function destroy(KategoriArtikel $kategoriArtikel) {
 
