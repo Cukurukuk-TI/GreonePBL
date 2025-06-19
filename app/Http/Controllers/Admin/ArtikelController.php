@@ -110,7 +110,48 @@ class ArtikelController extends Controller
         return redirect()->route('admin.artikel.index')
                          ->with('success', 'Artikel berhasil diperbarui!');
     }
-    public function destroy(Artikel $artikel) {
+    
+    public function destroy(Artikel $artikel)
+    {
+        $artikel->delete(); // Ini akan melakukan soft delete
+        return redirect()->route('admin.artikel.index')
+                         ->with('success', 'Artikel berhasil diarsipkan.');
+    }
 
+    /**
+     * Menampilkan daftar artikel yang sudah di-soft delete.
+     */
+    public function trash()
+    {
+        $artikels = Artikel::onlyTrashed()->latest()->paginate(10);
+        return view('admin.artikel.trash', compact('artikels'));
+    }
+
+    /**
+     * Mengembalikan artikel dari trash.
+     */
+    public function restore($id)
+    {
+        $artikel = Artikel::onlyTrashed()->findOrFail($id);
+        $artikel->restore();
+        return redirect()->route('admin.artikel.trash')
+                         ->with('success', 'Artikel berhasil dipulihkan.');
+    }
+
+    /**
+     * Menghapus artikel secara permanen dari database.
+     */
+    public function forceDelete($id)
+    {
+        $artikel = Artikel::onlyTrashed()->findOrFail($id);
+
+        // Hapus gambar dari storage sebelum menghapus record database
+        if ($artikel->gambar && Storage::disk('public')->exists($artikel->gambar)) {
+            Storage::disk('public')->delete($artikel->gambar);
+        }
+
+        $artikel->forceDelete();
+        return redirect()->route('admin.artikel.trash')
+                         ->with('success', 'Artikel berhasil dihapus permanen.');
     }
 }

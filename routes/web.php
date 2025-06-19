@@ -102,6 +102,9 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
     Route::resource('pelanggan', PelangganController::class);
 
     // Artikel Admin
+    Route::get('artikel/trash', [ArtikelController::class, 'trash'])->name('artikel.trash');
+    Route::patch('artikel/{id}/restore', [ArtikelController::class, 'restore'])->name('artikel.restore');
+    Route::delete('artikel/{id}/force-delete', [ArtikelController::class, 'forceDelete'])->name('artikel.forceDelete');
     Route::resource('artikel', ArtikelController::class);
     Route::resource('kategori-artikel', KategoriArtikelController::class)->except('show');
 });
