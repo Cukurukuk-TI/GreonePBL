@@ -15,6 +15,7 @@ use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\PublicArtikelController;
+use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\Admin\PelangganController;
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\KategoriArtikelController;
@@ -170,3 +171,6 @@ Route::post('reset-password', function (Request $request) {
                 ? redirect()->route('login')->with('status', __($status))
                 : back()->withErrors(['email' => __($status)]);
 })->middleware('guest')->name('password.update');
+
+// Route untuk menangani notifikasi dari Midtrans
+Route::post('/midtrans/notification', [MidtransController::class, 'notificationHandler'])->name('midtrans.notification');
