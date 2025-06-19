@@ -1,4 +1,4 @@
-@extends('layouts.admindashboard') {{-- Asumsi layout admin Anda ada di layouts/admin.blade.php --}}
+@extends('layouts.userlayouts') {{-- Asumsi layout admin Anda ada di layouts/admin.blade.php --}}
 
 @section('title', 'Daftar Testimoni')
 
@@ -91,7 +91,7 @@
                                             </svg>
                                         </div>
                                     @endif
-                                    {{ $testimoni->user->nama }}
+                                    {{ $testimoni->user->name }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

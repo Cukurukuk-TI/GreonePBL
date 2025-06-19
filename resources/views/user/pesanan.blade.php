@@ -1,9 +1,9 @@
-@extends('layouts.alamat')
+@extends('layouts.userlayouts')
 
 @section('title', 'Pesanan Saya')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 py-6">
+<div class="max-w-7xl mx-auto px-4 py-6 pt-16">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-900">Pesanan Saya</h1>
         <div class="text-sm text-gray-500">

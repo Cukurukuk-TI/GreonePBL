@@ -1,8 +1,8 @@
 {{-- resources/views/alamat/index.blade.php --}}
-@extends('layouts.alamat')
+@extends('layouts.userlayouts')
 
-@section('alamat-content')
-<div class="mb-4 flex justify-between items-center">
+@section('content')
+<div class="mb-4 flex justify-between items-center pt-16">
     <form action="{{ route('alamat.index') }}" method="GET">
         <input type="text" name="search" class="border rounded px-3 py-2" placeholder="Cari nama penerima..." value="{{ request('search') }}">
     </form>

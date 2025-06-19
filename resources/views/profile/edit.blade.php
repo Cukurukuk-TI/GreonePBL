@@ -1,7 +1,9 @@
-@extends('layouts.profileuser')
+@extends('layouts.userlayouts')
 
-@section('profile-content')
-<div class="bg-white shadow-xl rounded-2xl p-8 max-w-3xl mx-auto mt-6">
+@section('content')
+{{-- <div class="bg-white shadow-xl rounded-2xl p-8 max-w-3xl mx-auto mt-6"> --}}
+<div class="bg-white shadow-xl rounded-2xl p-8 w-full mt-6 pt-10">
+
     <div class="text-center mb-8">
         <h2 class="text-2xl font-bold text-gray-800">Pengaturan Akun</h2>
         <p class="text-sm text-gray-500 mt-1">Kelola informasi, keamanan, dan privasi akun Anda.</p>
