@@ -1,4 +1,4 @@
-@extends('layouts.userlayouts') {{-- Asumsi layout admin Anda ada di layouts/admin.blade.php --}}
+@extends('layouts.admindashboard') {{-- Asumsi layout admin Anda ada di layouts/admin.blade.php --}}
 
 @section('title', 'Daftar Testimoni')
 
