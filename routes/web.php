@@ -14,12 +14,16 @@ use App\Http\Controllers\AlamatController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\PublicArtikelController;
 use App\Http\Controllers\Admin\PelangganController;
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\KategoriArtikelController;
 use App\Http\Controllers\Auth\PasswordController;
+
 //   Home (Boleh Diakses Guest)
 Route::get('/', [KategoriController::class, 'indexUser'])->name('home');
+
+Route::get('/artikel', [PublicArtikelController::class, 'index'])->name('artikel.public.index');
 
 //   Guest-only routes (login/register)
 Route::middleware('guest')->group(function () {
@@ -36,7 +40,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/deskripsi-produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
 
     // Halaman statis
-    Route::view('/artikel', 'artikel');
     Route::view('/tentang', 'user.aboutus');
     Route::view('/kontak', 'kontak');
 
