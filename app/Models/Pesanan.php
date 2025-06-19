@@ -81,7 +81,7 @@ class Pesanan extends Model
         do {
             $kode = 'PSN' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
         } while (self::where('kode_pesanan', $kode)->exists());
-        
+
         return $kode;
     }
 
@@ -99,6 +99,11 @@ class Pesanan extends Model
     {
         return $query->where('status', 'complete');
     }
-    
+
+    // app/Models/Pesanan.php
+    public function detailPesanans()
+    {
+        return $this->hasMany(DetailPesanan::class, 'pesanan_id');
+    }
     
 }
