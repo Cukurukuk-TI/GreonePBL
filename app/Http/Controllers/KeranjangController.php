@@ -9,6 +9,8 @@ use App\Models\DetailPesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Midtrans\Config;
+use Midtrans\Snap;
 
 class KeranjangController extends Controller
 {
@@ -38,7 +40,7 @@ class KeranjangController extends Controller
         ]);
 
         $produk = Produk::findOrFail($request->produk_id);
-        
+
         // Cek stok
         if ($request->jumlah > $produk->stok_produk) {
             return redirect()->back()->with('error', 'Jumlah melebihi stok yang tersedia!');
@@ -55,7 +57,7 @@ class KeranjangController extends Controller
             if ($keranjangExisting) {
                 // Update jumlah jika produk sudah ada
                 $jumlahBaru = $keranjangExisting->jumlah + $request->jumlah;
-                
+
                 // Cek stok lagi setelah penambahan
                 if ($jumlahBaru > $produk->stok_produk) {
                     return redirect()->back()->with('error', 'Total jumlah melebihi stok yang tersedia!');
@@ -125,7 +127,7 @@ class KeranjangController extends Controller
     public function clear()
     {
         Keranjang::where('user_id', Auth::id())->delete();
-        
+
         return redirect()->back()->with('success', 'Keranjang berhasil dikosongkan!');
     }
 
@@ -148,6 +150,7 @@ class KeranjangController extends Controller
     // Proses checkout dari keranjang
     public function processCheckout(Request $request)
     {
+        // 1. Validasi input dari form checkout
         $request->validate([
             'nama_pemesan' => 'required|string|max:255',
             'alamat_pengiriman' => 'required|string',
@@ -155,6 +158,7 @@ class KeranjangController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
+        // 2. Ambil data keranjang dari user yang login
         $keranjangs = Keranjang::with('produk')
             ->where('user_id', Auth::id())
             ->get();
@@ -163,17 +167,19 @@ class KeranjangController extends Controller
             return redirect()->route('keranjang.index')->with('error', 'Keranjang kosong!');
         }
 
-        try {
-            DB::beginTransaction();
+        // Awal dari transaksi database
+        DB::beginTransaction();
 
-            // Cek stok semua produk
+        try {
+            // Cek stok semua produk sebelum lanjut
             foreach ($keranjangs as $item) {
                 if ($item->jumlah > $item->produk->stok_produk) {
+                    DB::rollBack(); // Batalkan jika ada stok yang tidak cukup
                     return redirect()->back()->with('error', 'Stok produk ' . $item->produk->nama_produk . ' tidak mencukupi!');
                 }
             }
 
-            // Buat pesanan
+            // 3. Buat pesanan di tabel `pesanans` dengan status 'pending'
             $pesanan = Pesanan::create([
                 'user_id' => Auth::id(),
                 'nama_pemesan' => $request->nama_pemesan,
@@ -181,11 +187,11 @@ class KeranjangController extends Controller
                 'nomor_telepon' => $request->nomor_telepon,
                 'catatan' => $request->catatan,
                 'total_harga' => $keranjangs->sum('subtotal'),
-                'status_pesanan' => 'pending',
+                'status_pesanan' => 'pending', // Status awal, menunggu pembayaran
                 'tanggal_pesanan' => now(),
             ]);
 
-            // Buat detail pesanan dan kurangi stok
+            // 4. Buat detail pesanan di tabel `detail_pesanans`
             foreach ($keranjangs as $item) {
                 DetailPesanan::create([
                     'pesanan_id' => $pesanan->id,
@@ -195,23 +201,56 @@ class KeranjangController extends Controller
                     'subtotal' => $item->subtotal,
                 ]);
 
-                // Kurangi stok produk
-                $item->produk->decrement('stok_produk', $item->jumlah);
+                // LOGIKA PENGURANGAN STOK AKAN DIPINDAH KE WEBHOOK (COMMIT 4)
+                // $item->produk->decrement('stok_produk', $item->jumlah);
             }
 
-            // Kosongkan keranjang
-            Keranjang::where('user_id', Auth::id())->delete();
+            // 5. Set konfigurasi Midtrans
+            Config::$serverKey = config('midtrans.server_key');
+            Config::$isProduction = config('midtrans.is_production');
+            Config::$isSanitized = true;
+            Config::$is3ds = true;
 
+            // 6. Siapkan parameter untuk Midtrans
+            $midtrans_params = [
+                'transaction_details' => [
+                    'order_id' => 'BGD-' . $pesanan->id . '-' . time(),
+                    'gross_amount' => $pesanan->total_harga,
+                ],
+                'customer_details' => [
+                    'first_name' => $request->nama_pemesan,
+                    'email' => Auth::user()->email,
+                    'phone' => $request->nomor_telepon,
+                ],
+                'item_details' => $keranjangs->map(function ($item) {
+                    return [
+                        'id' => $item->produk_id,
+                        'price' => $item->harga_satuan,
+                        'quantity' => $item->jumlah,
+                        'name' => $item->produk->nama_produk,
+                    ];
+                })->toArray(),
+            ];
+
+            // 7. Dapatkan Snap Token
+            $snapToken = Snap::getSnapToken($midtrans_params);
+
+            // Jika semua berhasil, commit transaksi database
             DB::commit();
 
-            return redirect()->route('pesanans.show', $pesanan->id)->with('success', 'Pesanan berhasil dibuat!');
+            // Kosongkan keranjang belanja
+            Keranjang::where('user_id', Auth::id())->delete();
+
+            // 8. Arahkan ke view pembayaran dengan token
+            return view('keranjang.payment', compact('snapToken', 'pesanan'));
 
         } catch (\Exception $e) {
+            // Jika ada error, batalkan semua operasi database
             DB::rollback();
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat memproses pesanan!');
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memproses pesanan: ' . $e->getMessage());
         }
     }
-
+    
     // Get total items in cart (for navbar)
     public function getCartCount()
     {
