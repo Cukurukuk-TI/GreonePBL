@@ -181,6 +181,7 @@ class KeranjangController extends Controller
 
             // 3. Buat pesanan di tabel `pesanans` dengan status 'pending'
             $pesanan = Pesanan::create([
+                'kode_pesanan' => Pesanan::generateKodePesanan(),
                 'user_id' => Auth::id(),
                 'nama_pemesan' => $request->nama_pemesan,
                 'alamat_pengiriman' => $request->alamat_pengiriman,
@@ -250,7 +251,7 @@ class KeranjangController extends Controller
             return redirect()->back()->with('error', 'Terjadi kesalahan saat memproses pesanan: ' . $e->getMessage());
         }
     }
-    
+
     // Get total items in cart (for navbar)
     public function getCartCount()
     {
