@@ -18,4 +18,10 @@ class PublicArtikelController extends Controller
 
         return view('artikel', compact('artikels'));
     }
+
+    public function show(Artikel $artikel)
+    {
+        return view('artikel-detail', compact('artikel'));
+    }
+
 }

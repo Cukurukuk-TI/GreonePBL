@@ -13,7 +13,7 @@
                 <div class="flex flex-col rounded-lg shadow-lg overflow-hidden">
                     <div class="flex-shrink-0">
                         {{-- Link ke halaman detail (akan kita buat di commit 2) --}}
-                        <a href="#">
+                        <a href="{{ route('artikel.public.show', $artikel->slug) }}">
                             <img class="h-48 w-full object-cover"
                                  src="{{ $artikel->gambar ? asset('storage/' . $artikel->gambar) : 'https://placehold.co/600x400/e2e8f0/64748b?text=BGD+Hydrofarm' }}"
                                  alt="Gambar {{ $artikel->judul }}">
@@ -27,7 +27,7 @@
                                     {{ $artikel->kategoriArtikel->nama ?? 'Umum' }}
                                 </span>
                             </p>
-                            <a href="#" class="block mt-2">
+                            <a href="{{ route('artikel.public.show', $artikel->slug) }}" class="block mt-2">
                                 <p class="text-xl font-semibold text-gray-900 hover:text-green-700">{{ $artikel->judul }}</p>
                                 <p class="mt-3 text-base text-gray-500">{{ Str::limit(strip_tags($artikel->konten), 100) }}</p>
                             </a>

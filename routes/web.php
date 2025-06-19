@@ -24,6 +24,7 @@ use App\Http\Controllers\Auth\PasswordController;
 Route::get('/', [KategoriController::class, 'indexUser'])->name('home');
 
 Route::get('/artikel', [PublicArtikelController::class, 'index'])->name('artikel.public.index');
+Route::get('/artikel/{artikel:slug}', [PublicArtikelController::class, 'show'])->name('artikel.public.show');
 
 //   Guest-only routes (login/register)
 Route::middleware('guest')->group(function () {
