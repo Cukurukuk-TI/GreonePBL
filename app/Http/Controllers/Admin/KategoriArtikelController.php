@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\KategoriArtikel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class KategoriArtikelController extends Controller
 {
@@ -18,11 +19,27 @@ class KategoriArtikelController extends Controller
         return view('admin.kategori-artikel.index', compact('kategoriArtikels'));
     }
 
-    public function create() {
-
+    public function create()
+    {
+        return view('admin.kategori-artikel.create');
     }
-    public function store(Request $request) {
 
+    /**
+     * Menyimpan kategori baru ke database.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama' => 'required|string|max:255|unique:kategori_artikels,nama',
+        ]);
+
+        KategoriArtikel::create([
+            'nama' => $request->nama,
+            'slug' => Str::slug($request->nama),
+        ]);
+
+        return redirect()->route('admin.artikel.kategori.index')
+                         ->with('success', 'Kategori artikel berhasil ditambahkan.');
     }
     public function show(KategoriArtikel $kategoriArtikel) {
 

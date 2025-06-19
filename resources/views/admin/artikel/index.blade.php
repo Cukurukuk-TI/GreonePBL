@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="m-0">Daftar Artikel</h3>
         {{-- Tombol Tambah akan kita fungsikan nanti --}}
-        <a href="#" class="btn btn-primary">
+        <a href="{{ route('admin.artikel.create') }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Tambah Artikel
         </a>
     </div>
