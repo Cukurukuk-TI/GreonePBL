@@ -15,6 +15,8 @@ use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\Admin\PelangganController;
+use App\Http\Controllers\Admin\ArtikelController;
+use App\Http\Controllers\Admin\KategoriArtikelController;
 use App\Http\Controllers\Auth\PasswordController;
 //   Home (Boleh Diakses Guest)
 Route::get('/', [KategoriController::class, 'indexUser'])->name('home');
@@ -99,6 +101,15 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
 
     Route::resource('pelanggan', PelangganController::class);
 
+    // Artikel Admin
+    Route::prefix('artikel')->name('artikel.')->group(function () {
+
+        // Menangani URL: /admin/artikel, /admin/artikel/create, dll.
+        Route::resource('/', ArtikelController::class)->parameters(['' => 'artikel']);
+
+        // Menangani URL: /admin/artikel/kategori, /admin/artikel/kategori/create, dll.
+        Route::resource('kategori', KategoriArtikelController::class)->except(['show']);
+    });
 });
 
 // Route untuk Verifikasi Email

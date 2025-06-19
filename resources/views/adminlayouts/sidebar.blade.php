@@ -33,7 +33,7 @@
             <i class="fas fa-tags w-5"></i><span class="ml-3">Promo</span>
         </a>
 
-        <a href="#" class="flex items-center p-2 rounded hover:bg-green-100">
+        <a href="{{ route('admin.artikel.index') }}" class="flex items-center p-2 rounded hover:bg-green-100">
             <i class="fas fa-newspaper w-5"></i><span class="ml-3">Artikel</span>
         </a>
         <a href="#" class="flex items-center p-2 rounded hover:bg-green-100">
