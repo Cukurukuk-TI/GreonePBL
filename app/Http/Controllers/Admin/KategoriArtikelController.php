@@ -12,11 +12,8 @@ class KategoriArtikelController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $kategoriArtikels = KategoriArtikel::latest()->paginate(10);
+    public function index(){
 
-        return view('admin.kategori-artikel.index', compact('kategoriArtikels'));
     }
 
     public function create()
@@ -29,18 +26,23 @@ class KategoriArtikelController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|string|max:255|unique:kategori_artikels,nama',
         ]);
 
-        KategoriArtikel::create([
-            'nama' => $request->nama,
-            'slug' => Str::slug($request->nama),
+        $kategori = KategoriArtikel::create([
+            'nama' => $validated['nama'],
+            'slug' => Str::slug($validated['nama']),
         ]);
 
-        return redirect()->route('admin.artikel.kategori.index')
-                         ->with('success', 'Kategori artikel berhasil ditambahkan.');
+        // Kembalikan response JSON untuk di-handle oleh JavaScript
+        return response()->json([
+            'success' => true,
+            'message' => 'Kategori berhasil ditambahkan!',
+            'data'    => $kategori
+        ]);
     }
+
     public function show(KategoriArtikel $kategoriArtikel) {
 
     }

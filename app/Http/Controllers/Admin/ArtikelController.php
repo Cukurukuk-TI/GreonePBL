@@ -15,15 +15,26 @@ class ArtikelController extends Controller
      */
     public function index()
     {
-        $artikels = Artikel::with('kategoriArtikel')->latest()->paginate(10);
+        // Data untuk Card Statistik
+        $totalArtikel = Artikel::count();
+        $artikelDihapus = Artikel::onlyTrashed()->count();
 
-        return view('admin.artikel.index', compact('artikels'));
+        // Data untuk Tabel
+        $artikels = Artikel::with('kategoriArtikel')->latest()->paginate(5, ['*'], 'artikel_page');
+        $kategoriArtikels = KategoriArtikel::latest()->paginate(5, ['*'], 'kategori_page');
+
+        return view('admin.artikel.index', compact(
+            'totalArtikel',
+            'artikelDihapus',
+            'artikels',
+            'kategoriArtikels'
+        ));
     }
 
     public function create()
     {
         // Ambil semua data kategori untuk ditampilkan di dropdown
-        $kategoriArtikels = KategoriArtikel::all();
+        $kategoriArtikels = KategoriArtikel::orderBy('nama')->get();
         return view('admin.artikel.create', compact('kategoriArtikels'));
     }
 
@@ -47,11 +58,11 @@ class ArtikelController extends Controller
             $validatedData['gambar'] = $gambarPath;
         }
 
-        $validatedData['slug'] = Str::slug($request->judul) . '-' . time(); // Tambah time() agar unik
+        $validatedData['slug'] = Str::slug($request->judul) . '-' . time();
         Artikel::create($validatedData);
 
         return redirect()->route('admin.artikel.index')
-                         ->with('success', 'Artikel berhasil dipublikasikan.');
+                         ->with('success', 'Artikel baru berhasil dipublikasikan!');
     }
 
     public function show(Artikel $artikel) {

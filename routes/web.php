@@ -102,14 +102,8 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
     Route::resource('pelanggan', PelangganController::class);
 
     // Artikel Admin
-    Route::prefix('artikel')->name('artikel.')->group(function () {
-
-        // Menangani URL: /admin/artikel, /admin/artikel/create, dll.
-        Route::resource('/', ArtikelController::class)->parameters(['' => 'artikel']);
-
-        // Menangani URL: /admin/artikel/kategori, /admin/artikel/kategori/create, dll.
-        Route::resource('kategori', KategoriArtikelController::class)->except(['show']);
-    });
+    Route::resource('artikel', ArtikelController::class);
+    Route::resource('kategori-artikel', KategoriArtikelController::class)->except('show');
 });
 
 // Route untuk Verifikasi Email

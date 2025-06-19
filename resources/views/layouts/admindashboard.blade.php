@@ -27,5 +27,7 @@
     {{-- Footer --}}
     @include('adminlayouts.footer')
 
+    @stack('scripts')
+
 </body>
 </html>
