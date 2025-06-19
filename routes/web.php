@@ -19,14 +19,15 @@ use App\Http\Controllers\Admin\PelangganController;
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\KategoriArtikelController;
 use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\TestimoniController; // Import TestimoniController
 
-//   Home (Boleh Diakses Guest)
+// Home (Boleh Diakses Guest)
 Route::get('/', [KategoriController::class, 'indexUser'])->name('home');
 
 Route::get('/artikel', [PublicArtikelController::class, 'index'])->name('artikel.public.index');
 Route::get('/artikel/{artikel:slug}', [PublicArtikelController::class, 'show'])->name('artikel.public.show');
 
-//   Guest-only routes (login/register)
+// Guest-only routes (login/register)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'loginPost']);
@@ -34,7 +35,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'registerPost']);
 });
 
-//   Semua route ini HANYA untuk user yang sudah login
+// Semua route ini HANYA untuk user yang sudah login
 Route::middleware('auth')->group(function () {
     // Produk
     Route::get('/produk', [ProdukController::class, 'showToUser'])->name('produk.user');
@@ -50,7 +51,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
-
 
     // Alamat
     Route::resource('alamat', AlamatController::class);
@@ -75,9 +75,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
     Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
     Route::get('/pesananuser', [PesananController::class, 'pesanan'])->name('user.pesanan');
+
+    // Testimoni routes for user
+    Route::get('/testimoni/create/{pesanan_id}', [TestimoniController::class, 'create'])->name('testimoni.create');
+    Route::post('/testimoni/store', [TestimoniController::class, 'store'])->name('testimoni.store');
 });
 
-//   Admin route
+// Admin route
 Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/produk-terlaris', [AdminController::class, 'getProdukTerlaris'])->name('produk-terlaris');
@@ -102,7 +106,6 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
     Route::get('pelanggan/trash', [App\Http\Controllers\Admin\PelangganController::class, 'trash'])->name('pelanggan.trash');
     Route::patch('pelanggan/{id}/restore', [App\Http\Controllers\Admin\PelangganController::class, 'restore'])->name('pelanggan.restore');
     Route::delete('pelanggan/{id}/force-delete', [App\Http\Controllers\Admin\PelangganController::class, 'forceDelete'])->name('pelanggan.forceDelete');
-
     Route::resource('pelanggan', PelangganController::class);
 
     // Artikel Admin
@@ -111,6 +114,10 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
     Route::delete('artikel/{id}/force-delete', [ArtikelController::class, 'forceDelete'])->name('artikel.forceDelete');
     Route::resource('artikel', ArtikelController::class);
     Route::resource('kategori-artikel', KategoriArtikelController::class)->except('show');
+
+    // Testimoni admin
+    Route::get('/testimonis', [TestimoniController::class, 'index'])->name('testimoni.index');
+    Route::delete('/testimonis/{testimoni}', [TestimoniController::class, 'destroy'])->name('testimoni.destroy');
 });
 
 // Route untuk Verifikasi Email

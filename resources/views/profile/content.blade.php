@@ -1,6 +1,6 @@
-@extends('layouts.profileuser')
-@section('profile-content')
-<div class="bg-white shadow-xl rounded-2xl p-8 max-w-2xl mx-auto mt-6">
+@extends('layouts.userlayouts')
+@section('content')
+<div class="bg-white shadow-xl rounded-2xl p-8 w-full mt-6 pt-10">
 
     <!-- Header -->
     <div class="text-center mb-8">
