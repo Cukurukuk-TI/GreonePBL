@@ -2,9 +2,9 @@ name: Laravel CI / CD
 
 on:
   push:
-    branches: [ "main", "testing3" ]
+    branches: [ "main", "testing" ]
   pull_request:
-    branches: [ "main", "testing3" ]
+    branches: [ "main", "testing" ]
 
 jobs:
   laravel-tests:
