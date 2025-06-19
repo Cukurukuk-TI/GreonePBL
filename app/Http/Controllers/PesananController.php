@@ -248,7 +248,7 @@ class PesananController extends Controller
     //
     public function pesanan(Request $request)
     {
-        $query = Auth::user()->pesanans()->with('produk')->latest();
+        $query = Auth::user()->pesanans()->with('detailPesanans.produk')->latest()->paginate(10);
 
         if ($request->status) {
             $query->where('status', $request->status);

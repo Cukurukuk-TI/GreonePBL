@@ -23,37 +23,35 @@
         </div>
     @endif
 
-    <!-- Filter Status -->
     <div class="bg-white rounded-lg shadow mb-6 p-4">
         <div class="flex flex-wrap gap-2">
-            <a href="{{ request()->fullUrlWithQuery(['status' => '']) }}" 
+            <a href="{{ request()->fullUrlWithQuery(['status' => '']) }}"
                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ !request('status') ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 Semua
             </a>
-            <a href="{{ request()->fullUrlWithQuery(['status' => 'pending']) }}" 
+            <a href="{{ request()->fullUrlWithQuery(['status' => 'pending']) }}"
                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ request('status') === 'pending' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 Menunggu
             </a>
-            <a href="{{ request()->fullUrlWithQuery(['status' => 'proses']) }}" 
+            <a href="{{ request()->fullUrlWithQuery(['status' => 'proses']) }}"
                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ request('status') === 'proses' ? 'bg-yellow-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 Diproses
             </a>
-            <a href="{{ request()->fullUrlWithQuery(['status' => 'dikirim']) }}" 
+            <a href="{{ request()->fullUrlWithQuery(['status' => 'dikirim']) }}"
                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ request('status') === 'dikirim' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 Dikirim
             </a>
-            <a href="{{ request()->fullUrlWithQuery(['status' => 'complete']) }}" 
+            <a href="{{ request()->fullUrlWithQuery(['status' => 'complete']) }}"
                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ request('status') === 'complete' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 Selesai
             </a>
-            <a href="{{ request()->fullUrlWithQuery(['status' => 'cancelled']) }}" 
+            <a href="{{ request()->fullUrlWithQuery(['status' => 'cancelled']) }}"
                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ request('status') === 'cancelled' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 Dibatalkan
             </a>
         </div>
     </div>
 
-    <!-- Tabel Pesanan -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -79,13 +77,11 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($pesanans as $pesanan)
                         <tr class="hover:bg-gray-50">
-                            <!-- Kolom Pesanan (Gambar + Info) -->
                             <td class="px-6 py-4">
                                 <div class="flex items-center space-x-4">
-                                    <!-- Gambar Produk -->
                                     <div class="flex-shrink-0">
                                         @if($pesanan->produk->gambar_produk)
-                                            <img src="{{ asset('storage/' . $pesanan->produk->gambar_produk) }}" 
+                                            <img src="{{ asset('storage/' . $pesanan->produk->gambar_produk) }}"
                                                  alt="{{ $pesanan->produk->nama_produk }}"
                                                  class="w-16 h-16 object-cover rounded-lg border">
                                         @else
@@ -96,7 +92,6 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <!-- Info Produk -->
                                     <div class="flex-1 min-w-0">
                                         <div class="text-sm font-medium text-gray-900 truncate">
                                             {{ $pesanan->produk->nama_produk }}
@@ -114,7 +109,6 @@
                                 </div>
                             </td>
 
-                            <!-- Kolom Harga -->
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">
                                     Rp{{ number_format($pesanan->total_harga, 0, ',', '.') }}
@@ -124,7 +118,6 @@
                                 </div>
                             </td>
 
-                            <!-- Kolom Status -->
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @switch($pesanan->status)
                                     @case('pending')
@@ -171,18 +164,15 @@
                                 @endswitch
                             </td>
 
-                            <!-- Kolom Tanggal -->
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <div>{{ \Carbon\Carbon::parse($pesanan->created_at)->format('d/m/Y') }}</div>
                                 <div class="text-xs">{{ \Carbon\Carbon::parse($pesanan->created_at)->format('H:i') }}</div>
                             </td>
 
-                            <!-- Kolom Aksi -->
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex flex-col space-y-2">
-                                    <!-- Tombol Testimoni -->
                                     @if($pesanan->status === 'complete')
-                                        <a href="{{ route('home') }}" 
+                                        <a href="{{ route('home') }}"
                                            class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition duration-200">
                                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
@@ -198,8 +188,7 @@
                                         </span>
                                     @endif
 
-                                    <!-- Tombol Detail (opsional) -->
-                                    <button onclick="showOrderDetail('{{ $pesanan->id }}')" 
+                                    <button onclick="showOrderDetail('{{ $pesanan->id }}')"
                                             class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition duration-200">
                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
@@ -219,7 +208,7 @@
                                     </svg>
                                     <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada pesanan</h3>
                                     <p class="text-gray-500 mb-4">Anda belum memiliki pesanan. Mulai berbelanja sekarang!</p>
-                                    <a href="{{ route('home') }}" 
+                                    <a href="{{ route('home') }}"
                                        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition duration-200">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -235,7 +224,6 @@
         </div>
     </div>
 
-    <!-- Pagination -->
     @if(method_exists($pesanans, 'hasPages') && $pesanans->hasPages())
         <div class="mt-6">
             {{ $pesanans->appends(request()->query())->links() }}
@@ -243,7 +231,6 @@
     @endif
 </div>
 
-<!-- Modal Detail Pesanan -->
 <div id="orderDetailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <div class="flex justify-between items-center mb-4">
@@ -255,8 +242,7 @@
             </button>
         </div>
         <div id="orderDetailContent">
-            <!-- Detail akan dimuat di sini -->
-        </div>
+            </div>
     </div>
 </div>
 
@@ -266,7 +252,7 @@ function showOrderDetail(orderId) {
     // Bisa menggunakan AJAX atau data yang sudah ada
     const modal = document.getElementById('orderDetailModal');
     const content = document.getElementById('orderDetailContent');
-    
+
     // Contoh konten statis, bisa diganti dengan AJAX call
     content.innerHTML = `
         <div class="space-y-3">
@@ -288,7 +274,7 @@ function showOrderDetail(orderId) {
             </div>
         </div>
     `;
-    
+
     modal.classList.remove('hidden');
     modal.classList.add('flex');
 }
