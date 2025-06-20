@@ -63,34 +63,18 @@
                 </div>
             </td>
             
-            <!-- Statistik Pendapatan (Chart) -->
-            <td class="w-[28%] p-2" colspan="2" rowspan="2">
-                <div class="bg-white shadow rounded-lg p-4 h-full min-h-[10rem]">
-                    <div class="mb-3">
-                        <h3 class="text-base font-semibold text-gray-900">Statistik Pendapatan</h3>
-                        <p class="text-xs text-gray-500">{{ $currentMonth ?? 'Bulan ini' }}</p>
-                    </div>
-                    <div class="h-24 flex items-end justify-center space-x-1">
-
-                        {{-- ini harusnya pake js biar bisa bikin statistik --}}
-                        {{-- <!-- Placeholder bars -->
-                        <div class="bg-green-200 w-3 h-6"></div>
-                        <div class="bg-green-300 w-3 h-9"></div>
-                        <div class="bg-green-400 w-3 h-4"></div>
-                        <div class="bg-green-500 w-3 h-12"></div>
-                        <div class="bg-green-300 w-3 h-8"></div>
-                        <div class="bg-green-400 w-3 h-10"></div>
-                        <div class="bg-green-600 w-3 h-15"></div>
-                        <div class="bg-green-500 w-3 h-13"></div>
-                        <div class="bg-green-400 w-3 h-9"></div>
-                        <div class="bg-green-700 w-3 h-18"></div>
-                        <div class="bg-green-600 w-3 h-16"></div>
-                        <div class="bg-green-500 w-3 h-12"></div> --}}
-                    </div>
-                </div>
-            </td>
+            <div class="grid grid-cols-2 gap-4 mt-6">
+            <div class="bg-white shadow p-4 rounded-lg">
+                <h3 class="text-sm font-semibold mb-2 text-gray-700">Grafik Pendapatan Harian</h3>
+                <canvas id="pendapatanChart"></canvas>
+            </div>
+            <div class="bg-white shadow p-4 rounded-lg">
+                <h3 class="text-sm font-semibold mb-2 text-gray-700">Grafik Jumlah Pesanan Harian</h3>
+                <canvas id="pesananChart"></canvas>
+            </div>
+        </div>
         </tr>
-        <tr>
+
             <!-- Pesanan Dikirim -->
             <td class="p-2">
                 <div class="bg-white shadow rounded-lg p-4 h-20">
@@ -206,6 +190,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const periodeFilter = document.getElementById('periode-filter');
@@ -293,5 +279,66 @@
                 }
             }
         });
+
+        // Inisialisasi grafik pendapatan harian
+        document.addEventListener('DOMContentLoaded', function () {
+    if (!window.dailyStats) return;
+
+    const labels = dailyStats.map(item => item.tanggal);
+    const pendapatanData = dailyStats.map(item => item.pendapatan);
+    const pesananData = dailyStats.map(item => item.jumlah_pesanan);
+
+    const ctxPendapatan = document.getElementById('pendapatanChart').getContext('2d');
+    const ctxPesanan = document.getElementById('pesananChart').getContext('2d');
+
+    new Chart(ctxPendapatan, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Rp',
+                data: pendapatanData,
+                backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                borderColor: 'rgba(5, 150, 105, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: value => 'Rp' + value.toLocaleString()
+                    }
+                }
+            }
+        }
+    });
+
+    new Chart(ctxPesanan, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Jumlah Pesanan',
+                data: pesananData,
+                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                borderColor: 'rgba(37, 99, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+
     </script>
+    <script src="/path/to/chart.js"></script>
 @endsection

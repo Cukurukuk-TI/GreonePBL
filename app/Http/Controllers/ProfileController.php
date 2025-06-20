@@ -32,6 +32,11 @@ class ProfileController extends Controller
     /**
      * Menampilkan form edit profil.
      */
+
+    // edit atmin
+    public function editatmin(Request $request) :View {
+        return view('admin.profile.edit');
+    }
     public function edit(Request $request): View
     {
         return view('profile.edit', [
