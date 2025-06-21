@@ -27,4 +27,23 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', compact('produkTerlaris'));
     }
+    
+    private function getDailyStats()
+    {
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+
+        $data = DB::table('pesanans')
+            ->selectRaw('DATE(created_at) as tanggal')
+            ->selectRaw('SUM(CASE WHEN status != "cancelled" THEN total_harga ELSE 0 END) as pendapatan')
+            ->selectRaw('COUNT(*) as jumlah_pesanan')
+            ->whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->groupBy('tanggal')
+            ->orderBy('tanggal')
+            ->get();
+
+        return $data;
+    }
+
 }

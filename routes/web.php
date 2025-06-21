@@ -31,7 +31,7 @@ Route::get('/artikel/{artikel:slug}', [PublicArtikelController::class, 'show'])-
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'loginPost']);
-    Route::get('/register', [AuthController::class, 'register']);
+    Route::get('/register', [AuthController::class, 'register']) ->name('register');
     Route::post('/register', [AuthController::class, 'registerPost']);
 });
 
@@ -82,12 +82,14 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin route
-Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/produk-terlaris', [AdminController::class, 'getProdukTerlaris'])->name('produk-terlaris');
 
     // Profile Admin
-    Route::get('/profile', [ProfileController::class, 'adminIndex'])->name('admin.profile');
+    Route::get('/profile', [ProfileController::class, 'adminIndex'])->name('profile.index');
+    // edit
+    Route::get('/profile/edit', [ProfileController::class, 'editatmin'])->name('profile.edit');
 
     Route::resource('produks', ProdukController::class);
     Route::resource('kategoris', KategoriController::class);

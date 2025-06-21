@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 class AdminSessionTimeout
 {
     // Timeout dalam detik (1 menit = 60 detik)
-    protected $timeout = 60;
+    protected $timeout = 7200;
 
     public function handle(Request $request, Closure $next)
     {
