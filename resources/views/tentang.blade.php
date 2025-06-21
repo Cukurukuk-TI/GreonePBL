@@ -3,110 +3,82 @@
 @section('title', 'Tentang Kami')
 
 @section('content')
-  <!-- Hero Slider -->
-  <div class="hero-slider">
-    <div class="slider-container" id="slider">
-      <div class="slide">
-        <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=1200&q=80" alt="Bgd Hydrofarm">
-        <div class="slide-content">
-          <div>
-            <h1>Mengenal usaha kami</h1>
-            <p>Sepak Terjang Usaha Kami</p>
-          </div>
-        </div>
-      </div>
-      <div class="slide">
-        <img src="https://images.unsplash.com/photo-1595470534683-c9e99c1e1a01?auto=format&fit=crop&w=1200&q=80" alt="Pertanian Hidroponik">
-        <div class="slide-content">
-          <div>
-            <h1>Teknologi Modern</h1>
-            <p>Solusi pertanian masa depan</p>
-          </div>
-        </div>
-      </div>
-      <div class="slide">
-        <img src="https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80" alt="Tim Kami">
-        <div class="slide-content">
-          <div>
-            <h1>Tim Profesional</h1>
-            <p>Dedikasi untuk hasil terbaik</p>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="bg-white">
 
-    <div class="slider-nav" id="slider-nav">
-      <div class="slider-dot active"></div>
-      <div class="slider-dot"></div>
-      <div class="slider-dot"></div>
-    </div>
+    {{-- Hero Section --}}
+    <section class="text-center py-16 sm:py-20 px-4">
+        <h1 class="text-base font-semibold text-green-600">Tentang Kami</h1>
+        <p class="mt-2 text-4xl sm:text-5xl font-extrabold text-gray-800">
+            Membawa Kesegaran Hidroponik ke Meja Anda
+        </p>
+        <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-600">
+            Kami percaya bahwa makanan sehat dan segar adalah hak semua orang. Pelajari lebih lanjut tentang perjalanan dan misi kami di Bgd Hydrofarm.
+        </p>
+    </section>
 
-    <div class="slider-arrow prev" id="prev">&#10094;</div>
-    <div class="slider-arrow next" id="next">&#10095;</div>
-  </div>
+    {{-- Visi & Solusi Section --}}
+    <section class="bg-gray-50 py-16 sm:py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
-  <!-- Content -->
-  <section class="content">
-    <div class="section">
-      <h2>How We Start It</h2>
-      <p>Bgd Hydrofarm memulai perjalanannya dengan visi untuk menghadirkan sistem pertanian hidroponik yang efisien dan ramah lingkungan...</p>
-    </div>
-    <div class="section">
-      <h2>How We Solve It</h2>
-      <p>Kami mengembangkan solusi hidroponik terintegrasi...</p>
-    </div>
-  </section>
+                {{-- Visi --}}
+                <div class="space-y-4">
+                    <div class="flex items-center justify-center w-12 h-12 bg-green-100 text-green-600 rounded-full">
+                        <i class="fas fa-rocket fa-lg"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Bagaimana Kami Memulai</h2>
+                    <p class="text-gray-600 leading-relaxed">
+                        Bgd Hydrofarm memulai perjalanannya dengan visi untuk menghadirkan sistem pertanian hidroponik yang efisien dan ramah lingkungan. Berawal dari kebun kecil, kami bertekad menjawab tantangan pangan masa kini dengan pendekatan berkelanjutan.
+                    </p>
+                </div>
+
+                {{-- Solusi --}}
+                <div class="space-y-4">
+                    <div class="flex items-center justify-center w-12 h-12 bg-green-100 text-green-600 rounded-full">
+                        <i class="fas fa-lightbulb fa-lg"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Solusi yang Kami Tawarkan</h2>
+                    <p class="text-gray-600 leading-relaxed">
+                        Kami mengembangkan sistem hidroponik terintegrasi yang menghasilkan sayuran berkualitas tinggi tanpa pestisida, serta menghemat air hingga 90%. Solusi kami cocok untuk skala rumah tangga maupun komersial.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    {{-- Tim Kami Section --}}
+    <section class="bg-white py-16 sm:py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-800">Bertemu dengan Tim Kami</h2>
+                <p class="mt-4 text-lg text-gray-600">Orang-orang hebat di balik kesegaran produk kami.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {{-- Tim 1 --}}
+                <div class="text-center">
+                    <img class="mx-auto h-32 w-32 rounded-full object-cover shadow-md transition hover:scale-105" src="{{asset('img/obat anti stres.jpeg')}}" alt="Foto Alex Wijaya">
+                    <h3 class="mt-4 text-base font-semibold text-gray-800">Jiwoo</h3>
+                    <p class="text-sm text-green-600 font-medium">Founder & CEO</p>
+                </div>
+
+                {{-- Tim 2 --}}
+                <div class="text-center">
+                    <img class="mx-auto h-32 w-32 rounded-full object-cover shadow-md transition hover:scale-105" src="{{asset('img/kebun.png')}}" alt="Foto Dita Rahma">
+                    <h3 class="mt-4 text-base font-semibold text-gray-800">Tukang Kebun</h3>
+                    <p class="text-sm text-green-600 font-medium">Head of Operations</p>
+                </div>
+
+                {{-- Tim 3 --}}
+                <div class="text-center">
+                    <img class="mx-auto h-32 w-32 rounded-full object-cover shadow-md transition hover:scale-105" src="{{asset('img/malive.jpeg')}}" alt="Foto Rino Mahendra">
+                    <h3 class="mt-4 text-base font-semibold text-gray-800">Carmen</h3>
+                    <p class="text-sm text-green-600 font-medium">Lead Agronomist</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
 @endsection
-
-@section('scripts')
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const slider = document.getElementById('slider');
-    const slides = document.querySelectorAll('.slide');
-    const dots = document.querySelectorAll('.slider-dot');
-    const prevBtn = document.getElementById('prev');
-    const nextBtn = document.getElementById('next');
-
-    let currentIndex = 0;
-    const slideCount = slides.length;
-
-    function updateSlider() {
-      slider.style.transform = `translateX(-${currentIndex * 100}%)`;
-      dots.forEach((dot, index) => {
-        dot.classList.toggle('active', index === currentIndex);
-      });
-    }
-
-    function nextSlide() {
-      currentIndex = (currentIndex + 1) % slideCount;
-      updateSlider();
-    }
-
-    function prevSlide() {
-      currentIndex = (currentIndex - 1 + slideCount) % slideCount;
-      updateSlider();
-    }
-
-    let slideInterval = setInterval(nextSlide, 5000);
-
-    document.querySelector('.hero-slider').addEventListener('mouseenter', () => {
-      clearInterval(slideInterval);
-    });
-
-    document.querySelector('.hero-slider').addEventListener('mouseleave', () => {
-      slideInterval = setInterval(nextSlide, 5000);
-    });
-
-    dots.forEach((dot, index) => {
-      dot.addEventListener('click', () => {
-        currentIndex = index;
-        updateSlider();
-      });
-    });
-
-    nextBtn.addEventListener('click', nextSlide);
-    prevBtn.addEventListener('click', prevSlide);
-  });
-</script>
-@endsection
-
