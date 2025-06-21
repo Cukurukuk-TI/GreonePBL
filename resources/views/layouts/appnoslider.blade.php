@@ -14,6 +14,9 @@
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    {{-- sweet alert --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         .carousel-wrapper {
             padding-top: 60px;
@@ -45,7 +48,7 @@
                 <a href="/artikel" class="hover:text-green-200">Artikel</a>
                 <a href="/kontak" class="hover:text-green-200">Kontak</a>
                 <a href="/tentang" class="hover:text-green-200">Tentang Kami</a>
-                <a class="nav-link" href="/chart"><i class="fas fa-shopping-bag"></i></a>
+                <a class="nav-link" href="/keranjang"><i class="fas fa-shopping-bag"></i></a>
                 <a class="nav-link" href="/profile"><i class="fas fa-user"></i></a>
             </nav>
         </div>

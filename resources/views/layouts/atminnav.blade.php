@@ -15,6 +15,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    {{-- SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     {{-- Tailwind Config --}}
     <script>
         tailwind.config = {
@@ -35,7 +38,6 @@
         };
     </script>
 
-    {{-- Custom Style --}}
     <style>
         body { font-family: 'Poppins', sans-serif; }
         [x-cloak] { display: none !important; }
@@ -72,10 +74,6 @@
                         >
                             <a href="{{ route('admin.profile.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-100">Profil Admin</a>
                             <div class="border-t border-gray-100"></div>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Keluar</button>
-                            </form>
                         </div>
                     </div>
                 </div>
@@ -83,7 +81,7 @@
         </div>
     </header>
 
-    {{-- Layout: Sidebar + Content --}}
+    {{-- Layout --}}
     <div class="flex pt-16 min-h-screen">
 
         {{-- Sidebar --}}
@@ -100,7 +98,6 @@
                 <p class="text-sm text-brand-text-muted">{{ Auth::user()->email }}</p>
             </div>
 
-            {{-- Navigasi --}}
             <nav>
                 <ul class="space-y-2">
                     <li>
@@ -120,18 +117,26 @@
                         </a>
                     </li>
                     <li>
-                        <a href="
-                        {{-- {{ route('pesanan.history') }} --}}
-                         
-                        " class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors duration-200 {{ request()->routeIs('pesanan.history') ? 'bg-brand-green-light text-brand-green font-semibold' : 'text-brand-text-muted hover:bg-gray-100 hover:text-brand-text' }}">
+                        <a href="#"
+                           class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors duration-200 
+                           {{ request()->routeIs('pesanan.history') ? 'bg-brand-green-light text-brand-green font-semibold' : 'text-brand-text-muted hover:bg-gray-100 hover:text-brand-text' }}">
                             <i class="fas fa-receipt w-6 text-center"></i>
                             <span>Riwayat Belanja</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{route('admin.dashboard')}}"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors duration-200 
+                           {{ request()->routeIs('home.*') ? 'bg-brand-green-light text-brand-green font-semibold' : 'text-brand-text-muted hover:bg-gray-100 hover:text-brand-text' }}">
+                            <i class="fas fa-home-alt w-6 text-center"></i>
+                            <span>Beranda Admin</span>
+                        </a>
+                    </li>
                     <li class="border-t border-gray-200 pt-2 mt-2">
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST">
+                        <form id="logout-sidebar-form" action="{{ route('logout') }}" method="POST">
                             @csrf
-                            <button type="button" onclick="confirmLogout()" class="flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-red-500 hover:bg-red-50 font-medium transition-colors">
+                            <button type="button" onclick="confirmLogout('logout-sidebar-form')" 
+                                class="flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-red-500 hover:bg-red-50 font-medium transition-colors">
                                 <i class="fas fa-sign-out-alt w-6 text-center"></i>
                                 <span>Keluar</span>
                             </button>
@@ -155,15 +160,12 @@
         </div>
     </div>
 
-    {{-- Slot tambahan script --}}
-    @stack('scripts')
-
-    {{-- Konfirmasi Logout --}}
+    {{-- Logout Confirmation Script --}}
     <script>
-        function confirmLogout() {
+        function confirmLogout(formId) {
             Swal.fire({
-                title: 'Konfirmasi Keluar',
-                text: "Anda yakin ingin keluar dari akun Anda?",
+                title: 'Keluar dari Akun?',
+                text: 'Anda yakin ingin keluar dari akun sekarang?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -176,10 +178,12 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    document.getElementById('logout-form').submit();
+                    document.getElementById(formId).submit();
                 }
             });
         }
     </script>
+
+    @stack('scripts')
 </body>
 </html>

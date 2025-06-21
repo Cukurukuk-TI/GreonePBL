@@ -1,167 +1,221 @@
 @extends('layouts.appnoslider')
 
+@section('title', 'Keranjang Belanja')
+
 @section('content')
-<div class="max-w-6xl mx-auto p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Keranjang Belanja</h1>
-    </div>
+<div class="py-5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {{ session('success') }}
+        {{-- Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+            <div class="flex items-center">
+                <i class="fas fa-shopping-cart text-3xl text-brand-green mr-4"></i>
+                <h1 class="text-3xl font-bold text-brand-text">Keranjang Belanja Anda</h1>
+            </div>
         </div>
-    @endif
 
-    @if(session('error'))
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {{ session('error') }}
-        </div>
-    @endif
+        {{-- Flash Messages --}}
+        @if(session('success'))
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-sm mb-6">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-sm mb-6">
+                {{ session('error') }}
+            </div>
+        @endif
 
-    @if($keranjangs->count() > 0)
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($keranjangs as $item)
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-16 w-16">
-                                        <img class="h-16 w-16 rounded-lg object-cover" 
-                                             src="{{ asset('storage/' . $item->produk->gambar_produk) }}" 
-                                             alt="{{ $item->produk->nama_produk }}">
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">
-                                            {{ $item->produk->nama_produk }}
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            {{ $item->produk->kategori->nama_kategori }}
-                                        </div>
-                                        <div class="text-xs text-gray-400">
-                                            Stok: {{ $item->produk->stok_produk }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-orange-600">
-                                    Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+        @if($keranjangs->isNotEmpty())
+        <form method="POST" action="{{ route('checkout.pilih') }}">
+            @csrf
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                
+                {{-- Kolom Kiri: Daftar Produk --}}
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-md p-4 sm:p-6 space-y-6">
+                    @foreach($keranjangs as $item)
+                    <div class="flex flex-col sm:flex-row gap-4 border-b pb-6 last:border-b-0 last:pb-0 items-center">
+
+                        {{-- Checkbox --}}
+                        <div class="flex-shrink-0">
+                            <input type="checkbox"
+                                   name="produk_terpilih[]"
+                                   value="{{ $item->id }}"
+                                   class="form-checkbox produk-checkbox text-green-600 w-5 h-5 mt-2 sm:mt-0"
+                                   data-subtotal="{{ $item->subtotal }}">
+                        </div>
+
+                        {{-- Gambar Produk --}}
+                        <div class="flex-shrink-0">
+                            <img src="{{ $item->produk->gambar_produk ? asset('storage/' . $item->produk->gambar_produk) : 'https://placehold.co/150x150' }}"
+                                alt="{{ $item->produk->nama_produk }}"
+                                class="w-28 h-28 object-cover rounded-lg border border-gray-300">
+                        </div>
+
+                        {{-- Konten Produk --}}
+                        <div class="flex flex-col sm:flex-row justify-between items-center w-full gap-6">
+
+                            {{-- Info --}}
+                            <div class="flex-1 text-left">
+                                <a href="{{ route('produk.show', $item->produk->id) }}"
+                                    class="text-lg font-semibold text-brand-text hover:text-brand-green block">
+                                    {{ $item->produk->nama_produk }}
+                                </a>
+                                <p class="text-2xl text-orange-500 font-bold mt-1">
+                                    Rp{{ number_format($item->subtotal, 0, ',', '.') }}
+                                </p>
+                            </div>
+
+                            {{-- Aksi --}}
+                            <div class="flex items-center gap-6">
+                                {{-- Hapus --}}
+                                <form method="POST" action="{{ route('keranjang.destroy', $item->id) }}"
+                                    onsubmit="return confirm('Yakin ingin menghapus item ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="text-gray-400 hover:text-red-600 transition duration-150 text-xl"
+                                        title="Hapus produk dari keranjang">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+
+                                {{-- Update Jumlah --}}
                                 <form method="POST" action="{{ route('keranjang.update', $item->id) }}" class="flex items-center">
                                     @csrf
                                     @method('PUT')
-                                    <div class="flex items-center border rounded">
-                                        <button type="button" class="px-2 py-1 text-gray-600 hover:text-gray-800" 
-                                                onclick="decreaseQuantity({{ $item->id }})">−</button>
-                                        <input type="number" name="jumlah" id="quantity-{{ $item->id }}" 
-                                               value="{{ $item->jumlah }}" min="1" max="{{ $item->produk->stok_produk }}"
-                                               class="w-16 text-center border-none focus:outline-none focus:ring-0"
-                                               onchange="this.form.submit()">
-                                        <button type="button" class="px-2 py-1 text-gray-600 hover:text-gray-800" 
-                                                onclick="increaseQuantity({{ $item->id }}, {{ $item->produk->stok_produk }})">+</button>
+                                    <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm">
+                                        <button type="button" onclick="decreaseQuantity({{ $item->id }})"
+                                            id="decrease-{{ $item->id }}"
+                                            class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg width="12" height="2" viewBox="0 0 12 2" fill="none">
+                                                <path d="M0 1H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            </svg>
+                                        </button>
+                                        <input type="number" name="jumlah" id="quantity-{{ $item->id }}" value="{{ $item->jumlah }}"
+                                            min="1" max="{{ $item->produk->stok_produk }}"
+                                            class="w-12 h-8 text-center text-sm font-medium border-0 focus:outline-none bg-transparent"
+                                            onchange="this.form.submit()" readonly>
+                                        <button type="button" onclick="increaseQuantity({{ $item->id }}, {{ $item->produk->stok_produk }})"
+                                            id="increase-{{ $item->id }}"
+                                            class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                                <path d="M6 0V12M0 6H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            </svg>
+                                        </button>
                                     </div>
                                 </form>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-bold text-green-600">
-                                    Rp {{ number_format($item->subtotal, 0, ',', '.') }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <form method="POST" action="{{ route('keranjang.destroy', $item->id) }}" 
-                                      onsubmit="return confirm('Yakin ingin menghapus produk ini dari keranjang?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Total dan Aksi -->
-            <div class="bg-gray-50 px-6 py-4">
-                <div class="flex justify-between items-center">
-                    <div class="flex gap-4">
-                        <form method="POST" action="{{ route('keranjang.clear') }}" 
-                              onsubmit="return confirm('Yakin ingin mengosongkan keranjang?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
-                                Kosongkan Keranjang
-                            </button>
-                        </form>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-sm text-gray-600">Total Belanja:</div>
-                        <div class="text-2xl font-bold text-green-600">
-                            Rp {{ number_format($totalHarga, 0, ',', '.') }}
+                            </div>
                         </div>
-                        <div class="mt-4">
-                            <a href="{{ route('keranjang.checkout') }}" 
-                               class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded">
-                                Checkout Sekarang
+                    </div>
+                    @endforeach
+                </div>
+
+                {{-- Kolom Kanan: Ringkasan --}}
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-xl shadow-lg p-6 sticky top-24">
+                        <h2 class="text-xl font-bold text-brand-text border-b pb-4 mb-4">Ringkasan Belanja</h2>
+
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-brand-text-muted">
+                                <span>Subtotal</span>
+                                <span id="total-harga">Rp0</span>
+                            </div>
+                            <div class="flex justify-between text-brand-text-muted">
+                                <span>Ongkos Kirim</span>
+                                <span id="ongkir">Rp0</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t my-4"></div>
+                        <div class="flex justify-between font-bold text-lg text-brand-text">
+                            <span>Total</span>
+                            <span id="grand-total">Rp0</span>
+                        </div>
+
+                        {{-- Tombol Checkout --}}
+                        <div class="mt-6">
+                            <a href="{{ route('keranjang.checkout') }}"
+                               class="w-full inline-block text-center bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition">
+                                Lanjutkan ke Checkout
                             </a>
+                        </div>
+
+                        {{-- Kosongkan --}}
+                        <div class="mt-4 text-center">
+                            <form method="POST" action="{{ route('keranjang.clear') }}"
+                                  onsubmit="return confirm('Yakin ingin mengosongkan seluruh keranjang?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="w-full inline-block border border-red-300 hover:border-red-800 text-red-700 py-3 px-6 rounded-lg transition">
+                                    Kosongkan Keranjang
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    @else
-        <!-- Keranjang Kosong -->
-        <div class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293a1 1 0 00.707 1.707H19M7 13v4a2 2 0 002 2h2a2 2 0 002-2v-1a2 2 0 00-2-2H9a2 2 0 00-2 2z"></path>
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">Keranjang kosong</h3>
-            <p class="mt-1 text-sm text-gray-500">Mulai berbelanja untuk menambahkan produk ke keranjang.</p>
-            <div class="mt-6">
-                <a href="{{ url('/') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+        </form>
+
+        <script>
+            function formatRupiah(angka) {
+                return 'Rp' + angka.toLocaleString('id-ID');
+            }
+
+            function updateRingkasan() {
+                let total = 0;
+
+                document.querySelectorAll('.produk-checkbox:checked').forEach(checkbox => {
+                    const subtotal = parseInt(checkbox.dataset.subtotal) || 0;
+                    total += subtotal;
+                });
+
+                const ongkir = total > 0 ? 10000 : 0;
+
+                document.getElementById('total-harga').innerText = formatRupiah(total);
+                document.getElementById('ongkir').innerText = formatRupiah(ongkir);
+                document.getElementById('grand-total').innerText = formatRupiah(total + ongkir);
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.produk-checkbox').forEach(cb => {
+                    cb.addEventListener('change', updateRingkasan);
+                });
+
+                updateRingkasan(); // jalankan saat awal load
+            });
+
+            function increaseQuantity(id, maxStock) {
+                const input = document.getElementById(`quantity-${id}`);
+                let value = parseInt(input.value);
+                if (value < maxStock) {
+                    input.value = value + 1;
+                    input.form.submit();
+                }
+            }
+
+            function decreaseQuantity(id) {
+                const input = document.getElementById(`quantity-${id}`);
+                let value = parseInt(input.value);
+                if (value > 1) {
+                    input.value = value - 1;
+                    input.form.submit();
+                }
+            }
+        </script>
+        @else
+            {{-- Tampilan ketika keranjang kosong --}}
+            <div class="bg-white rounded-xl shadow-md text-center p-16">
+                <i class="fas fa-cart-arrow-down fa-4x text-gray-300 mb-4"></i>
+                <h2 class="text-2xl font-semibold text-gray-800">Keranjang Anda masih kosong</h2>
+                <p class="text-gray-500 mt-2 mb-6">Sepertinya Anda belum menambahkan produk apapun ke keranjang.</p>
+                <a href="{{ url('/') }}" 
+                   class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 rounded-lg shadow-md transition-transform hover:scale-105">
                     Mulai Belanja
                 </a>
             </div>
-        </div>
-    @endif
+        @endif
+    </div>
 </div>
-
-<script>
-function increaseQuantity(id, maxStock) {
-    const input = document.getElementById(`quantity-${id}`);
-    const currentValue = parseInt(input.value);
-    if (currentValue < maxStock) {
-        input.value = currentValue + 1;
-        input.form.submit();
-    }
-}
-
-function decreaseQuantity(id) {
-    const input = document.getElementById(`quantity-${id}`);
-    const currentValue = parseInt(input.value);
-    if (currentValue > 1) {
-        input.value = currentValue - 1;
-        input.form.submit();
-    }
-}
-</script>
 @endsection
