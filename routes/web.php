@@ -27,7 +27,6 @@ Route::middleware('guest')->group(function () {
 //   Semua route ini HANYA untuk user yang sudah login
 Route::middleware('auth')->group(function () {
     // Produk
-    
     Route::get('/produk', [ProdukController::class, 'showToUser'])->name('produk.user');
     Route::get('/deskripsi-produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
 
@@ -62,7 +61,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout', [KeranjangController::class, 'processCheckout'])->name('keranjang.process');
 
     // Pesanan user
-    Route::post('/checkout/pilih', [PesananController::class, 'checkoutTerpilih'])->name('checkout.pilih');
     Route::get('/pesanan/create/{produk}', [PesananController::class, 'create'])->name('pesanans.create');
     Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
     Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
