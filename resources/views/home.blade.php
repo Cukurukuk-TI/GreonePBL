@@ -1,55 +1,39 @@
 @extends('layouts.app')
 
-@section('title', 'Selamat Datang di Bgd Hydrofarm')
-
-{{-- Bagian Carousel (jika diperlukan) --}}
-@section('carousel')
-    {{-- Tambahkan carousel di sini jika ada --}}
-@endsection
-
 @section('content')
-    <section class="py-12 sm:py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="container mx-auto px-4 py-5">
+    <h1 class="text-3xl font-bold text-center mb-10">Kategori Produk</h1>
 
-            <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-8">
-                Kategori Produk
-            </h2>
+    @if($kategoris->isEmpty())
+        <p class="text-gray-500 text-center">Belum ada kategori tersedia.</p>
+    @else
+        <div class="flex flex-wrap justify-center gap-8">
+            @foreach($kategoris as $kategori)
+                <a href="{{route('produk.user')}}"
+                   class="w-80 bg-white shadow-md rounded-xl overflow-hidden transform transition duration-150 hover:scale-105 hover:shadow-xl">
+                    
+                    @if ($kategori->gambar_kategori)
+                        <img src="{{ asset('storage/' . $kategori->gambar_kategori) }}"
+                             alt="{{ $kategori->nama_kategori }}"
+                             class="w-full h-52 object-cover group-hover:opacity-90 transition duration-300">
+                    @else
+                        <div class="w-full h-52 bg-gray-200 flex items-center justify-center text-gray-500">
+                            Tidak Ada Gambar
+                        </div>
+                    @endif
 
-            @if($kategoris->isEmpty())
-                <p class="text-center text-gray-500">Belum ada kategori tersedia saat ini.</p>
-            @else
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    @foreach($kategoris as $kategori)
-                        <a href="{{ route('produk.user', ['kategori' => $kategori->slug]) }}"
-                           class="group block bg-white rounded-xl overflow-hidden shadow hover:shadow-xl transition-transform transform hover:-translate-y-1 duration-300">
-
-                            {{-- Gambar Kategori --}}
-                            <div class="h-64 w-full">
-                                @if ($kategori->gambar_kategori)
-                                    <img src="{{ asset('storage/' . $kategori->gambar_kategori) }}"
-                                         alt="{{ $kategori->nama_kategori }}"
-                                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                                @else
-                                    <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
-                                        <i class="fas fa-image fa-4x"></i>
-                                    </div>
-                                @endif
-                            </div>
-
-                            {{-- Info Kategori --}}
-                            <div class="p-5 text-center">
-                                <h3 class="text-lg font-semibold text-gray-800">
-                                    {{ $kategori->nama_kategori }}
-                                </h3>
-                                <p class="mt-1 text-sm text-gray-500">
-                                    {{ $kategori->produks_count ?? 0 }} Produk
-                                </p>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-            @endif
-
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold text-gray-800 group-hover:text-green-600">
+                            {{ $kategori->nama_kategori }}
+                        </h3>
+                        <p class="text-sm text-gray-600 mb-3">{{ Str::limit($kategori->deskripsi, 70) }}</p>
+                        <p class="text-sm font-medium text-gray-700">
+                            Jumlah Produk: {{ $kategori->produks_count ?? 0 }}
+                        </p>
+                    </div>
+                </a>
+            @endforeach
         </div>
-    </section>
+    @endif
+</div>
 @endsection
