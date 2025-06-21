@@ -28,12 +28,6 @@ class Keranjang extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Relationship dengan Pesanann
-    public function pesanan()  
-    {
-        return $this->hasMany(Keranjang::class);
-    }
-
     // Relationship dengan Produk
     public function produk()
     {
