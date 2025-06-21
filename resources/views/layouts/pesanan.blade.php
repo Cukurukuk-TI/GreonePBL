@@ -69,7 +69,7 @@
                 <a href="/artikel" class="hover:text-green-200">Artikel</a>
                 <a href="/kontak" class="hover:text-green-200">Kontak</a>
                 <a href="/tentang" class="hover:text-green-200">Tentang Kami</a>
-                <a class="nav-link" href="/keranjang"><i class="fas fa-shopping-bag"></i></a>
+                <a class="nav-link" href="/chart"><i class="fas fa-shopping-bag"></i></a>
                 <a class="nav-link" href="/profile"><i class="fas fa-user"></i></a>
             </nav>
         </div>
