@@ -3,6 +3,14 @@
 @section('title', 'Manajemen Kategori')
 
 @section('content')
+    
+    {{-- Header Halaman --}}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-brand-text">Manajemen Kategori</h1>
+            <p class="text-sm text-brand-text-muted mt-1">Buat dan kelola semua daftar kategori.</p>
+        </div>
+    </div>
     {{-- Notifikasi akan muncul di sini --}}
     @if (session('success'))
         <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-sm mb-6" role="alert">

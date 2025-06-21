@@ -20,12 +20,12 @@
     <style>
         .splide__slide img {
             width: 100%;
-            height: 100%;
+            height: 50%;
             object-fit: cover;
         }
 
         .splide {
-            height: 70vh;
+            height: 38vh;
             /* Tinggi carousel disesuaikan */
         }
 
