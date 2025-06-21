@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pesanan;
-use App\Models\Keranjang;
 use App\Models\Produk;
 use App\Models\Promo;
 use App\Models\Alamat;
@@ -227,21 +226,6 @@ class PesananController extends Controller
         }
     }
     
-    // untuk checkbox
-    public function checkoutTerpilih(Request $request)
-    {
-        $ids = $request->input('produk_terpilih');
-        
-        if (!$ids || count($ids) == 0) {
-            return back()->with('error', 'Pilih setidaknya satu produk.');
-        }
-
-        $keranjangs = Keranjang::with('produk')->whereIn('id', $ids)->get();
-
-        return view('pesanan.checkout', compact('keranjangs'));
-    }
-
-
     // Method untuk menghapus pesanan secara permanen
     public function forceDelete($id)
     {
