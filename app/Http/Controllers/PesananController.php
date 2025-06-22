@@ -24,10 +24,10 @@ class PesananController extends Controller
     // Index untuk admin (daftar pesanan aktif saja - TIDAK termasuk cancelled)
     public function index()
     {
-        $pesanans = Pesanan::with(['user', 'produk'])
+        $pesanans = Pesanan::with(['user', 'details.produk'])
             ->whereNotIn('status', ['cancelled']) // Exclude cancelled orders
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
         return view('pesanans.index', compact('pesanans'));
     }

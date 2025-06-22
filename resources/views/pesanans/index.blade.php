@@ -89,8 +89,25 @@
                             </td>
                             <td class="px-6 py-4 font-medium text-brand-text">{{ $pesanan->user->name ?? 'N/A' }}</td>
                             <td class="px-6 py-4 text-brand-text-muted">
-                                {{ $pesanan->produk->nama_produk ?? 'N/A' }}
-                                <span class="font-semibold text-brand-text">({{ $pesanan->jumlah }}x)</span>
+                                @if ($pesanan->details->isNotEmpty())
+                                    @php
+                                        // Ambil produk pertama sebagai perwakilan
+                                        $firstDetail = $pesanan->details->first();
+                                    @endphp
+
+                                    {{-- Tampilkan nama produk pertama --}}
+                                    {{ $firstDetail->produk->nama_produk ?? 'Produk Dihapus' }}
+
+                                    {{-- Tampilkan total jumlah dari semua item --}}
+                                    <span class="font-semibold text-brand-text">({{ $pesanan->details->sum('jumlah') }}x)</span>
+
+                                    {{-- Beri keterangan jika ada produk lain dalam pesanan yang sama --}}
+                                    @if($pesanan->details->count() > 1)
+                                        <p class="text-xs italic text-gray-400">(dan {{ $pesanan->details->count() - 1 }} item lainnya)</p>
+                                    @endif
+                                @else
+                                    N/A
+                                @endif
                             </td>
                             <td class="px-6 py-4 font-bold text-brand-text">Rp{{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
                             <td class="px-6 py-4 text-center">
