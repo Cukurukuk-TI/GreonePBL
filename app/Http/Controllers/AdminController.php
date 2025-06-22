@@ -17,32 +17,51 @@ class AdminController extends Controller
         return view('layouts.admindashboard', compact('user'));
     }
 
-    public function dashboard()
+    private function getDailyStats()
     {
-        // Ambil produk terlaris berdasarkan jumlah pesanan bulan ini  
-        $produkTerlaris = DB::table('pesanans')
-            ->join('produks', 'pesanans.produk_id', '=', 'produks.id')
-            ->select(
-                'produks.id',
-                'produks.nama_produk',
-                'produks.gambar_produk',
-                DB::raw('SUM(pesanans.jumlah) as total_terjual')
-            )
-            ->whereMonth('pesanans.created_at', now()->month)
-            ->whereYear('pesanans.created_at', now()->year)
-            ->where('pesanans.status', '!=', 'cancelled') // Exclude cancelled orders
-            ->groupBy('produks.id', 'produks.nama_produk', 'produks.gambar_produk')
-            ->orderBy('total_terjual', 'desc')
-            ->limit(10)
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+
+        $data = DB::table('pesanans')
+            ->selectRaw('DATE(created_at) as tanggal')
+            ->selectRaw('SUM(CASE WHEN status != "cancelled" THEN total_harga ELSE 0 END) as pendapatan')
+            ->selectRaw('COUNT(id) as jumlah_pesanan') // Menggunakan COUNT(id)
+            ->whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->groupBy('tanggal')
+            ->orderBy('tanggal')
             ->get();
 
-        // Dapatkan nama bulan saat ini dari pesanan
-        $currentMonth = $this->getCurrentMonthName();
+        return $data;
+    }
 
-        // Hitung statistik dashboard untuk bulan ini
-        $stats = $this->getDashboardStats();
+    public function dashboard()
+    {
+        // Ambil produk terlaris berdasarkan jumlah pesanan bulan ini
+    $produkTerlaris = DB::table('detail_pesanans')
+        ->join('produks', 'detail_pesanans.produk_id', '=', 'produks.id')
+        ->join('pesanans', 'detail_pesanans.pesanan_id', '=', 'pesanans.id')
+        ->select(
+            'produks.id',
+            'produks.nama_produk',
+            'produks.gambar_produk',
+            DB::raw('SUM(detail_pesanans.jumlah) as total_terjual')
+        )
+        ->whereMonth('pesanans.created_at', now()->month)
+        ->whereYear('pesanans.created_at', now()->year)
+        ->where('pesanans.status', '!=', 'cancelled')
+        ->groupBy('produks.id', 'produks.nama_produk', 'produks.gambar_produk')
+        ->orderBy('total_terjual', 'desc')
+        ->limit(10)
+        ->get();
 
-        return view('admin.dashboard', compact('produkTerlaris', 'currentMonth', 'stats'));
+    $currentMonth = $this->getCurrentMonthName();
+    $stats = $this->getDashboardStats();
+
+    // Data untuk Chart.js
+    $dailyStats = $this->getDailyStats();
+
+    return view('admin.dashboard', compact('produkTerlaris', 'currentMonth', 'stats'))->with('dailyStats', json_encode($dailyStats));
     }
 
     // Method untuk mendapatkan statistik dashboard
@@ -147,43 +166,33 @@ class AdminController extends Controller
     {
         $periode = $request->get('periode', 'monthly');
 
-        $query = DB::table('pesanans')
-            ->join('produks', 'pesanans.produk_id', '=', 'produks.id')
+        $query = DB::table('detail_pesanans')
+            ->join('produks', 'detail_pesanans.produk_id', '=', 'produks.id')
+            ->join('pesanans', 'detail_pesanans.pesanan_id', '=', 'pesanans.id')
             ->select(
                 'produks.id',
                 'produks.nama_produk',
                 'produks.gambar_produk',
-                DB::raw('SUM(pesanans.jumlah) as total_terjual')
+                DB::raw('SUM(detail_pesanans.jumlah) as total_terjual')
             )
-            ->where('pesanans.status', '!=', 'cancelled'); // Exclude cancelled orders
+            ->where('pesanans.status', '!=', 'cancelled');
 
         if ($periode === 'weekly') {
-            $query->whereBetween('pesanans.created_at', [
-                now()->startOfWeek(),
-                now()->endOfWeek()
-            ]);
+            $query->whereBetween('pesanans.created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+            $currentPeriod = 'Minggu ini';
         } elseif ($periode === 'daily') {
             $query->whereDate('pesanans.created_at', now()->toDateString());
-        } else {
-            // Default monthly
+            $currentPeriod = 'Hari ini';
+        } else { // monthly
             $query->whereMonth('pesanans.created_at', now()->month)
                 ->whereYear('pesanans.created_at', now()->year);
+            $currentPeriod = $this->getCurrentMonthName();
         }
 
         $produkTerlaris = $query->groupBy('produks.id', 'produks.nama_produk', 'produks.gambar_produk')
             ->orderBy('total_terjual', 'desc')
             ->limit(10)
             ->get();
-
-        // Tentukan nama periode untuk response
-        $currentPeriod = '';
-        if ($periode === 'monthly') {
-            $currentPeriod = $this->getCurrentMonthName();
-        } elseif ($periode === 'weekly') {
-            $currentPeriod = 'Minggu sekarang';
-        } elseif ($periode === 'daily') {
-            $currentPeriod = 'Hari ini';
-        }
 
         return response()->json([
             'products' => $produkTerlaris,
