@@ -44,10 +44,15 @@ class Pesanan extends Model
         return $this->belongsTo(Produk::class);
     }
 
-    public function promo()
+    public function details()
     {
-        return $this->belongsTo(Promo::class);
+        return $this->hasMany(DetailPesanan::class);
     }
+
+    // public function promo()
+    // {
+    //     return $this->belongsTo(Promo::class);
+    // }
 
     // Accessor
     public function getFormattedTotalHargaAttribute()
@@ -81,7 +86,7 @@ class Pesanan extends Model
         do {
             $kode = 'PSN' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
         } while (self::where('kode_pesanan', $kode)->exists());
-        
+
         return $kode;
     }
 
@@ -99,6 +104,6 @@ class Pesanan extends Model
     {
         return $query->where('status', 'complete');
     }
-    
-    
+
+
 }
