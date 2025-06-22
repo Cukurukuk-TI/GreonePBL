@@ -99,18 +99,18 @@
                         <i class="fas fa-tags w-5 mr-3"></i><span>Promo</span>
                     </a>
                     {{-- Tambahan lainnya --}}
-                    <a href="#" class="flex items-center p-2 rounded-lg text-brand-text-muted hover:bg-gray-100">
+                    <a href="{{ route('admin.artikel.index') }}" class="flex items-center p-2 rounded-lg {{ request()->routeIs('admin.artikel.*') ? 'bg-brand-green-light text-brand-green font-semibold' : 'text-brand-text-muted hover:bg-gray-100' }}">
                         <i class="fas fa-newspaper w-5 mr-3"></i><span>Artikel</span>
                     </a>
                     <a href="#" class="flex items-center p-2 rounded-lg text-brand-text-muted hover:bg-gray-100">
                         <i class="fas fa-comment-dots w-5 mr-3"></i><span>Testimoni</span>
                     </a>
-                    <a href="#" class="flex items-center p-2 rounded-lg text-brand-text-muted hover:bg-gray-100">
+                    <a href="{{ route('admin.pelanggan.index') }}" class="flex items-center p-2 rounded-lg {{ request()->routeIs('admin.pelanggan.*') ? 'bg-brand-green-light text-brand-green font-semibold' : 'text-brand-text-muted hover:bg-gray-100' }}">
                         <i class="fas fa-user-friends w-5 mr-3"></i><span>Daftar Pelanggan</span>
                     </a>
-                    <a href="#" class="flex items-center p-2 rounded-lg text-brand-text-muted hover:bg-gray-100">
+                    {{-- <a href="#" class="flex items-center p-2 rounded-lg text-brand-text-muted hover:bg-gray-100">
                         <i class="fas fa-user-shield w-5 mr-3"></i><span>Role Pengguna</span>
-                    </a>
+                    </a> --}}
                 </nav>
             </div>
         </aside>
