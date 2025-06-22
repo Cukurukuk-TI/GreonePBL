@@ -7,16 +7,16 @@
         <h1 class="text-3xl font-bold text-gray-800">
             <span class="text-green-600">Produk</span> Kami
         </h1>
-        
+
         <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <div class="relative flex-grow">
-                <input type="text" placeholder="Cari produk..." 
+                <input type="text" placeholder="Cari produk..."
                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                 <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
             </div>
-            
+
             <select class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
                 <option value="">Semua Kategori</option>
                 @foreach($kategoris as $kategori)
@@ -62,13 +62,13 @@
                             -{{ $produk->diskon }}%
                         </div>
                     @endif
-                    
+
                     <!-- Gambar Produk -->
                     <div class="relative overflow-hidden h-48 bg-gray-100">
-                        <img src="{{ asset('storage/' . $produk->gambar_produk) }}" 
+                        <img src="{{ asset('storage/' . $produk->gambar_produk) }}"
                              alt="{{ $produk->nama_produk }}"
                              class="w-full h-full object-cover transition duration-500 hover:scale-105">
-                        
+
                         <!-- Quick Actions (Muncul saat hover) -->
                         <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                             <button class="bg-white rounded-full p-2 mx-1 transform translate-y-3 group-hover:translate-y-0 transition duration-300 hover:bg-green-100" title="Lihat Detail">
@@ -96,17 +96,17 @@
                         <span class="text-xs font-semibold text-green-600 mb-1">
                             {{ $produk->kategori->nama_kategori ?? 'Umum' }}
                         </span>
-                        
+
                         <!-- Nama Produk -->
                         <h3 class="text-lg font-semibold text-gray-800 mb-2 hover:text-green-600 transition">
                             <a href="{{ route('produk.show', $produk->id) }}">{{ $produk->nama_produk }}</a>
                         </h3>
-                        
+
                         <!-- Deskripsi Singkat -->
                         <p class="text-sm text-gray-600 mb-4 line-clamp-2">
                             {{ $produk->deskripsi_produk }}
                         </p>
-                        
+
                         <!-- Harga -->
                         <div class="mt-auto">
                             @if($produk->promo)
@@ -124,11 +124,11 @@
                                 </span>
                             @endif
                         </div>
-                        
+
                     <!-- Tombol Aksi -->
-                    <div class="mt-4 grid grid-cols-2 gap-2">
+                    <div class="mt-4 gap-2">
                         {{-- Tombol Detail --}}
-                        <a href="{{ route('produk.show', $produk->id) }}" 
+                        <a href="{{ route('produk.show', $produk->id) }}"
                         class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-3 rounded text-sm font-medium text-center transition flex items-center justify-center shadow-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -136,18 +136,6 @@
                             </svg>
                             Detail
                         </a>
-
-                        {{-- Tombol Tambah ke Keranjang --}}
-                        <form action="{{ route('keranjang.store') }}" method="POST" class="w-full">
-                            @csrf
-                            <input type="hidden" name="produk_id" value="{{ $produk->id }}">
-                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded text-sm font-medium transition flex items-center justify-center shadow-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                Tambah ke Keranjang
-                            </button>
-                        </form>
                     </div>
                     </div>
                 </div>
@@ -169,16 +157,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterInfo = document.getElementById('filter-info');
     const filterText = document.getElementById('filter-text');
     const resetFilter = document.getElementById('reset-filter');
-    
+
     // Simulasikan filter (implementasi AJAX bisa ditambahkan)
     function applyFilters() {
         const searchValue = searchInput.value.trim();
         const categoryValue = categoryFilter.value;
-        
+
         if (searchValue || categoryValue) {
             filterInfo.classList.remove('hidden');
             let filterMessage = '';
-            
+
             if (searchValue && categoryValue) {
                 const categoryName = categoryFilter.options[categoryFilter.selectedIndex].text;
                 filterMessage = `"${searchValue}" dalam kategori "${categoryName}"`;
@@ -188,21 +176,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 const categoryName = categoryFilter.options[categoryFilter.selectedIndex].text;
                 filterMessage = `kategori "${categoryName}"`;
             }
-            
+
             filterText.textContent = filterMessage;
         } else {
             filterInfo.classList.add('hidden');
         }
-        
+
         // Di sini bisa ditambahkan AJAX untuk filter real-time
     }
-    
+
     // Event listeners
     categoryFilter.addEventListener('change', applyFilters);
     searchInput.addEventListener('keyup', function(e) {
         if (e.key === 'Enter') applyFilters();
     });
-    
+
     resetFilter.addEventListener('click', function() {
         searchInput.value = '';
         categoryFilter.value = '';

@@ -41,18 +41,16 @@
                         <button type="button" class="text-lg font-bold px-2" onclick="tambahJumlah()">+</button>
                     </div>
                 </div>
-
-                <div class="mt-6 flex gap-4">
-                    <button onclick="beliSekarang()" 
-                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded">
-                        Beli Sekarang
-                    </button>
-                    <form method="POST" action="{{ route('keranjang.store') }}" class="inline">
+                <div class="mt-6">
+                    <form method="POST" action="{{ route('keranjang.store') }}">
                         @csrf
                         <input type="hidden" name="produk_id" value="{{ $produk->id }}">
                         <input type="hidden" name="jumlah" id="jumlah-keranjang" value="1">
                         <button type="submit"
-                            class="border border-green-500 text-green-500 hover:bg-green-100 font-bold py-2 px-4 rounded shadow">
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
                             Tambah ke Keranjang
                         </button>
                     </form>
@@ -119,7 +117,7 @@
             const hiddenInput = document.getElementById('jumlah-keranjang');
             const stokMaksimal = {{ $produk->stok_produk }};
             const currentValue = parseInt(input.value || 1);
-            
+
             if (currentValue < stokMaksimal) {
                 const newValue = currentValue + 1;
                 input.value = newValue;
@@ -141,23 +139,15 @@
         document.getElementById('jumlah').addEventListener('input', function() {
             const stokMaksimal = {{ $produk->stok_produk }};
             let value = parseInt(this.value) || 1;
-            
+
             // Validasi batas minimum dan maksimum
             if (value < 1) value = 1;
             if (value > stokMaksimal) value = stokMaksimal;
-            
+
             this.value = value;
             document.getElementById('jumlah-keranjang').value = value;
         });
 
-        // Fungsi untuk beli sekarang dengan jumlah
-        function beliSekarang() {
-            const jumlah = document.getElementById('jumlah').value;
-            const produkId = {{ $produk->id }};
-            
-            // Redirect ke halaman create pesanan dengan parameter jumlah
-            window.location.href = "{{ route('pesanans.create', $produk->id) }}" + "?jumlah=" + jumlah;
-        }
     </script>
 @endsection@extends('layouts.appnoslider')
 
@@ -202,24 +192,23 @@
                         <button type="button" class="text-lg font-bold px-2" onclick="tambahJumlah()">+</button>
                     </div>
                 </div>
-
-                <div class="mt-6 flex gap-4">
-                    <button onclick="beliSekarang()" 
-                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded">
-                        Beli Sekarang
-                    </button>
-                    <form method="POST" action="{{ route('keranjang.store') }}" class="inline">
-                        @csrf
-                        <input type="hidden" name="produk_id" value="{{ $produk->id }}">
-                        <input type="hidden" name="jumlah" id="jumlah-keranjang" value="1">
-                        <button type="submit"
-                            class="border border-green-500 text-green-500 hover:bg-green-100 font-bold py-2 px-4 rounded shadow">
-                            Tambah ke Keranjang
-                        </button>
-                    </form>
-                </div>
+                    <div class="mt-6">
+                        <form method="POST" action="{{ route('keranjang.store') }}">
+                            @csrf
+                            <input type="hidden" name="produk_id" value="{{ $produk->id }}">
+                            <input type="hidden" name="jumlah" id="jumlah-keranjang" value="1">
+                            <button type="submit"
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                Tambah ke Keranjang
+                            </button>
+                        </form>
+                    </div>
             </div>
         </div>
+
 
         <hr class="my-8">
 
@@ -280,7 +269,7 @@
             const hiddenInput = document.getElementById('jumlah-keranjang');
             const stokMaksimal = {{ $produk->stok_produk }};
             const currentValue = parseInt(input.value || 1);
-            
+
             if (currentValue < stokMaksimal) {
                 const newValue = currentValue + 1;
                 input.value = newValue;
@@ -302,22 +291,15 @@
         document.getElementById('jumlah').addEventListener('input', function() {
             const stokMaksimal = {{ $produk->stok_produk }};
             let value = parseInt(this.value) || 1;
-            
+
             // Validasi batas minimum dan maksimum
             if (value < 1) value = 1;
             if (value > stokMaksimal) value = stokMaksimal;
-            
+
             this.value = value;
             document.getElementById('jumlah-keranjang').value = value;
         });
 
         // Fungsi untuk beli sekarang dengan jumlah
-        function beliSekarang() {
-            const jumlah = document.getElementById('jumlah').value;
-            const produkId = {{ $produk->id }};
-            
-            // Redirect ke halaman create pesanan dengan parameter jumlah
-            window.location.href = "{{ route('pesanans.create', $produk->id) }}" + "?jumlah=" + jumlah;
-        }
     </script>
 @endsection
