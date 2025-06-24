@@ -75,6 +75,7 @@ Route::middleware('auth')->group(function () {
     // Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
     Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
     Route::get('/pesananuser', [PesananController::class, 'pesanan'])->name('user.pesanan');
+    Route::post('/pesanan/{pesanan}/cancel', [PesananController::class, 'cancelByUser'])->name('pesanan.user.cancel');
 
     // Testimoni routes for user
     Route::get('/testimoni/create/{pesanan_id}', [TestimoniController::class, 'create'])->name('testimoni.create');

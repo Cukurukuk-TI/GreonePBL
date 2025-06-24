@@ -156,4 +156,36 @@ class PesananController extends Controller
 
         return view('user.pesanan', compact('pesanans'));
     }
+
+    public function cancelByUser(Pesanan $pesanan)
+    {
+        // 1. Otorisasi: Pastikan pesanan ini milik pengguna yang sedang login.
+        if ($pesanan->user_id !== Auth::id()) {
+            abort(403, 'AKSI TIDAK DIIZINKAN.');
+        }
+
+        // 2. Validasi: Pastikan status pesanan adalah 'pending'.
+        if ($pesanan->status !== 'pending') {
+            return back()->with('error', 'Pesanan ini sudah diproses dan tidak dapat dibatalkan lagi.');
+        }
+
+        try {
+            // 3. Mulai Transaksi Database
+            DB::transaction(function () use ($pesanan) {
+                // 4. Kembalikan stok untuk setiap item dalam pesanan
+                foreach ($pesanan->details as $detail) {
+                    Produk::find($detail->produk_id)->increment('stok_produk', $detail->jumlah);
+                }
+
+                // 5. Ubah status pesanan menjadi 'cancelled'
+                $pesanan->update(['status' => 'cancelled']);
+            });
+
+            return redirect()->route('user.pesanan')->with('success', 'Pesanan berhasil dibatalkan.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat membatalkan pesanan: ' . $e->getMessage());
+        }
+    }
+
 }
