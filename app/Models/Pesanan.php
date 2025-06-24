@@ -49,10 +49,10 @@ class Pesanan extends Model
         return $this->hasMany(DetailPesanan::class);
     }
 
-    // public function promo()
-    // {
-    //     return $this->belongsTo(Promo::class);
-    // }
+    public function promo()
+    {
+        return $this->belongsTo(Promo::class);
+    }
 
     // Accessor
     public function getFormattedTotalHargaAttribute()
