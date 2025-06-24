@@ -70,9 +70,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [KeranjangController::class, 'checkout'])->name('keranjang.checkout');
     Route::post('/checkout', [KeranjangController::class, 'processCheckout'])->name('keranjang.process');
 
-    // Pesanan user - HARUS LOGIN (untuk beli sekarang)
-    Route::get('/pesanan/create/{produk}', [PesananController::class, 'create'])->name('pesanans.create');
-    Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
+    // Pesanan user
+    // Route::get('/pesanan/create/{produk}', [PesananController::class, 'create'])->name('pesanans.create');
+    // Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
     Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
     Route::get('/pesananuser', [PesananController::class, 'pesanan'])->name('user.pesanan');
 
