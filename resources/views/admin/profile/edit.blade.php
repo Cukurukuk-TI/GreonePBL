@@ -17,7 +17,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{-- route('profile.update') --}}" enctype="multipart/form-data">
+<form method="POST" action="{{route('admin.profile.update')}}" enctype="multipart/form-data">
         @csrf
         @method('patch')
 
@@ -42,7 +42,7 @@
                         </div>
                     </div>
                 </label>
-                <input type="file" id="foto" name="foto" class="hidden">
+                <input type="file" id="foto" name="foto" class="hidden" accept="image/*">
                 @error('foto')
                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                 @enderror
@@ -65,18 +65,7 @@
                         @error('email')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
-                    {{-- Jenis Kelamin --}}
-                    <div>
-                        <label for="jenis_kelamin" class="block text-sm font-medium text-brand-text-muted mb-1">Jenis Kelamin</label>
-                        <select id="jenis_kelamin" name="jenis_kelamin" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-brand-green focus:ring-2 focus:ring-brand-green-light">
-                            <option value="" disabled>Pilih Jenis Kelamin</option>
-                            <option value="Laki-laki" {{ old('jenis_kelamin', auth()->user()->jenis_kelamin) == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                            <option value="Perempuan" {{ old('jenis_kelamin', auth()->user()->jenis_kelamin) == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
-                        </select>
-                        @error('jenis_kelamin')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
-                    </div>
-
-                    {{-- Tanggal Lahir --}}
+                    {{-- Date --}}
                     <div>
                         <label for="tanggal_lahir" class="block text-sm font-medium text-brand-text-muted mb-1">Tanggal Lahir</label>
                         <input type="date" id="tanggal_lahir" name="tanggal_lahir" value="{{ old('tanggal_lahir', auth()->user()->tanggal_lahir) }}" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-brand-green focus:ring-2 focus:ring-brand-green-light">
@@ -87,7 +76,7 @@
         </div>
 
         <div class="flex justify-end items-center space-x-4 pt-6 mt-8 border-t border-gray-200">
-            <a href="#" class="text-sm font-medium text-brand-text-muted hover:underline"> {{-- href="{{ route('profile.show') }}" --}}
+            <a href="{{route('admin.profile.index')}}" class="text-sm font-medium text-brand-text-muted hover:underline"> {{-- href="{{ route('profile.show') }}" --}}
                 Batal
             </a>
             <button type="submit" class="inline-flex items-center px-6 py-2.5 bg-brand-green text-white font-bold rounded-lg shadow-md hover:bg-brand-green-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105">
@@ -100,44 +89,122 @@
 
 @push('scripts')
 <script>
-    const dropZone = document.getElementById('drop-zone-foto');
-    const fileInput = document.getElementById('foto');
-    const imagePreview = document.getElementById('preview-foto');
-    const placeholder = document.getElementById('placeholder-icon');
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropZone = document.getElementById('drop-zone-foto');
+        const fileInput = document.getElementById('foto');
+        const imagePreview = document.getElementById('preview-foto');
+        const placeholder = document.getElementById('placeholder-icon');
+        
+        // Variable untuk mencegah event bubbling
+        let isProcessing = false;
 
-    // Menangani klik pada drop zone
-    dropZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', handleFileSelect);
+        // Event handler untuk click pada drop zone
+        dropZone.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (!isProcessing) {
+                fileInput.click();
+            }
+        });
 
-    // Menangani drag and drop
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('border-brand-green', 'bg-green-50');
-    });
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('border-brand-green', 'bg-green-50');
-    });
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('border-brand-green', 'bg-green-50');
-        if (e.dataTransfer.files.length) {
-            fileInput.files = e.dataTransfer.files;
-            handleFileSelect({ target: fileInput });
-        }
-    });
+        // Drag and drop visual feedback
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!isProcessing) {
+                dropZone.classList.add('border-brand-green', 'bg-green-50');
+            }
+        });
 
-    // Fungsi untuk menampilkan preview
-    function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (file && file.type.startsWith('image/')) {
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('border-brand-green', 'bg-green-50');
+        });
+
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('border-brand-green', 'bg-green-50');
+            
+            if (!isProcessing && e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    // Set file ke input
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    fileInput.files = dt.files;
+                    
+                    // Process file
+                    handleFileSelect(file);
+                }
+            }
+        });
+
+        // Event handler untuk perubahan file input
+        fileInput.addEventListener('change', function(e) {
+            if (!isProcessing && e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (isProcessing) return;
+            
+            isProcessing = true;
+            
+            // Validasi file
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file.');
+                resetFileInput();
+                isProcessing = false;
+                return;
+            }
+            
+            // Validasi ukuran file (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size must be less than 2MB.');
+                resetFileInput();
+                isProcessing = false;
+                return;
+            }
+            
+            // Tampilkan preview
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = function(e) {
                 imagePreview.src = e.target.result;
                 imagePreview.classList.remove('hidden');
                 placeholder.classList.add('hidden');
+                
+                // Reset processing flag after preview loaded
+                setTimeout(() => {
+                    isProcessing = false;
+                }, 100);
             };
+            
+            reader.onerror = function() {
+                alert('Error reading file.');
+                resetFileInput();
+                isProcessing = false;
+            };
+            
             reader.readAsDataURL(file);
         }
-    }
+        
+        function resetFileInput() {
+            fileInput.value = '';
+            // Reset ke gambar asli jika ada
+            const originalSrc = '{{ auth()->user()->foto ? asset('storage/' . auth()->user()->foto) : '' }}';
+            if (originalSrc) {
+                imagePreview.src = originalSrc;
+                imagePreview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                imagePreview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+        }
+    });
 </script>
 @endpush

@@ -28,15 +28,7 @@
         --}}
         @include('admin.kategoris.form', ['kategori' => $kategoriToEdit ?? null])
     </div>
-    
-    {{-- Tombol untuk beralih kembali ke mode "Tambah" jika sedang dalam mode "Edit" --}}
-    @if (isset($kategoriToEdit))
-        <div class="mb-6">
-            <a href="{{ route('admin.kategoris.index') }}" class="inline-block bg-brand-green hover:bg-brand-green-dark text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition-transform hover:scale-105">
-                <i class="fas fa-plus mr-2"></i> Tambah Kategori Baru
-            </a>
-        </div>
-    @endif
+ 
 
     {{-- Kartu untuk Tabel Daftar Kategori --}}
     <div class="bg-white rounded-xl shadow-md overflow-hidden">

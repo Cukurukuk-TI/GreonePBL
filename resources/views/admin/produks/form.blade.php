@@ -45,15 +45,17 @@
         <div class="space-y-6">
             <div>
                 <label for="harga_produk" class="block text-sm font-medium text-brand-text-muted mb-1">Harga (Rp)</label>
-                <input type="number" id="harga_produk" name="harga_produk" value="{{ old('harga_produk', $produk->harga_produk ?? '') }}" placeholder="Contoh: 15000"
+                <input type="text" id="harga_produk" name="harga_produk" value="{{ old('harga_produk', $produk->harga_produk ?? '') }}" placeholder="Contoh: 15000"
                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-brand-green focus:ring-2 focus:ring-brand-green-light transition-colors duration-200">
+                <p id="error-harga" class="text-red-500 text-xs mt-1 hidden">Hanya angka yang diterima</p>
                 @error('harga_produk')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
             
             <div>
                 <label for="stok_produk" class="block text-sm font-medium text-brand-text-muted mb-1">Stok</label>
-                <input type="number" id="stok_produk" name="stok_produk" value="{{ old('stok_produk', $produk->stok_produk ?? '') }}" placeholder="Contoh: 100"
+                <input type="text" id="stok_produk" name="stok_produk" value="{{ old('stok_produk', $produk->stok_produk ?? '') }}" placeholder="Contoh: 100"
                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-brand-green focus:ring-2 focus:ring-brand-green-light transition-colors duration-200">
+                <p id="error-stok" class="text-red-500 text-xs mt-1 hidden">Hanya angka yang diterima</p>
                 @error('stok_produk')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
@@ -85,6 +87,64 @@
 </form>
 
 <script>
+    // Fungsi validasi untuk input hanya angka
+    function validateNumericInput(inputElement, errorElement) {
+        inputElement.addEventListener('input', function(e) {
+            const value = e.target.value;
+            const numericValue = value.replace(/[^0-9]/g, '');
+            
+            if (value !== numericValue) {
+                // Jika ada karakter selain angka, tampilkan error dan hapus karakter tersebut
+                e.target.value = numericValue;
+                errorElement.classList.remove('hidden');
+                e.target.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-200');
+                e.target.classList.remove('border-gray-300', 'focus:border-brand-green', 'focus:ring-brand-green-light');
+            } else {
+                // Jika input valid, sembunyikan error
+                errorElement.classList.add('hidden');
+                e.target.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-200');
+                e.target.classList.add('border-gray-300', 'focus:border-brand-green', 'focus:ring-brand-green-light');
+            }
+        });
+
+        // Validasi saat kehilangan fokus
+        inputElement.addEventListener('blur', function(e) {
+            const value = e.target.value;
+            if (!/^\d*$/.test(value)) {
+                e.target.value = value.replace(/[^0-9]/g, '');
+            }
+        });
+
+        // Mencegah paste karakter non-angka
+        inputElement.addEventListener('paste', function(e) {
+            setTimeout(() => {
+                const value = e.target.value;
+                const numericValue = value.replace(/[^0-9]/g, '');
+                if (value !== numericValue) {
+                    e.target.value = numericValue;
+                    errorElement.classList.remove('hidden');
+                    e.target.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-200');
+                    e.target.classList.remove('border-gray-300', 'focus:border-brand-green', 'focus:ring-brand-green-light');
+                }
+            }, 10);
+        });
+    }
+
+    // Inisialisasi validasi untuk field harga dan stok
+    const hargaInput = document.getElementById('harga_produk');
+    const stokInput = document.getElementById('stok_produk');
+    const errorHarga = document.getElementById('error-harga');
+    const errorStok = document.getElementById('error-stok');
+
+    if (hargaInput && errorHarga) {
+        validateNumericInput(hargaInput, errorHarga);
+    }
+
+    if (stokInput && errorStok) {
+        validateNumericInput(stokInput, errorStok);
+    }
+
+    // Script untuk drag & drop gambar (existing code)
     const dropZoneProduk = document.getElementById('drop-zone-produk');
     const fileInputProduk = document.getElementById('gambar_produk');
     const imagePreviewProduk = document.getElementById('preview-produk');

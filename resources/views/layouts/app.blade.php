@@ -90,6 +90,8 @@
                 <a href="/artikel" class="block py-2 hover:text-green-600">Artikel</a>
                 <a href="/kontak" class="block py-2 hover:text-green-600">Kontak</a>
                 <a href="/tentang" class="block py-2 hover:text-green-600">Tentang Kami</a>
+                <a class="nav-link" href="/chart"><i class="fas fa-shopping-bag"></i></a>
+                <a class="nav-link" href="/profile"><i class="fas fa-user"></i></a>
             </div>
         </div>
         </div>

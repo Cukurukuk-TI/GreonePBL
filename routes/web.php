@@ -88,7 +88,8 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
 
     // Profile Admin
     Route::get('/profile', [ProfileController::class, 'adminIndex'])->name('profile.index');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile/edit', [ProfileController::class, 'editAdmin'])->name('profile.edit');
+    Route::patch('/profile/update', [ProfileController::class, 'updateAdmin'])->name('profile.update');
 
     Route::resource('produks', ProdukController::class);
     Route::resource('kategoris', KategoriController::class);
