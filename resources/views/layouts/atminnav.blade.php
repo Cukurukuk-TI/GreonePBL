@@ -112,20 +112,11 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('alamat.index') }}"
-                           class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors duration-200 
-                           {{ request()->routeIs('alamat.*') ? 'bg-brand-green-light text-brand-green font-semibold' : 'text-brand-text-muted hover:bg-gray-100 hover:text-brand-text' }}">
-                            <i class="fas fa-map-marker-alt w-6 text-center"></i>
-                            <span>Daftar Alamat</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="
-                        {{-- {{ route('pesanan.history') }} --}}
-                         
-                        " class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors duration-200 {{ request()->routeIs('pesanan.history') ? 'bg-brand-green-light text-brand-green font-semibold' : 'text-brand-text-muted hover:bg-gray-100 hover:text-brand-text' }}">
-                            <i class="fas fa-receipt w-6 text-center"></i>
-                            <span>Riwayat Belanja</span>
+                        <a href="{{route('admin.dashboard')}}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors duration-200 
+                           {{ request()->routeIs('admin.dashboard') ? 'bg-brand-green-light text-brand-green font-semibold' : 'text-brand-text-muted hover:bg-gray-100 hover:text-brand-text' }}">
+                            <i class="fas fa-home w-6 text-center"></i>
+                            <span>Dashboard</span>
                         </a>
                     </li>
                     <li class="border-t border-gray-200 pt-2 mt-2">

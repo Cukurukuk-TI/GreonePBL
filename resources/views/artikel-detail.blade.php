@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.appnoslider')
 
 @section('content')
 <div class="bg-white py-12">

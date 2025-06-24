@@ -1,7 +1,7 @@
 @extends('layouts.admindashboard')
 
 @section('content')
-<div class="container-fluid pt-14 p-6">
+<div class="container-fluid pt-0 p-6">
 
     {{-- Header Halaman --}}
     <div class="mb-8">

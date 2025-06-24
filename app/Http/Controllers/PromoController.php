@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Promo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -12,17 +11,18 @@ class PromoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
         $promos = Promo::orderBy('created_at', 'desc')->get();
-        $editPromo = null;
+        return view('admin.promos.index', compact('promos'));
+    }
 
-        // Jika ada parameter edit, ambil data promo untuk diedit
-        if ($request->has('edit')) {
-            $editPromo = Promo::find($request->get('edit'));
-        }
-
-        return view('admin.promos.index', compact('promos', 'editPromo'));
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return view('admin.promos.create');
     }
 
     /**
@@ -37,17 +37,6 @@ class PromoController extends Controller
             'minimum_belanja' => 'required|numeric|min:0',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-        ], [
-            'nama_promo.required' => 'Nama promo harus diisi',
-            'deskripsi_promo.required' => 'Deskripsi promo harus diisi',
-            'besaran_potongan.required' => 'Besaran potongan harus diisi',
-            'besaran_potongan.min' => 'Besaran potongan minimal 1%',
-            'besaran_potongan.max' => 'Besaran potongan maksimal 100%',
-            'minimum_belanja.required' => 'Minimum belanja harus diisi',
-            'minimum_belanja.min' => 'Minimum belanja tidak boleh negatif',
-            'tanggal_mulai.required' => 'Tanggal mulai harus diisi',
-            'tanggal_selesai.required' => 'Tanggal selesai harus diisi',
-            'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai',
         ]);
 
         if ($validator->fails()) {
@@ -68,6 +57,17 @@ class PromoController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Promo $promo)
+    {
+        $promos = Promo::orderBy('created_at', 'desc')->get();
+        $editPromo = $promo;
+
+        return view('admin.promos.index', compact('promos', 'editPromo'));
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Promo $promo)
@@ -79,17 +79,6 @@ class PromoController extends Controller
             'minimum_belanja' => 'required|numeric|min:0',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-        ], [
-            'nama_promo.required' => 'Nama promo harus diisi',
-            'deskripsi_promo.required' => 'Deskripsi promo harus diisi',
-            'besaran_potongan.required' => 'Besaran potongan harus diisi',
-            'besaran_potongan.min' => 'Besaran potongan minimal 1%',
-            'besaran_potongan.max' => 'Besaran potongan maksimal 100%',
-            'minimum_belanja.required' => 'Minimum belanja harus diisi',
-            'minimum_belanja.min' => 'Minimum belanja tidak boleh negatif',
-            'tanggal_mulai.required' => 'Tanggal mulai harus diisi',
-            'tanggal_selesai.required' => 'Tanggal selesai harus diisi',
-            'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai',
         ]);
 
         if ($validator->fails()) {
@@ -125,7 +114,7 @@ class PromoController extends Controller
     }
 
     /**
-     * Toggle promo status (active/inactive)
+     * Toggle the active status of a promo.
      */
     public function toggleStatus(Promo $promo)
     {

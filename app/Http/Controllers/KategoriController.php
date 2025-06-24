@@ -8,18 +8,21 @@ use Illuminate\Support\Facades\Storage;
 
 class KategoriController extends Controller
 {
-
     public function indexUser()
     {
         $kategoris = Kategori::withCount('produks')->get();
         return view('home', compact('kategoris'));
     }
+
+    // ✅ Menampilkan form tambah & daftar kategori
     public function index()
     {
         $kategoris = Kategori::withCount('produks')->get();
-        return view('admin.kategoris.index', compact('kategoris'));
+        $kategoriToEdit = null; // Penting untuk form dinamis
+        return view('admin.kategoris.index', compact('kategoris', 'kategoriToEdit'));
     }
 
+    // ✅ Menyimpan data baru
     public function store(Request $request)
     {
         $request->validate([
@@ -41,22 +44,17 @@ class KategoriController extends Controller
         return redirect()->route('admin.kategoris.index')->with('success', 'Kategori berhasil ditambahkan.');
     }
 
-
-    // public function index()
-    // {
-    //     $kategoris = Kategori::withCount('produks')->get();
-    //     return view('admin.kategoris.index', compact('kategoris'));
-    // }
-
+    // ✅ Menampilkan form edit dan daftar kategori
     public function edit($id)
     {
-        $kategori = Kategori::findOrFail($id);
         $kategoris = Kategori::withCount('produks')->get();
-        return view('admin.kategoris.index', compact('kategori', 'kategoris'));
+        $kategoriToEdit = Kategori::findOrFail($id);
+
+        // Kirim data kategori yg sedang diedit
+        return view('admin.kategoris.index', compact('kategoris', 'kategoriToEdit'));
     }
 
-
-
+    // ✅ Memperbarui data kategori
     public function update(Request $request, Kategori $kategori)
     {
         $request->validate([
@@ -82,10 +80,9 @@ class KategoriController extends Controller
         return redirect()->route('admin.kategoris.index')->with('success', 'Kategori berhasil diperbarui.');
     }
 
-
+    // ✅ Menghapus kategori
     public function destroy(Kategori $kategori)
     {
-        // Hapus gambar jika ada
         if ($kategori->gambar_kategori && Storage::disk('public')->exists($kategori->gambar_kategori)) {
             Storage::disk('public')->delete($kategori->gambar_kategori);
         }

@@ -14,24 +14,19 @@ use App\Http\Controllers\AlamatController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KeranjangController;
-use App\Http\Controllers\PublicArtikelController;
 use App\Http\Controllers\Admin\PelangganController;
-use App\Http\Controllers\Admin\ArtikelController;
-use App\Http\Controllers\Admin\KategoriArtikelController;
 use App\Http\Controllers\Auth\PasswordController;
-use App\Http\Controllers\TestimoniController;
+use App\Http\Controllers\TestimoniController; // Import TestimoniController
 
 // Home (Boleh Diakses Guest)
 Route::get('/', [KategoriController::class, 'indexUser'])->name('home');
 
-Route::get('/artikel', [PublicArtikelController::class, 'index'])->name('artikel.public.index');
-Route::get('/artikel/{artikel:slug}', [PublicArtikelController::class, 'show'])->name('artikel.public.show');
-
-// Produk - BOLEH DILIHAT TANPA LOGIN
+// Produk (Boleh Diakses Guest untuk melihat)
 Route::get('/produk', [ProdukController::class, 'showToUser'])->name('produk.user');
 Route::get('/deskripsi-produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
 
-// Halaman statis - boleh diakses tanpa login
+// Halaman statis (Boleh Diakses Guest)
+Route::view('/artikel', 'artikel');
 Route::view('/tentang', 'user.aboutus');
 Route::view('/kontak', 'kontak');
 
@@ -39,20 +34,20 @@ Route::view('/kontak', 'kontak');
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'loginPost']);
-    Route::get('/register', [AuthController::class, 'register'])->name('register');
+    Route::get('/register', [AuthController::class, 'register']);
     Route::post('/register', [AuthController::class, 'registerPost']);
 });
 
-// Semua route ini HANYA untuk user yang sudah login
+// Routes yang memerlukan autentikasi (login)
 Route::middleware('auth')->group(function () {
-    // Profile - HARUS LOGIN
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.content');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    // Profile - HANYA UNTUK USER YANG LOGIN
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.content'); // menampilkan ringkasan profil
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit'); // form edit profil
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
-    // Alamat
+    // Alamat - HANYA UNTUK USER YANG LOGIN
     Route::resource('alamat', AlamatController::class);
 
     // Halaman chart (opsional)
@@ -61,7 +56,7 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Keranjang - HARUS LOGIN (untuk tambah ke keranjang & checkout)
+    // Keranjang - HANYA UNTUK USER YANG LOGIN
     Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang.index');
     Route::post('/keranjang', [KeranjangController::class, 'store'])->name('keranjang.store');
     Route::put('/keranjang/{id}', [KeranjangController::class, 'update'])->name('keranjang.update');
@@ -70,7 +65,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [KeranjangController::class, 'checkout'])->name('keranjang.checkout');
     Route::post('/checkout', [KeranjangController::class, 'processCheckout'])->name('keranjang.process');
 
-    // Pesanan user - HARUS LOGIN (untuk beli sekarang)
+    // Pesanan user - HANYA UNTUK USER YANG LOGIN
     Route::get('/pesanan/create/{produk}', [PesananController::class, 'create'])->name('pesanans.create');
     Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
     Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
@@ -88,8 +83,9 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
 
     // Profile Admin
     Route::get('/profile', [ProfileController::class, 'adminIndex'])->name('profile.index');
-    Route::get('/profile/edit', [ProfileController::class, 'editAdmin'])->name('profile.edit');
-    Route::patch('/profile/update', [ProfileController::class, 'updateAdmin'])->name('profile.update');
+    Route::get('/profile/edit', [ProfileController::class, 'adminEdit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'adminUpdate'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'adminDestroy'])->name('profile.destroy');
 
     Route::resource('produks', ProdukController::class);
     Route::resource('kategoris', KategoriController::class);
@@ -110,14 +106,7 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
     Route::delete('pelanggan/{id}/force-delete', [App\Http\Controllers\Admin\PelangganController::class, 'forceDelete'])->name('pelanggan.forceDelete');
     Route::resource('pelanggan', PelangganController::class);
 
-    // Artikel Admin
-    Route::get('artikel/trash', [ArtikelController::class, 'trash'])->name('artikel.trash');
-    Route::patch('artikel/{id}/restore', [ArtikelController::class, 'restore'])->name('artikel.restore');
-    Route::delete('artikel/{id}/force-delete', [ArtikelController::class, 'forceDelete'])->name('artikel.forceDelete');
-    Route::resource('artikel', ArtikelController::class);
-    Route::resource('kategori-artikel', KategoriArtikelController::class)->except('show');
-
-    // Testimoni admin
+    // Testimoni routes for admin
     Route::get('/testimonis', [TestimoniController::class, 'index'])->name('testimoni.index');
     Route::delete('/testimonis/{testimoni}', [TestimoniController::class, 'destroy'])->name('testimoni.destroy');
 });
@@ -137,13 +126,12 @@ Route::post('/email/verification-notification', function (Request $request) {
     return back()->with('message', 'Link verifikasi baru telah dikirim!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
-// =====================================================
-// PASSWORD RESET ROUTES
-// =====================================================
+// Menampilkan form untuk meminta link reset
 Route::get('forgot-password', function () {
     return view('auth.forgot-password');
 })->middleware('guest')->name('password.request');
 
+// Mengirim link reset ke email pengguna
 Route::post('forgot-password', function (Request $request) {
     $request->validate(['email' => 'required|email']);
 
@@ -154,10 +142,12 @@ Route::post('forgot-password', function (Request $request) {
                 : back()->withErrors(['email' => __($status)]);
 })->middleware('guest')->name('password.email');
 
+// Menampilkan form untuk mereset password
 Route::get('reset-password/{token}', function (string $token) {
     return view('auth.reset-password', ['token' => $token]);
 })->middleware('guest')->name('password.reset');
 
+// Memperbarui password pengguna
 Route::post('reset-password', function (Request $request) {
     $request->validate([
         'token' => 'required',

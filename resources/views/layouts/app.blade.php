@@ -20,12 +20,12 @@
     <style>
         .splide__slide img {
             width: 100%;
-            height: 100%;
+            height: 50%;
             object-fit: cover;
         }
 
         .splide {
-            height: 70vh;
+            height: 38vh;
             /* Tinggi carousel disesuaikan */
         }
 
@@ -90,6 +90,8 @@
                 <a href="/artikel" class="block py-2 hover:text-green-600">Artikel</a>
                 <a href="/kontak" class="block py-2 hover:text-green-600">Kontak</a>
                 <a href="/tentang" class="block py-2 hover:text-green-600">Tentang Kami</a>
+                <a class="nav-link" href="/chart"><i class="fas fa-shopping-bag"></i></a>
+                <a class="nav-link" href="/profile"><i class="fas fa-user"></i></a>
             </div>
         </div>
         </div>

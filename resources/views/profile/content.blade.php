@@ -46,10 +46,10 @@
             <p class="font-semibold text-gray-800">{{ auth()->user()->email }}</p>
         </div>
 
-        <div>
+        {{-- <div>
             <p class="text-sm text-gray-500">Jenis Kelamin</p>
             <p class="font-semibold text-gray-800">{{ auth()->user()->jenis_kelamin ?? '-' }}</p>
-        </div>
+        </div> --}}
 
         <div>
             <p class="text-sm text-gray-500">Tanggal Lahir</p>
@@ -65,7 +65,7 @@
 
     <!-- Tombol Edit -->
     <div class="text-right">
-        <a href="{{ route('admin.profile.edit') }}"
+        <a href="{{ route('profile.edit') }}"
            class="inline-flex items-center px-4 py-2 border border-green-600 text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors">
             Edit Profil
         </a>

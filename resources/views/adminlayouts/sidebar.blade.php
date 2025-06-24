@@ -1,4 +1,4 @@
-<aside class="w-58 bg-white border-r min-h-screen p-4 pt-20">
+<aside class="w-50 bg-white border-r min-h-screen p-4 pt-20">
     <nav class="space-y-2">
 
         <a href="{{ route('admin.dashboard') }}"
@@ -33,13 +33,13 @@
             <i class="fas fa-tags w-5"></i><span class="ml-3">Promo</span>
         </a>
 
-        <a href="{{ route('admin.artikel.index') }}" class="flex items-center p-2 rounded hover:bg-green-100">
+        {{-- <a href="{{ route('admin.artikel.index') }}" class="flex items-center p-2 rounded hover:bg-green-100">
             <i class="fas fa-newspaper w-5"></i><span class="ml-3">Artikel</span>
-        </a>
+        </a> --}}
         {{-- <a href="#" class="flex items-center p-2 rounded hover:bg-green-100">
             <i class="fas fa-comment-dots w-5"></i><span class="ml-3">Testimoni</span>
         </a> --}}
-        <a href="{{ route('admin.testimoni.index') }}"
+        {{-- <a href="{{ route('admin.testimoni.index') }}"
             class="flex items-center p-2 rounded {{ request()->routeIs('admin.testimoni.*') ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-green-100' }}">
             <i class="fas fa-comment-dots w-5"></i><span class="ml-3">Testimoni</span>
         </a>
@@ -48,7 +48,21 @@
             <span class="ml-3">Daftar Pelanggan</span>
         </a>
         <a href="#" class="flex items-center p-2 rounded hover:bg-green-100">
-            <i class="fas fa-user-shield w-5"></i><span class="ml-3">Role Pengguna</span>
+            <i class="fas fa-user-shield w-5"></i><span class="ml-3">Role Pengguna</span> --}}
+        {{-- </a> --}}
+        <a href="{{ route('admin.artikel.index') }}"
+            class="flex items-center p-2 rounded {{ request()->routeIs('admin.artikel.*') ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-green-100' }}">
+            <i class="fas fa-newspaper w-5"></i><span class="ml-3">Artikel</span>
+        </a>
+
+        <a href="{{ route('admin.testimoni.index') }}"
+            class="flex items-center p-2 rounded {{ request()->routeIs('admin.testimoni.*') ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-green-100' }}">
+            <i class="fas fa-comment-dots w-5"></i><span class="ml-3">Testimoni</span>
+        </a>
+
+        <a href="{{ route('admin.pelanggan.index') }}"
+            class="flex items-center p-2 rounded {{ request()->routeIs('admin.pelanggan.*') ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-green-100' }}">
+            <i class="fas fa-fw fa-users"></i><span class="ml-3">Daftar Pelanggan</span>
         </a>
         <!-- Tambahkan menu lainnya -->
     </nav>
