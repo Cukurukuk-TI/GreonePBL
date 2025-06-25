@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin'=> \App\Http\Middleware\AdminMiddleware::class,
             'admin.timeout' => \App\Http\Middleware\AdminSessionTimeout::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            '/midtrans/notification' // URL webhook Anda
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\KategoriArtikelController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\TestimoniController;
+use App\Http\Controllers\MidtransController;
 
 // Home (Boleh Diakses Guest)
 Route::get('/', [KategoriController::class, 'indexUser'])->name('home');
@@ -77,6 +78,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesananuser', [PesananController::class, 'pesanan'])->name('user.pesanan');
     Route::post('/pesanan/{pesanan}/cancel', [PesananController::class, 'cancelByUser'])->name('pesanan.user.cancel');
     Route::get('/pesanan-detail/{pesanan}', [App\Http\Controllers\PesananController::class, 'showAjax'])->name('pesanan.detail.ajax');
+    Route::post('/midtrans/notification', [MidtransController::class, 'notificationHandler'])->name('midtrans.notification');
 
     // Testimoni routes for user
     Route::get('/testimoni/create/{pesanan_id}', [TestimoniController::class, 'create'])->name('testimoni.create');
