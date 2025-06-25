@@ -40,6 +40,13 @@
 </style>
 @endpush
 
+@push('scripts')
+    <script type="text/javascript"
+      src="https://app.sandbox.midtrans.com/snap/snap.js"
+      data-client-key="{{ config('midtrans.client_key') }}"></script>
+@endpush
+
+
 @section('content')
 <div class="max-w-6xl mx-auto p-4 md:p-6">
     <div class="flex justify-between items-center mb-6">
@@ -66,12 +73,10 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('keranjang.process') }}" id="checkout-form">
-        @csrf
+    <div id="checkout-container">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6" x-data="{ activeStep: 1 }">
 
-                <!-- Step 1: Detail Pesanan -->
                 <div class="bg-white rounded-xl shadow-lg transition-all duration-500 step-card active">
                     <div class="step-header p-6">
                         <div class="flex items-center">
@@ -104,141 +109,139 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Alamat Pengiriman -->
-                <div class="bg-white rounded-xl shadow-lg transition-all duration-500 step-card active">
-                    <div class="step-header p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-500 text-white">
-                                <i class="fas fa-map-marker-alt text-lg"></i>
-                            </div>
-                            <div class="ml-4">
-                                <h2 class="text-xl font-bold text-gray-800">Alamat Pengiriman</h2>
-                                <p class="text-sm text-gray-500">Pilih alamat tujuan</p>
+                {{-- Biarkan bagian ini seperti aslinya, karena data ini akan diambil oleh JavaScript --}}
+                <div id="checkout-options">
+                    <div class="bg-white rounded-xl shadow-lg transition-all duration-500 step-card active">
+                        <div class="step-header p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-500 text-white">
+                                    <i class="fas fa-map-marker-alt text-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h2 class="text-xl font-bold text-gray-800">Alamat Pengiriman</h2>
+                                    <p class="text-sm text-gray-500">Pilih alamat tujuan</p>
+                                </div>
                             </div>
                         </div>
+                        <div class="step-content px-6" style="max-height: 1000px; padding-top: 1.5rem; padding-bottom: 1.5rem;">
+                            @if($alamats->count() > 0)
+                                <div class="space-y-3 mb-4">
+                                    @foreach($alamats as $alamat)
+                                    <label class="block cursor-pointer">
+                                        <input type="radio" name="alamat_id" value="{{ $alamat->id }}" class="sr-only peer" data-label="{{ $alamat->label }} - {{ $alamat->nama_penerima }}" {{ $loop->first ? 'checked' : '' }}>
+                                        <div class="p-4 border-2 rounded-lg peer-checked:border-green-500 peer-checked:bg-green-50 transition hover:bg-gray-50">
+                                            <p class="font-semibold text-gray-800">{{ $alamat->label }} - {{ $alamat->nama_penerima }}</p>
+                                            <p class="text-sm text-gray-600">{{ $alamat->detail_alamat }}, {{ $alamat->kota }}, {{ $alamat->provinsi }}</p>
+                                            <p class="text-sm text-gray-500">{{ $alamat->nomor_hp }}</p>
+                                        </div>
+                                    </label>
+                                    @endforeach
+                                </div>
+                                <a href="{{ route('alamat.index') }}" class="inline-flex items-center text-green-600 hover:text-green-800 text-sm font-medium">
+                                    <i class="fas fa-plus mr-1"></i> Kelola Alamat
+                                </a>
+                            @else
+                                <div class="text-center py-8 border-dashed border-2 rounded-lg border-gray-300">
+                                    <i class="fas fa-map-marker-alt text-gray-400 text-3xl mb-3"></i>
+                                    <p class="text-gray-500 mb-4">Anda belum memiliki alamat tersimpan.</p>
+                                    <a href="{{ route('alamat.create') }}" class="bg-green-600 text-white px-6 py-3 rounded-lg text-sm hover:bg-green-700 transition">
+                                        <i class="fas fa-plus mr-2"></i>Tambah Alamat Baru
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
                     </div>
-                    <div class="step-content px-6" style="max-height: 1000px; padding-top: 1.5rem; padding-bottom: 1.5rem;">
-                        @if($alamats->count() > 0)
-                            <div class="space-y-3 mb-4">
-                                @foreach($alamats as $alamat)
+
+                    <div class="bg-white rounded-xl shadow-lg transition-all duration-500 step-card active mt-6">
+                        <div class="step-header p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-500 text-white">
+                                    <i class="fas fa-truck text-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h2 class="text-xl font-bold text-gray-800">Metode Pengiriman</h2>
+                                    <p class="text-sm text-gray-500">Pilih cara pengiriman</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step-content px-6" style="max-height: 1000px; padding-top: 1.5rem; padding-bottom: 1.5rem;">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label class="block cursor-pointer">
-                                    <input type="radio" name="alamat_id" value="{{ $alamat->id }}" class="sr-only peer" data-label="{{ $alamat->label }} - {{ $alamat->nama_penerima }}" {{ $loop->first ? 'checked' : '' }}>
-                                    <div class="p-4 border-2 rounded-lg peer-checked:border-green-500 peer-checked:bg-green-50 transition hover:bg-gray-50">
-                                        <p class="font-semibold text-gray-800">{{ $alamat->label }} - {{ $alamat->nama_penerima }}</p>
-                                        <p class="text-sm text-gray-600">{{ $alamat->detail_alamat }}, {{ $alamat->kota }}, {{ $alamat->provinsi }}</p>
-                                        <p class="text-sm text-gray-500">{{ $alamat->nomor_hp }}</p>
+                                    <input type="radio" name="metode_pengiriman" value="diantar" class="sr-only peer" checked data-ongkir="10000" data-label="Diantar ke Alamat">
+                                    <div class="p-6 border-2 rounded-lg peer-checked:border-green-500 peer-checked:bg-green-50 transition text-center option-card h-full flex flex-col justify-center items-center hover:border-green-300">
+                                        <img src="https://api.iconify.design/material-symbols:local-shipping-outline.svg?color=%2310b981" alt="Diantar" class="h-16 w-16 mb-3">
+                                        <p class="font-semibold text-gray-800">Diantar ke Alamat</p>
+                                        <p class="text-sm text-gray-600 mt-1">Rp 10.000</p>
                                     </div>
                                 </label>
-                                @endforeach
+                                <label class="block cursor-pointer">
+                                    <input type="radio" name="metode_pengiriman" value="jemput" class="sr-only peer" data-ongkir="0" data-label="Jemput di Lokasi">
+                                    <div class="p-6 border-2 rounded-lg peer-checked:border-green-500 peer-checked:bg-green-50 transition text-center option-card h-full flex flex-col justify-center items-center hover:border-green-300">
+                                        <img src="https://api.iconify.design/material-symbols:storefront-outline.svg?color=%2310b981" alt="Jemput" class="h-16 w-16 mb-3">
+                                        <p class="font-semibold text-gray-800">Jemput di Lokasi</p>
+                                        <p class="text-sm text-gray-600 mt-1">Gratis</p>
+                                    </div>
+                                </label>
                             </div>
-                            <a href="{{ route('alamat.index') }}" class="inline-flex items-center text-green-600 hover:text-green-800 text-sm font-medium">
-                                <i class="fas fa-plus mr-1"></i> Kelola Alamat
-                            </a>
-                        @else
-                            <div class="text-center py-8 border-dashed border-2 rounded-lg border-gray-300">
-                                <i class="fas fa-map-marker-alt text-gray-400 text-3xl mb-3"></i>
-                                <p class="text-gray-500 mb-4">Anda belum memiliki alamat tersimpan.</p>
-                                <a href="{{ route('alamat.create') }}" class="bg-green-600 text-white px-6 py-3 rounded-lg text-sm hover:bg-green-700 transition">
-                                    <i class="fas fa-plus mr-2"></i>Tambah Alamat Baru
-                                </a>
-                            </div>
-                        @endif
+                        </div>
                     </div>
-                </div>
 
-                <!-- Step 3: Metode Pengiriman -->
-                <div class="bg-white rounded-xl shadow-lg transition-all duration-500 step-card active">
-                    <div class="step-header p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-500 text-white">
-                                <i class="fas fa-truck text-lg"></i>
+                    <div class="bg-white rounded-xl shadow-lg transition-all duration-500 step-card active mt-6">
+                        <div class="step-header p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-500 text-white">
+                                    <i class="fas fa-credit-card text-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h2 class="text-xl font-bold text-gray-800">Metode Pembayaran</h2>
+                                    <p class="text-sm text-gray-500">Pilih cara pembayaran</p>
+                                </div>
                             </div>
-                            <div class="ml-4">
-                                <h2 class="text-xl font-bold text-gray-800">Metode Pengiriman</h2>
-                                <p class="text-sm text-gray-500">Pilih cara pengiriman</p>
+                        </div>
+                        <div class="step-content px-6" style="max-height: 1000px; padding-top: 1.5rem; padding-bottom: 1.5rem;">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label class="block cursor-pointer">
+                                    <input type="radio" name="metode_pembayaran" value="cod" class="sr-only peer" checked data-label="Cash on Delivery">
+                                    <div class="p-6 border-2 rounded-lg peer-checked:border-green-500 peer-checked:bg-green-50 transition text-center option-card h-full flex flex-col justify-center items-center hover:border-green-300">
+                                        <svg class="h-12 w-12 mb-2 text-green-500" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z"/> <circle cx="12" cy="12" r="9" /> <path d="M14.8 9a2 2 0 0 0 -1.8 -1h-2a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4h-2a2 2 0 0 1 -1.8 -1" /> <path d="M12 6v2m0 8v2" /> </svg>
+                                        <p class="font-semibold text-gray-800">Cash on Delivery</p>
+                                        <p class="text-sm text-gray-600 mt-1">Bayar di Tempat</p>
+                                    </div>
+                                </label>
+                                <label class="block cursor-pointer">
+                                    <input type="radio" name="metode_pembayaran" value="transfer" class="sr-only peer" data-label="Transfer Bank">
+                                    <div class="p-6 border-2 rounded-lg peer-checked:border-green-500 peer-checked:bg-green-50 transition text-center option-card h-full flex flex-col justify-center items-center hover:border-green-300">
+                                        <img src="https://api.iconify.design/material-symbols:account-balance-outline.svg?color=%2310b981" alt="Transfer" class="h-16 w-16 mb-3">
+                                        <p class="font-semibold text-gray-800">Transfer Bank</p>
+                                        <p class="text-sm text-gray-600 mt-1">Via Payment Gateway</p>
+                                    </div>
+                                </label>
                             </div>
                         </div>
                     </div>
-                    <div class="step-content px-6" style="max-height: 1000px; padding-top: 1.5rem; padding-bottom: 1.5rem;">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block cursor-pointer">
-                                <input type="radio" name="metode_pengiriman" value="diantar" class="sr-only peer" checked data-ongkir="10000" data-label="Diantar ke Alamat">
-                                <div class="p-6 border-2 rounded-lg peer-checked:border-green-500 peer-checked:bg-green-50 transition text-center option-card h-full flex flex-col justify-center items-center hover:border-green-300">
-                                    <img src="https://api.iconify.design/material-symbols:local-shipping-outline.svg?color=%2310b981" alt="Diantar" class="h-16 w-16 mb-3">
-                                    <p class="font-semibold text-gray-800">Diantar ke Alamat</p>
-                                    <p class="text-sm text-gray-600 mt-1">Rp 10.000</p>
-                                </div>
-                            </label>
-                            <label class="block cursor-pointer">
-                                <input type="radio" name="metode_pengiriman" value="jemput" class="sr-only peer" data-ongkir="0" data-label="Jemput di Lokasi">
-                                <div class="p-6 border-2 rounded-lg peer-checked:border-green-500 peer-checked:bg-green-50 transition text-center option-card h-full flex flex-col justify-center items-center hover:border-green-300">
-                                    <img src="https://api.iconify.design/material-symbols:storefront-outline.svg?color=%2310b981" alt="Jemput" class="h-16 w-16 mb-3">
-                                    <p class="font-semibold text-gray-800">Jemput di Lokasi</p>
-                                    <p class="text-sm text-gray-600 mt-1">Gratis</p>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Step 4: Metode Pembayaran -->
-                <div class="bg-white rounded-xl shadow-lg transition-all duration-500 step-card active">
-                    <div class="step-header p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-500 text-white">
-                                <i class="fas fa-credit-card text-lg"></i>
-                            </div>
-                            <div class="ml-4">
-                                <h2 class="text-xl font-bold text-gray-800">Metode Pembayaran</h2>
-                                <p class="text-sm text-gray-500">Pilih cara pembayaran</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="step-content px-6" style="max-height: 1000px; padding-top: 1.5rem; padding-bottom: 1.5rem;">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block cursor-pointer">
-                                <input type="radio" name="metode_pembayaran" value="cod" class="sr-only peer" checked data-label="Cash on Delivery">
-                                <div class="p-6 border-2 rounded-lg peer-checked:border-green-500 peer-checked:bg-green-50 transition text-center option-card h-full flex flex-col justify-center items-center hover:border-green-300">
-                                    <svg class="h-12 w-12 mb-2 text-green-500" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z"/> <circle cx="12" cy="12" r="9" /> <path d="M14.8 9a2 2 0 0 0 -1.8 -1h-2a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4h-2a2 2 0 0 1 -1.8 -1" /> <path d="M12 6v2m0 8v2" /> </svg>
-                                    <p class="font-semibold text-gray-800">Cash on Delivery</p>
-                                    <p class="text-sm text-gray-600 mt-1">Bayar di Tempat</p>
+                    <div class="bg-white rounded-xl shadow-lg transition-all duration-500 step-card active mt-6">
+                        <div class="step-header p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-500 text-white">
+                                    <i class="fas fa-pencil-alt text-lg"></i>
                                 </div>
-                            </label>
-                            <label class="block cursor-pointer">
-                                <input type="radio" name="metode_pembayaran" value="transfer" class="sr-only peer" data-label="Transfer Bank">
-                                <div class="p-6 border-2 rounded-lg peer-checked:border-green-500 peer-checked:bg-green-50 transition text-center option-card h-full flex flex-col justify-center items-center hover:border-green-300">
-                                    <img src="https://api.iconify.design/material-symbols:account-balance-outline.svg?color=%2310b981" alt="Transfer" class="h-16 w-16 mb-3">
-                                    <p class="font-semibold text-gray-800">Transfer Bank</p>
-                                    <p class="text-sm text-gray-600 mt-1">Via Payment Gateway Midtrans</p>
+                                <div class="ml-4">
+                                    <h2 class="text-xl font-bold text-gray-800">Catatan</h2>
+                                    <p class="text-sm text-gray-500">Tambahkan catatan khusus (opsional)</p>
                                 </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 5: Catatan -->
-                <div class="bg-white rounded-xl shadow-lg transition-all duration-500 step-card active">
-                    <div class="step-header p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-500 text-white">
-                                <i class="fas fa-pencil-alt text-lg"></i>
-                            </div>
-                            <div class="ml-4">
-                                <h2 class="text-xl font-bold text-gray-800">Catatan</h2>
-                                <p class="text-sm text-gray-500">Tambahkan catatan khusus (opsional)</p>
                             </div>
                         </div>
-                    </div>
-                    <div class="step-content px-6" style="max-height: 1000px; padding-top: 1.5rem; padding-bottom: 1.5rem;">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <textarea name="catatan" rows="4" placeholder="Contoh: Tolong packing yang aman, kirim pagi hari..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none">{{ old('catatan') }}</textarea>
+                        <div class="step-content px-6" style="max-height: 1000px; padding-top: 1.5rem; padding-bottom: 1.5rem;">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <textarea name="catatan" rows="4" placeholder="Contoh: Tolong packing yang aman, kirim pagi hari..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none">{{ old('catatan') }}</textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
 
             </div>
 
-            <!-- Sidebar Ringkasan -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-lg p-6 sticky top-24">
                     <h2 class="text-xl font-bold mb-6 text-gray-800">Ringkasan Belanja</h2>
@@ -279,7 +282,8 @@
                         </div>
                     </div>
 
-                    <button type="submit"
+                    <button type="button"
+                            id="pay-button"
                             class="w-full mt-8 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-6 rounded-lg transition-all transform hover:scale-105 disabled:bg-gray-400 disabled:transform-none"
                             {{ $alamats->count() == 0 ? 'disabled' : '' }}>
                         {{ $alamats->count() == 0 ? 'Tambah Alamat Dulu' : 'Selesaikan Pesanan' }}
@@ -290,16 +294,14 @@
                 </div>
             </div>
         </div>
-    </form>
+    </div>
 </div>
-
-@endsection
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Definisi elemen
-    const form = document.getElementById('checkout-form');
+    const optionsContainer = document.getElementById('checkout-options');
     const subtotalEl = document.getElementById('subtotal');
     const ongkirEl = document.getElementById('ongkir');
     const diskonEl = document.getElementById('diskon');
@@ -317,7 +319,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const subtotal = parseFloat(subtotalEl.dataset.value) || 0;
         const ongkir = parseFloat(ongkirEl.dataset.value) || 0;
 
-        // Kalkulasi diskon promo
         const selectedPromo = promoSelect.options[promoSelect.selectedIndex];
         const potongan = parseFloat(selectedPromo.dataset.potongan) || 0;
         const minimum = parseFloat(selectedPromo.dataset.minimum) || 0;
@@ -341,20 +342,91 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Event listener untuk perubahan ongkir
-    form.querySelectorAll('input[name="metode_pengiriman"]').forEach(radio => {
+    optionsContainer.querySelectorAll('input[name="metode_pengiriman"]').forEach(radio => {
         radio.addEventListener('change', function() {
             const ongkirValue = parseFloat(this.dataset.ongkir);
             ongkirEl.dataset.value = ongkirValue;
             ongkirEl.textContent = (ongkirValue > 0) ? formatRupiah(ongkirValue) : 'Gratis';
             calculateTotal();
         });
-        if(radio.checked) radio.dispatchEvent(new Event('change')); // Trigger awal
+        if(radio.checked) radio.dispatchEvent(new Event('change'));
     });
 
     promoSelect.addEventListener('change', calculateTotal);
+    calculateTotal(); // Kalkulasi awal saat halaman dimuat
 
-    // Kalkulasi awal saat halaman dimuat
-    calculateTotal();
+    const payButton = document.getElementById('pay-button');
+    payButton.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        // Cek metode pembayaran
+        const paymentMethod = document.querySelector('input[name="metode_pembayaran"]:checked').value;
+
+        // Ambil data form untuk dikirim ke backend
+        const formData = new FormData();
+        formData.append('_token', '{{ csrf_token() }}');
+        formData.append('alamat_id', document.querySelector('input[name="alamat_id"]:checked').value);
+        formData.append('metode_pengiriman', document.querySelector('input[name="metode_pengiriman"]:checked').value);
+        formData.append('metode_pembayaran', paymentMethod);
+        formData.append('promo_id', document.getElementById('promo-select').value);
+        formData.append('catatan', document.querySelector('textarea[name="catatan"]').value);
+
+
+        if (paymentMethod === 'cod') {
+            // Jika COD, submit form seperti biasa ke endpoint process.checkout
+            const formElement = document.createElement('form');
+            formElement.method = 'POST';
+            formElement.action = '{{ route("keranjang.process") }}';
+            for (let [key, value] of formData.entries()) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                formElement.appendChild(input);
+            }
+            document.body.appendChild(formElement);
+            formElement.submit();
+
+        } else if (paymentMethod === 'transfer') {
+            // Jika Transfer (Midtrans), kirim AJAX untuk dapatkan Snap Token
+            fetch('{{ route("keranjang.process") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.snap_token) {
+                    // Jika token didapat, buka popup pembayaran Midtrans
+                    window.snap.pay(data.snap_token, {
+                        onSuccess: function(result) {
+                            // Redirect ke halaman sukses setelah pembayaran berhasil
+                            window.location.href = `/pesanan/success/${result.order_id}`;
+                        },
+                        onPending: function(result) {
+                            // Redirect ke halaman sukses (atau halaman status pesanan) untuk pembayaran pending
+                            window.location.href = `/pesanan/success/${result.order_id}`;
+                        },
+                        onError: function(result) {
+                            alert('Pembayaran gagal. Silakan coba lagi.');
+                        },
+                        onClose: function() {
+                           alert('Anda menutup pop-up tanpa menyelesaikan pembayaran.');
+                        }
+                    });
+                } else if(data.error) {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan. Silakan coba lagi.');
+            });
+        }
+    });
+
 });
 </script>
 @endpush
