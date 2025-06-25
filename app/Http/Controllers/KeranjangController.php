@@ -13,6 +13,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Midtrans\Config;
+use Midtrans\Snap;
 
 class KeranjangController extends Controller
 {
@@ -167,6 +169,7 @@ class KeranjangController extends Controller
      */
     public function processCheckout(Request $request)
     {
+        // Validasi dasar tetap sama
         $request->validate([
             'alamat_id' => 'required|exists:alamats,id,user_id,' . Auth::id(),
             'metode_pengiriman' => 'required|string|in:diantar,jemput',
@@ -175,41 +178,91 @@ class KeranjangController extends Controller
         ]);
 
         $keranjangs = Keranjang::with('produk')->where('user_id', Auth::id())->get();
-
         if ($keranjangs->isEmpty()) {
+            // Jika request dari AJAX, kirim JSON. Jika tidak, redirect.
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Keranjang kosong!'], 400);
+            }
             return redirect()->route('keranjang.index')->with('error', 'Keranjang kosong!');
         }
 
+        // --- LOGIKA UTAMA BARU ---
         try {
-            // Memulai transaksi database untuk memastikan semua operasi berhasil atau tidak sama sekali.
-            return DB::transaction(function () use ($request, $keranjangs) {
-                // Validasi Stok Tahap 2: Di dalam transaksi untuk mencegah race condition.
-                $this->_validateStockInCart($keranjangs, true);
+            $orderData = $this->_prepareOrderData($request, $keranjangs); // Siapkan data pesanan
 
-                // Menyiapkan data pesanan (kalkulasi total, diskon, ongkir).
-                $orderData = $this->_prepareOrderData($request, $keranjangs);
+            if ($request->metode_pembayaran == 'transfer') {
+                // ============ ALUR UNTUK MIDTRANS ============
+                $pesanan = DB::transaction(function () use ($orderData, $keranjangs) {
+                    $this->_validateStockInCart($keranjangs, true); // Validasi stok
+                    $pesanan = Pesanan::create($orderData['pesanan']); // Buat pesanan di DB
 
-                // Membuat pesanan utama.
-                $pesanan = Pesanan::create($orderData['pesanan']);
+                    // Pindahkan item keranjang ke detail pesanan
+                    foreach ($keranjangs as $item) {
+                        DetailPesanan::create([
+                            'pesanan_id' => $pesanan->id,
+                            'produk_id' => $item->produk_id,
+                            'jumlah' => $item->jumlah,
+                            'harga_satuan' => $item->harga_satuan,
+                            'subtotal' => $item->subtotal,
+                        ]);
+                        $item->produk->decrement('stok_produk', $item->jumlah);
+                    }
+                    Keranjang::where('user_id', Auth::id())->delete(); // Kosongkan keranjang
+                    return $pesanan;
+                });
 
-                // Membuat detail pesanan dan mengurangi stok untuk setiap item.
-                foreach ($keranjangs as $item) {
-                    DetailPesanan::create([
-                        'pesanan_id' => $pesanan->id,
-                        'produk_id' => $item->produk_id,
-                        'jumlah' => $item->jumlah,
-                        'harga_satuan' => $item->harga_satuan,
-                        'subtotal' => $item->subtotal,
-                    ]);
-                    $item->produk->decrement('stok_produk', $item->jumlah);
-                }
+                // Konfigurasi Midtrans
+                Config::$serverKey = config('midtrans.server_key');
+                Config::$isProduction = config('midtrans.is_production', false);
+                Config::$isSanitized = true;
+                Config::$is3ds = true;
 
-                // Mengosongkan keranjang setelah pesanan berhasil dibuat.
-                Keranjang::where('user_id', Auth::id())->delete();
+                // Buat parameter untuk Snap
+                $params = [
+                    'transaction_details' => [
+                        'order_id' => $pesanan->id,
+                        'gross_amount' => $pesanan->total_harga,
+                    ],
+                    'customer_details' => [
+                        'first_name' => Auth::user()->name,
+                        'email' => Auth::user()->email,
+                    ],
+                ];
 
-                return redirect()->route('pesanans.success', $pesanan->id)->with('success', 'Pesanan berhasil dibuat!');
-            });
+                $snapToken = Snap::getSnapToken($params);
+
+                // Simpan snap_token dan kembalikan sebagai JSON
+                $pesanan->snap_token = $snapToken;
+                $pesanan->save();
+
+                return response()->json(['snap_token' => $snapToken]); // Kembalikan JSON
+
+            } else {
+                // ============ ALUR UNTUK COD (LOGIKA LAMA ANDA) ============
+                return DB::transaction(function () use ($orderData, $keranjangs) {
+                    $this->_validateStockInCart($keranjangs, true);
+                    $pesanan = Pesanan::create($orderData['pesanan']);
+
+                    foreach ($keranjangs as $item) {
+                        DetailPesanan::create([
+                            'pesanan_id' => $pesanan->id,
+                            'produk_id' => $item->produk_id,
+                            'jumlah' => $item->jumlah,
+                            'harga_satuan' => $item->harga_satuan,
+                            'subtotal' => $item->subtotal,
+                        ]);
+                        $item->produk->decrement('stok_produk', $item->jumlah);
+                    }
+
+                    Keranjang::where('user_id', Auth::id())->delete();
+                    return redirect()->route('pesanans.success', $pesanan->id)->with('success', 'Pesanan berhasil dibuat!');
+                });
+            }
         } catch (Exception $e) {
+            // Tangani semua jenis error
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+            }
             return redirect()->route('keranjang.checkout')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
