@@ -1,4 +1,3 @@
-// config/midtrans.php
 <?php
 
 return [
