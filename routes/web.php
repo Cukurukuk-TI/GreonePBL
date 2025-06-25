@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
     Route::get('/pesananuser', [PesananController::class, 'pesanan'])->name('user.pesanan');
     Route::post('/pesanan/{pesanan}/cancel', [PesananController::class, 'cancelByUser'])->name('pesanan.user.cancel');
+    Route::get('/pesanan-detail/{pesanan}', [App\Http\Controllers\PesananController::class, 'showAjax'])->name('pesanan.detail.ajax');
 
     // Testimoni routes for user
     Route::get('/testimoni/create/{pesanan_id}', [TestimoniController::class, 'create'])->name('testimoni.create');

@@ -146,7 +146,8 @@ class PesananController extends Controller
     //
     public function pesanan(Request $request)
     {
-        $query = Auth::user()->pesanans()->with('produk')->latest();
+        // --- SEDIKIT PERBAIKAN: Gunakan Eager Loading untuk efisiensi ---
+        $query = Auth::user()->pesanans()->with('details.produk')->latest();
 
         if ($request->status) {
             $query->where('status', $request->status);
@@ -159,20 +160,21 @@ class PesananController extends Controller
 
     public function cancelByUser(Pesanan $pesanan)
     {
-        // 1. Otorisasi: Pastikan pesanan ini milik pengguna yang sedang login.
+        // 1. Otorisasi: Pastikan pesanan ini milik pengguna yang sedang login
         if ($pesanan->user_id !== Auth::id()) {
-            abort(403, 'AKSI TIDAK DIIZINKAN.');
+            abort(403, 'Akses Ditolak.');
         }
 
-        // 2. Validasi: Pastikan status pesanan adalah 'pending'.
+        // 2. Validasi: Hanya pesanan dengan status 'pending' yang bisa dibatalkan
         if ($pesanan->status !== 'pending') {
-            return back()->with('error', 'Pesanan ini sudah diproses dan tidak dapat dibatalkan lagi.');
+            return back()->with('error', 'Pesanan ini sudah diproses dan tidak dapat dibatalkan.');
         }
 
         try {
-            // 3. Mulai Transaksi Database
+            // 3. Mulai Transaksi Database untuk menjaga konsistensi data
             DB::transaction(function () use ($pesanan) {
-                // 4. Kembalikan stok untuk setiap item dalam pesanan
+
+                // 4. Kembalikan stok untuk setiap item detail pesanan
                 foreach ($pesanan->details as $detail) {
                     Produk::find($detail->produk_id)->increment('stok_produk', $detail->jumlah);
                 }
@@ -181,11 +183,50 @@ class PesananController extends Controller
                 $pesanan->update(['status' => 'cancelled']);
             });
 
-            return redirect()->route('user.pesanan')->with('success', 'Pesanan berhasil dibatalkan.');
+            return redirect()->route('user.pesanan')->with('success', 'Pesanan dengan kode ' . $pesanan->kode_pesanan . ' berhasil dibatalkan.');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat membatalkan pesanan: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat membatalkan pesanan. Silakan coba lagi.');
         }
+    }
+
+    // --- METHOD BARU UNTUK MENGAMBIL DATA DETAIL PESANAN ---
+    public function showAjax(Pesanan $pesanan)
+    {
+        // Otorisasi: Pastikan pesanan ini milik pengguna yang sedang login.
+        if ($pesanan->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Akses ditolak'], 403);
+        }
+
+        // Memuat relasi yang dibutuhkan agar data produk ikut terkirim.
+        $pesanan->load('details.produk');
+
+        // Mengembalikan data dalam format JSON yang siap digunakan oleh JavaScript.
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'kode_pesanan' => $pesanan->kode_pesanan,
+                'tanggal' => $pesanan->created_at->isoFormat('D MMMM YYYY, HH:mm'),
+                'status' => $pesanan->status,
+                'metode_pengiriman' => $pesanan->metode_pengiriman,
+                'metode_pembayaran' => $pesanan->metode_pembayaran,
+                'alamat_pengiriman' => $pesanan->alamat_pengiriman,
+                'catatan' => $pesanan->catatan ?? '-',
+                'subtotal' => 'Rp ' . number_format($pesanan->details->sum('subtotal'), 0, ',', '.'),
+                'ongkos_kirim' => 'Rp ' . number_format($pesanan->ongkos_kirim, 0, ',', '.'),
+                'diskon' => '- Rp ' . number_format($pesanan->diskon, 0, ',', '.'),
+                'total_harga' => 'Rp ' . number_format($pesanan->total_harga, 0, ',', '.'),
+                'items' => $pesanan->details->map(function ($detail) {
+                    return [
+                        'nama_produk' => optional($detail->produk)->nama_produk ?? 'Produk Dihapus',
+                        'gambar_url' => optional($detail->produk)->gambar_produk ? asset('storage/' . $detail->produk->gambar_produk) : 'https://via.placeholder.com/150',
+                        'jumlah' => $detail->jumlah,
+                        'harga_satuan' => 'Rp ' . number_format($detail->harga_satuan, 0, ',', '.'),
+                        'subtotal' => 'Rp ' . number_format($detail->subtotal, 0, ',', '.'),
+                    ];
+                }),
+            ]
+        ]);
     }
 
 }
