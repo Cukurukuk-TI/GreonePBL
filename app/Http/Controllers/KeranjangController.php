@@ -13,6 +13,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Midtrans\Config;
+use Midtrans\Snap;
 
 class KeranjangController extends Controller
 {
@@ -212,6 +214,36 @@ class KeranjangController extends Controller
         } catch (Exception $e) {
             return redirect()->route('keranjang.checkout')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+
+        // 1. Set Konfigurasi Midtrans
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = config('midtrans.is_production');
+        Config::$isSanitized = config('midtrans.is_sanitized');
+        Config::$is3ds = config('midtrans.is_3ds');
+
+        // 2. Siapkan Parameter untuk Midtrans
+        $params = [
+            'transaction_details' => [
+                'order_id' => $pesanan->id, // Gunakan ID unik dari tabel pesanan Anda
+                'gross_amount' => $pesanan->total_harga,
+            ],
+            'customer_details' => [
+                'first_name' => $pesanan->user->name,
+                'email' => $pesanan->user->email,
+                'phone' => $pesanan->user->telepon,
+            ],
+        ];
+
+        // 3. Dapatkan Snap Token
+        $snapToken = Snap::getSnapToken($params);
+
+        // 4. Simpan snap_token ke pesanan (opsional tapi direkomendasikan)
+        // Anda perlu menambahkan kolom `snap_token` (string, nullable) ke tabel `pesanans`
+        $pesanan->snap_token = $snapToken;
+        $pesanan->save();
+
+        // 5. Kirim token ke view
+        return view('keranjang.checkout', compact('snapToken', 'pesanan'));
     }
 
 
