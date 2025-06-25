@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pesanan;
+use App\Models\Produk;
 use Midtrans\Config;
 use Midtrans\Notification;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class MidtransController extends Controller
 {
@@ -49,18 +51,27 @@ class MidtransController extends Controller
         // 5. Update status pesanan berdasarkan notifikasi
         if ($transactionStatus == 'capture') {
             if ($fraudStatus == 'accept') {
-                // Untuk kartu kredit, transaksi berhasil dan aman
                 $order->status = 'processed';
             }
         } else if ($transactionStatus == 'settlement') {
-            // Untuk metode lain, transaksi berhasil
             $order->status = 'processed';
-        } else if ($transactionStatus == 'pending') {
-            // Transaksi masih menunggu pembayaran
-            $order->status = 'pending';
+
         } else if (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
-            // Transaksi gagal, kedaluwarsa, atau dibatalkan
             $order->status = 'cancelled';
+
+            // --- TAMBAHAN: LOGIKA PENGEMBALIAN STOK PRODUK ---
+            // Gunakan DB::transaction untuk memastikan semua operasi berhasil
+            DB::transaction(function () use ($order) {
+                foreach ($order->details as $detail) {
+                    // Temukan produk terkait
+                    $produk = Produk::find($detail->produk_id);
+                    if ($produk) {
+                        // Kembalikan stoknya
+                        $produk->increment('stok_produk', $detail->jumlah);
+                        Log::info("Stok untuk produk ID: {$produk->id} dikembalikan sebanyak {$detail->jumlah}.");
+                    }
+                }
+            });
         }
 
         // 6. Simpan perubahan status ke database
