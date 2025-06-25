@@ -15,10 +15,13 @@ class PesananController extends Controller
 {
 
     // Halaman sukses pesanan
-    public function success($id)
+    public function success(Request $request,$id)
     {
-        $pesanan = Pesanan::with(['produk', 'promo'])->findOrFail($id);
-        return view('pesanans.success', compact('pesanan'));
+        $paymentStatus = $request->query('status', 'success');
+
+        $pesanan = Pesanan::with(['details.produk', 'promo'])->findOrFail($id);
+
+        return view('pesanans.success', compact('pesanan', 'paymentStatus'));
     }
 
     // Index untuk admin (daftar pesanan aktif saja - TIDAK termasuk cancelled)

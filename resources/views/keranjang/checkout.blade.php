@@ -249,6 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const promoSelect = document.getElementById('promo-select');
     const promoErrorEl = document.getElementById('promo-error');
     const payButton = document.getElementById('pay-button');
+    const originalButtonHtml = payButton.innerHTML; // Simpan teks asli tombol
 
     function formatRupiah(angka) {
         return 'Rp ' + Math.round(angka).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -291,8 +292,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     payButton.addEventListener('click', function(e) {
         e.preventDefault();
+
+        // --- TAMBAHAN: Umpan Balik Visual ---
         payButton.disabled = true;
-        payButton.textContent = 'Memproses...';
+        payButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
+        // ------------------------------------
 
         const paymentMethod = document.querySelector('input[name="metode_pembayaran"]:checked').value;
 
@@ -300,19 +304,20 @@ document.addEventListener('DOMContentLoaded', function() {
             form.submit();
         } else if (paymentMethod === 'transfer') {
             const formData = new FormData(form);
+            // --- FIX URL Redirect: Gunakan URL Relatif ---
+            // Saya asumsikan route 'keranjang.process' Anda mengarah ke '/checkout'
             fetch("{{ route('keranjang.process') }}", {
                 method: 'POST',
                 body: formData,
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
                 }
             })
             .then(response => {
-                // Cek jika response tidak OK (bukan 2xx)
                 if (!response.ok) {
                     return response.json().then(data => {
-                        // Lemparkan error agar bisa ditangkap oleh .catch()
                         throw new Error(data.error || 'Terjadi kesalahan pada server.');
                     });
                 }
@@ -322,24 +327,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.snap_token) {
                     window.snap.pay(data.snap_token, {
                         onSuccess: function(result){
-                            window.location.href = `/pesanan/success/${result.order_id}`;
+                             // --- PERUBAHAN: Tambah query parameter status & fix URL ---
+                             // Pastikan route 'pesanans.success' ada di web.php
+                            window.location.href = `/pesanan/success/${result.order_id}?status=success`;
                         },
                         onPending: function(result){
-                            window.location.href = `/pesanan/success/${result.order_id}`;
+                             // --- PERUBAHAN: Tambah query parameter status & fix URL ---
+                            window.location.href = `/pesanan/success/${result.order_id}?status=pending`;
                         },
                         onError: function(result){
                             alert('Pembayaran gagal. Silakan coba lagi.');
                             payButton.disabled = false;
-                            payButton.innerHTML = 'Selesaikan Pesanan <i class="fas fa-arrow-right ml-2"></i>';
+                            payButton.innerHTML = originalButtonHtml; // Kembalikan teks tombol
                         },
                         onClose: function(){
                            alert('Anda menutup pop-up tanpa menyelesaikan pembayaran.');
                            payButton.disabled = false;
-                           payButton.innerHTML = 'Selesaikan Pesanan <i class="fas fa-arrow-right ml-2"></i>';
+                           payButton.innerHTML = originalButtonHtml; // Kembalikan teks tombol
                         }
                     });
                 } else {
-                    // Jika tidak ada snap_token meski response OK
                     throw new Error(data.error || 'Gagal mendapatkan token pembayaran.');
                 }
             })
@@ -347,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Fetch Error:', error);
                 alert('Terjadi kesalahan: ' + error.message);
                 payButton.disabled = false;
-                payButton.innerHTML = 'Selesaikan Pesanan <i class="fas fa-arrow-right ml-2"></i>';
+                payButton.innerHTML = originalButtonHtml; // Kembalikan teks tombol jika error
             });
         }
     });

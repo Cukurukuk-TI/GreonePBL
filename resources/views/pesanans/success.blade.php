@@ -1,35 +1,44 @@
-@extends('layouts.pesanan')
+@extends('layouts.appnoslider')
 
-@section('title', 'Pesanan Berhasil')
+@section('title', 'Pesanan Diterima')
 
 @section('content')
-<div class="max-w-2xl mx-auto text-center">
-    <div class="bg-white p-8 rounded-lg shadow-md">
-        <div class="mb-6">
-            <svg class="w-16 h-16 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
+<div class="container mx-auto px-4 py-16">
+    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-2xl p-8 md:p-12 text-center">
+
+        {{-- Tampilkan ikon dan pesan berdasarkan status pembayaran --}}
+        @if($paymentStatus == 'success')
+            {{-- Status Sukses/Lunas --}}
+            <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-green-100 mb-6">
+                <i class="fas fa-check-circle text-6xl text-green-500"></i>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">Pembayaran Berhasil!</h1>
+            <p class="text-gray-600 mt-4 text-lg">
+                Terima kasih! Pesanan Anda telah kami terima dan pembayaran telah lunas. Kami akan segera memproses pesanan Anda.
+            </p>
+        @else {{-- Status Pending/Menunggu --}}
+            <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-yellow-100 mb-6">
+                <i class="fas fa-hourglass-half text-6xl text-yellow-500"></i>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">Pesanan Diterima!</h1>
+            <p class="text-gray-600 mt-4 text-lg">
+                Pesanan Anda telah berhasil dibuat. Silakan selesaikan pembayaran Anda sesuai instruksi yang telah diberikan.
+            </p>
+        @endif
+
+        <div class="mt-8 border-t border-gray-200 pt-8">
+            <h2 class="text-xl font-bold text-gray-700">Kode Pesanan Anda:</h2>
+            <p class="mt-2 text-2xl font-mono tracking-widest bg-gray-100 text-green-600 py-3 px-4 rounded-lg inline-block">
+                {{ $pesanan->kode_pesanan }}
+            </p>
         </div>
-        
-        <h1 class="text-2xl font-bold text-gray-900 mb-4">Pesanan Berhasil Dibuat!</h1>
-        
-        <div class="bg-gray-50 p-4 rounded-lg mb-6">
-            <p class="text-lg font-semibold">Kode Pesanan: {{ $pesanan->kode_pesanan }}</p>
-            <p class="text-gray-600">Total Bayar: {{ $pesanan->formatted_total_harga }}</p>
-        </div>
-        
-        <p class="text-gray-600 mb-6">
-            Terima kasih! Pesanan Anda sedang diproses. Kami akan menghubungi Anda segera untuk konfirmasi pembayaran.
-        </p>
-        
-        <div class="space-x-4">
-            <a href="{{ route('produk.user') }}" 
-                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
-                Kembali ke Dashboard
+
+        <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{{ route('user.pesanan') }}" class="w-full sm:w-auto bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105">
+                <i class="fas fa-receipt mr-2"></i>Lihat Riwayat Pesanan
             </a>
-            <a href="{{ route('produk.user') }}" 
-                class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded">
-                Belanja Lagi
+            <a href="{{ route('home') }}" class="w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition">
+                Kembali ke Beranda
             </a>
         </div>
     </div>
