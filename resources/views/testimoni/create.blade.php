@@ -12,12 +12,14 @@
         <form action="{{ route('testimoni.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="pesanan_id" value="{{ $pesanan->id }}">
-            <input type="hidden" name="produk_id" value="{{ $pesanan->produk->id }}">
+            {{-- FIX: Mengambil produk id dari objek $detail --}}
+            <input type="hidden" name="produk_id" value="{{ $detail->produk->id }}">
 
             <div class="flex items-center mb-4">
                 <div class="flex-shrink-0 mr-4">
-                    @if($pesanan->produk->gambar_produk)
-                        <img src="{{ asset('storage/' . $pesanan->produk->gambar_produk) }}" alt="{{ $pesanan->produk->nama_produk }}" class="w-20 h-20 object-cover rounded-lg border">
+                    {{-- FIX: Menggunakan $detail->produk untuk info produk --}}
+                    @if($detail->produk->gambar_produk)
+                        <img src="{{ asset('storage/' . $detail->produk->gambar_produk) }}" alt="{{ $detail->produk->nama_produk }}" class="w-20 h-20 object-cover rounded-lg border">
                     @else
                         <div class="w-20 h-20 bg-gray-200 rounded-lg border flex items-center justify-center">
                             <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,8 +29,10 @@
                     @endif
                 </div>
                 <div>
-                    <h4 class="text-md font-semibold text-gray-800">{{ $pesanan->produk->nama_produk }}</h4>
-                    <p class="text-sm text-gray-500">Jumlah: {{ $pesanan->jumlah }}x</p>
+                    {{-- FIX: Menggunakan $detail->produk untuk nama produk --}}
+                    <h4 class="text-md font-semibold text-gray-800">{{ $detail->produk->nama_produk }}</h4>
+                    {{-- FIX: Mengambil jumlah dari objek $detail --}}
+                    <p class="text-sm text-gray-500">Jumlah: {{ $detail->jumlah }}x</p>
                 </div>
             </div>
 
@@ -117,13 +121,12 @@
             });
         }
 
-        // Initialize stars if old input exists (e.g., after validation error)
         if (ratingValueInput.value > 0) {
             updateStarRating(ratingValueInput.value);
         }
     });
 
     function closeTestimoniModal() {
-        document.getElementById('testimoniModal').remove(); // Menghapus modal dari DOM
+        document.getElementById('testimoniModal').remove();
     }
 </script>

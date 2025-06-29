@@ -25,22 +25,36 @@ class TestimoniController extends Controller
      */
     public function create($pesanan_id)
     {
-        $pesanan = Pesanan::with('produk')->findOrFail($pesanan_id);
+        // 1. Ambil pesanan beserta relasi detail dan produknya
+        $pesanan = Pesanan::with('details.produk')->findOrFail($pesanan_id);
 
+        // 2. Otorisasi: Pastikan pesanan ini milik user yang sedang login
+        if ($pesanan->user_id !== Auth::id()) {
+            return response('Akses ditolak.', 403);
+        }
+        
+        // 3. Validasi: Hanya pesanan 'complete' yang bisa diulas
         if ($pesanan->status !== 'complete') {
-            return redirect()->back()->with('error', 'Testimoni hanya bisa diberikan untuk pesanan yang sudah selesai.');
+            return response('Testimoni hanya bisa diberikan untuk pesanan yang sudah selesai.', 403);
+        }
+        
+        // 4. Ambil detail produk pertama dari pesanan
+        $detail = $pesanan->details->first();
+        if (!$detail) {
+            return response('Pesanan ini tidak memiliki produk untuk diulas.', 404);
         }
 
-        // Cek apakah user sudah memberikan testimoni untuk pesanan ini
+        // 5. Cek apakah testimoni untuk produk ini sudah ada
         $existingTestimoni = Testimoni::where('user_id', Auth::id())
-                                    ->where('produk_id', $pesanan->produk_id)
-                                    ->first();
-
+                                    ->where('produk_id', $detail->produk_id)
+                                    ->exists();
+        
         if ($existingTestimoni) {
-            return redirect()->back()->with('error', 'Anda sudah memberikan testimoni untuk produk ini.');
+            return response('<div class="p-8 text-center bg-white rounded-lg"><p class="text-gray-700">Anda sudah memberikan ulasan untuk produk ini.</p><button onclick="closeTestimoniModal()" class="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md">Tutup</button></div>', 409);
         }
-
-        return view('testimoni.create', compact('pesanan'));
+        
+        // 6. Kirim data ke view modal
+        return view('testimoni.create', compact('pesanan', 'detail'));
     }
 
 
@@ -50,23 +64,28 @@ class TestimoniController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pesanan_id' => 'required|exists:pesanans,id', // Validasi pesanan_id
+            'pesanan_id' => 'required|exists:pesanans,id',
+            'produk_id' => 'required|exists:produks,id', // Validasi produk_id dari form
             'rating' => 'required|integer|min:1|max:5',
             'komentar' => 'required|string|max:500',
-            'foto_testimoni' => 'nullable|image|max:2048', // Max 2MB
+            'foto_testimoni' => 'nullable|image|max:2048',
         ]);
 
         $pesanan = Pesanan::findOrFail($request->pesanan_id);
 
-        // Pastikan pesanan adalah milik user yang sedang login dan statusnya 'complete'
         if ($pesanan->user_id !== Auth::id() || $pesanan->status !== 'complete') {
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk memberikan testimoni pada pesanan ini.');
         }
 
-        // Pastikan user belum memberikan testimoni untuk produk ini dari pesanan ini
+        // Cek apakah produk yang diulas benar-benar ada dalam pesanan tersebut
+        $productInOrder = $pesanan->details()->where('produk_id', $request->produk_id)->exists();
+        if (!$productInOrder) {
+            return redirect()->back()->with('error', 'Produk tidak ditemukan dalam pesanan yang Anda ulas.');
+        }
+
         $existingTestimoni = Testimoni::where('user_id', Auth::id())
-                                    ->where('produk_id', $pesanan->produk_id)
-                                    ->first();
+                                    ->where('produk_id', $request->produk_id)
+                                    ->exists();
         if ($existingTestimoni) {
             return redirect()->back()->with('error', 'Anda sudah memberikan testimoni untuk produk ini.');
         }
@@ -78,7 +97,7 @@ class TestimoniController extends Controller
 
         Testimoni::create([
             'user_id' => Auth::id(),
-            'produk_id' => $pesanan->produk_id,
+            'produk_id' => $request->produk_id,
             'rating' => $request->rating,
             'komentar' => $request->komentar,
             'foto_testimoni' => $fotoPath,
