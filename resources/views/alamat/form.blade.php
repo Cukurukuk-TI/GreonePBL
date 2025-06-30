@@ -2,7 +2,7 @@
     $alamat = $alamat ?? new \App\Models\Alamat;
 @endphp
 
-<div class="space-y-4">
+<div class="space-y-4 w-full max-w-3xl mx-auto">
 
     {{-- Label Alamat --}}
     <div>
@@ -60,11 +60,13 @@
             placeholder="Masukkan alamat lengkap">{{ old('detail_alamat', $alamat->detail_alamat) }}</textarea>
     </div>
 
+    {{-- Map --}}
     <div class="mt-3">
         <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Lokasi di Peta</label>
-        <div id="map" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+        <div id="map" class="w-full h-80 rounded-md border border-gray-300"></div>
     </div>
 
+    {{-- Hidden Latitude & Longitude --}}
     <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $alamat->latitude) }}">
     <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $alamat->longitude) }}">
 
