@@ -72,6 +72,12 @@
                         @php
                             $firstDetail = $pesanan->details->first();
                             $produk = $firstDetail ? $firstDetail->produk : null;
+                            
+                            // Cek apakah sudah ada testimoni untuk pesanan ini
+                            $produkIds = $pesanan->details->pluck('produk_id');
+                            $hasTestimoni = App\Models\Testimoni::where('user_id', auth()->id())
+                                                ->whereIn('produk_id', $produkIds)
+                                                ->exists();
                         @endphp
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4">
@@ -135,6 +141,7 @@
                                     <button onclick="showOrderDetail('{{ $pesanan->id }}')" class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition duration-200">
                                         <i class="fas fa-eye mr-1"></i> Detail
                                     </button>
+                                    
                                     @if ($pesanan->status == 'pending')
                                         <form action="{{ route('pesanan.user.cancel', $pesanan->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
                                             @csrf
@@ -143,10 +150,18 @@
                                             </button>
                                         </form>
                                     @endif
-                                     @if($pesanan->status === 'complete')
-                                        <button onclick="showTestimoniModal('{{ route('testimoni.create', ['pesanan_id' => $pesanan->id]) }}')" class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium rounded-md transition duration-200">
-                                            <i class="fas fa-star mr-1"></i> Ulasan
-                                        </button>
+                                    
+                                    {{-- Tombol Testimoni untuk pesanan yang sudah selesai --}}
+                                    @if($pesanan->status === 'complete')
+                                        @if($hasTestimoni)
+                                            <button disabled class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-gray-400 text-white text-xs font-medium rounded-md cursor-not-allowed opacity-60">
+                                                <i class="fas fa-check mr-1"></i> Sudah Ditestimoni
+                                            </button>
+                                        @else
+                                            <button onclick="showTestimoniModal('{{ route('testimoni.create', ['pesanan_id' => $pesanan->id]) }}')" class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium rounded-md transition duration-200">
+                                                <i class="fas fa-star mr-1"></i> Beri Testimoni
+                                            </button>
+                                        @endif
                                     @endif
                                 </div>
                             </td>
@@ -226,7 +241,6 @@ function closeOrderDetail(event) {
         modal.classList.add('hidden');
     }, 300);
 }
-
 
 // Fungsi UTAMA untuk menampilkan detail pesanan dengan desain baru
 async function showOrderDetail(orderId) {
@@ -314,9 +328,7 @@ document.addEventListener('keydown', function (e) {
     }
 });
 
-
-
-// --- Kode untuk Testimoni (sudah ada di file Anda) ---
+// --- Kode untuk Testimoni ---
 function initializeStarRating() {
     const stars = document.querySelectorAll('#star-rating .star');
     const ratingValueInput = document.getElementById('rating-value');
@@ -357,7 +369,23 @@ function showTestimoniModal(testimoniCreateUrl) {
                 });
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            // Tampilkan pesan error di modal container
+            document.getElementById('testimoniModalContainer').innerHTML = `
+                <div class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+                        <div class="text-center">
+                            <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+                            <p class="text-gray-700 mb-4">Gagal memuat form testimoni</p>
+                            <button onclick="closeTestimoniModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
 }
 
 function closeTestimoniModal() {
@@ -365,6 +393,14 @@ function closeTestimoniModal() {
     if (modalContainer) {
         modalContainer.innerHTML = ''; // Kosongkan container
     }
+}
+
+// Fungsi untuk reload halaman setelah testimoni berhasil ditambahkan
+function reloadAfterTestimoni() {
+    closeTestimoniModal();
+    setTimeout(() => {
+        location.reload();
+    }, 500);
 }
 </script>
 @endsection

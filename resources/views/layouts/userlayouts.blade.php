@@ -182,7 +182,7 @@
                                class="flex items-center px-4 py-3 rounded-lg {{ request()->routeIs('profile.content') ? 'bg-green-100 text-green-700 font-semibold' : 'text-gray-700 hover:bg-green-100' }}"
                                @click="sidebarOpen = false">
                                 <i class="fas fa-user-circle mr-3"></i>
-                                <span>My Account</span>
+                                <span>MyAccount</span>
                             </a>
                         </li>
                         <li>

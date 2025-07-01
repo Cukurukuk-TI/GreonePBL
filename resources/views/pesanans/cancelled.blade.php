@@ -57,14 +57,14 @@
                             <td class="px-6 py-4 text-center">
                                 {{-- PENYESUAIAN UI: Tombol Aksi Didesain Ulang --}}
                                 <div class="flex items-center justify-center gap-2">
-                                    <form action="{{-- route('admin.pesanans.restore', $pesanan->id) --}}" method="POST" onsubmit="return confirm('Yakin ingin memulihkan pesanan ini?')">
+                                    <form action="{{route('admin.pesanans.restore', $pesanan->id)}}" method="POST" onsubmit="return confirm('Yakin ingin memulihkan pesanan ini?')">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" class="p-2 rounded-full hover:bg-green-100 text-green-600 transition-colors" title="Pulihkan Pesanan">
+                                        {{-- <button type="submit" class="p-2 rounded-full hover:bg-green-100 text-green-600 transition-colors" title="Pulihkan Pesanan">
                                             <i class="fas fa-undo-alt"></i>
-                                        </button>
+                                        </button> --}}
                                     </form>
-                                    <form action="{{-- route('admin.pesanans.force-delete', $pesanan->id) --}}" method="POST" onsubmit="return confirm('PERINGATAN: Tindakan ini akan menghapus data secara permanen dan tidak dapat dibatalkan. Lanjutkan?')">
+                                    <form action="{{route('admin.pesanans.force-delete', $pesanan->id)}}" method="POST" onsubmit="return confirm('PERINGATAN: Tindakan ini akan menghapus data secara permanen dan tidak dapat dibatalkan. Lanjutkan?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-2 rounded-full hover:bg-red-100 text-red-600 transition-colors" title="Hapus Permanen">
