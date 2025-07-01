@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\Keranjang;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,5 +23,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+    View::composer('*', function ($view) {
+        if (Auth::check()) {
+            $uniqueProductCount = Keranjang::where('user_id', Auth::id())
+                ->distinct('produk_id')
+                ->count('produk_id');
+        } else {
+            $uniqueProductCount = 0;
+        }
+
+        $view->with('uniqueProductCount', $uniqueProductCount);
+    });
+
     }
 }

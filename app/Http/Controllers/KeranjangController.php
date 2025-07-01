@@ -12,10 +12,12 @@ use Illuminate\Support\Facades\DB;
 
 class KeranjangController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware('auth');
-    // }
+    public function jumlahCart()
+    {
+        $cart = session()->get('cart', []);
+        return count($cart);
+    }
+
 
     // Menampilkan halaman keranjang
     public function index()
