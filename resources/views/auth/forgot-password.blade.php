@@ -1,48 +1,52 @@
-@extends('layouts.app')
+{{-- Menggunakan layout form yang konsisten --}}
+@extends('layouts.form')
+
+@section('title', 'Lupa Password')
 
 @section('content')
-<div class="flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="w-full max-w-lg p-10 bg-white rounded-xl shadow-xl">
-        <h2 class="text-3xl font-bold text-center mb-4 text-gray-700">Lupa Password</h2>
-        <p class="text-center text-gray-500 mb-8">
-            Masukkan alamat email Anda yang terdaftar. Kami akan mengirimkan tautan untuk mengatur ulang password Anda.
-        </p>
+<div class="w-full max-w-md bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-8 sm:p-12">
+    <h1 class="text-3xl font-bold text-center text-brand-text mb-4">
+        Lupa Password Anda?
+    </h1>
+    <p class="text-center text-brand-text-muted mb-8">
+        Masukkan email Anda, kami akan mengirimkan tautan untuk mengatur ulang password.
+    </p>
 
-        @if (session('status'))
-            <div class="mb-4 text-sm font-medium text-green-700 bg-green-100 p-3 rounded-md text-center">
-                {{ session('status') }}
-            </div>
-        @endif
+    @if (session('status'))
+        <div class="mb-4 text-sm font-medium text-green-700 bg-green-100 p-3 rounded-md text-center">
+            {{ session('status') }}
+        </div>
+    @endif
 
-        <form method="POST" action="{{ route('password.email') }}" class="space-y-6">
-            @csrf
-
+    <form method="POST" action="{{ route('password.email') }}">
+        @csrf
+        <div class="space-y-6">
             <div>
-                <label for="email" class="block font-semibold mb-1">Email</label>
-                <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    value="{{ old('email') }}"
-                    placeholder="contoh@email.com"
-                    required
-                    autofocus
-                    class="w-full border px-3 py-2 rounded-md shadow-sm @error('email') border-red-500 @enderror focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
+                <label for="email" class="block text-sm font-medium text-brand-text-muted mb-1">Email</label>
+                <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
+                    placeholder="Masukkan email terdaftar"
+                    class="w-full border-gray-300 rounded-lg shadow-sm px-4 py-3 transition-colors duration-200 focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green-light @error('email') border-red-500 @enderror">
                 @error('email')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                 @enderror
             </div>
 
-            <button type="submit"
-                class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition duration-200">
-                Kirim Link Reset Password
-            </button>
-        </form>
+            <div>
+                <button type="submit"
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-bold text-white bg-brand-green hover:bg-brand-green-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105">
+                    Kirim Tautan Reset
+                </button>
+            </div>
+        </div>
+    </form>
 
-        <p class="mt-6 text-center text-sm text-gray-600">
-            Tiba-tiba ingat password Anda?
-            <a href="{{ route('login') }}" class="text-green-600 hover:underline font-medium">Kembali ke Login</a>
+    <div class="mt-8 text-center">
+        <p class="text-sm text-brand-text-muted">
+            Tiba-tiba ingat password?
+            <a href="{{ route('login') }}"
+                class="font-semibold text-green-600 hover:text-brand-green hover:underline">
+                Kembali ke Login
+            </a>
         </p>
     </div>
 </div>

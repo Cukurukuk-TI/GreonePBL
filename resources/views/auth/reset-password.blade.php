@@ -1,71 +1,52 @@
-@extends('layouts.app')
+{{-- Menggunakan layout form yang konsisten --}}
+@extends('layouts.form')
+
+@section('title', 'Atur Password Baru')
 
 @section('content')
-<div class="flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="w-full max-w-lg p-10 bg-white rounded-xl shadow-xl">
-        <h2 class="text-3xl font-bold text-center mb-4 text-gray-700">Atur Password Baru</h2>
-        <p class="text-center text-gray-500 mb-8">
-            Buat password baru untuk akun yang terhubung dengan email di bawah ini.
-        </p>
+<div class="w-full max-w-md bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-8 sm:p-12">
+    <h1 class="text-3xl font-bold text-center text-brand-text mb-8">
+        Atur Password Baru
+    </h1>
 
-        <form method="POST" action="{{ route('password.update') }}" class="space-y-6">
-            @csrf
+    <form method="POST" action="{{ route('password.update') }}">
+        @csrf
+        <input type="hidden" name="token" value="{{ $token }}">
 
-            <input type="hidden" name="token" value="{{ $token }}">
-
+        <div class="space-y-5">
             <div>
-                <label for="email" class="block font-semibold mb-1">Email</label>
-                <input
-                    type="email"
-                    id="email"
-                    value="{{ request('email') }}"
-                    class="w-full border px-3 py-2 rounded-md shadow-sm bg-gray-100 text-gray-600 cursor-not-allowed"
-                    readonly
-                >
-                {{-- Input email tersembunyi untuk dikirim bersama form --}}
-                <input type="hidden" name="email" value="{{ request('email') }}">
-
+                <label for="email" class="block text-sm font-medium text-brand-text-muted mb-1">Email</label>
+                <input id="email" type="email" name="email" value="{{ request('email') }}" required readonly
+                    class="w-full border-gray-300 rounded-lg shadow-sm px-4 py-3 bg-gray-100 text-gray-500 cursor-not-allowed">
                 @error('email')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                 @enderror
             </div>
 
             <div>
-                <label for="password" class="block font-semibold mb-1">Password Baru</label>
-                <input
-                    type="password"
-                    name="password"
-                    id="password"
+                <label for="password" class="block text-sm font-medium text-brand-text-muted mb-1">Password Baru</label>
+                <input id="password" type="password" name="password" required autocomplete="new-password"
                     placeholder="Masukkan password baru"
-                    required
-                    autofocus
-                    class="w-full border px-3 py-2 rounded-md shadow-sm @error('password') border-red-500 @enderror focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
+                    class="w-full border-gray-300 rounded-lg shadow-sm px-4 py-3 transition-colors duration-200 focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green-light @error('password') border-red-500 @enderror">
                 @error('password')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                 @enderror
             </div>
 
             <div>
-                <label for="password_confirmation" class="block font-semibold mb-1">Konfirmasi Password Baru</label>
-                <input
-                    type="password"
-                    name="password_confirmation"
-                    id="password_confirmation"
-                    placeholder="Ketik ulang password baru Anda"
-                    required
-                    class="w-full border px-3 py-2 rounded-md shadow-sm"
-                />
-                @error('password_confirmation')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
+                <label for="password_confirmation" class="block text-sm font-medium text-brand-text-muted mb-1">Konfirmasi Password</label>
+                <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
+                    placeholder="Ulangi password baru"
+                    class="w-full border-gray-300 rounded-lg shadow-sm px-4 py-3 transition-colors duration-200 focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green-light">
             </div>
 
-            <button type="submit"
-                class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition duration-200">
-                Reset Password
-            </button>
-        </form>
-    </div>
+            <div class="pt-4">
+                <button type="submit"
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-bold text-white bg-brand-green hover:bg-brand-green-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105">
+                    Reset Password
+                </button>
+            </div>
+        </div>
+    </form>
 </div>
 @endsection
