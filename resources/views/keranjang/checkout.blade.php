@@ -329,11 +329,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         onSuccess: function(result){
                              // --- PERUBAHAN: Tambah query parameter status & fix URL ---
                              // Pastikan route 'pesanans.success' ada di web.php
-                            window.location.href = `/pesanan/success/${result.order_id}?status=success`;
+                            window.location.href = `/pesanan/success/${data.order_id}?status=success`;
                         },
                         onPending: function(result){
                              // --- PERUBAHAN: Tambah query parameter status & fix URL ---
-                            window.location.href = `/pesanan/success/${result.order_id}?status=pending`;
+                            window.location.href = `/pesanan/success/${data.order_id}?status=pending`;
                         },
                         onError: function(result){
                             alert('Pembayaran gagal. Silakan coba lagi.');

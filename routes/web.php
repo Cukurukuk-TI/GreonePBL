@@ -185,4 +185,6 @@ Route::post('reset-password', function (Request $request) {
                 : back()->withErrors(['email' => __($status)]);
 })->middleware('guest')->name('password.update');
 
-Route::post('/midtrans/notification', [MidtransController::class, 'notificationHandler'])->name('midtrans.notification');
+    // Route untuk menangani notifikasi dari Midtrans
+    Route::post('/midtrans/callback', [MidtransController::class, 'handle'])->name('midtrans.callback');
+    Route::post('/midtrans/notification', [MidtransController::class, 'notificationHandler'])->name('midtrans.notification');
