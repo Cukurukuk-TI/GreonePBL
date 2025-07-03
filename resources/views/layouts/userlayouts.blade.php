@@ -14,64 +14,84 @@
 <body class="bg-gray-50" x-data="{ sidebarOpen: false, mobileMenuOpen: false }">
     
 <!-- Header -->
-<header class="bg-green-700 text-white fixed top-0 w-full z-50 shadow-md">
+<header class="bg-green-700 text-white fixed top-0 w-full z-50 shadow-md" x-data="{ mobileMenuOpen: false }">
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center">
-            <!-- Sidebar Toggle Button (Desktop & Mobile) -->
-            @auth
-            <button @click="sidebarOpen = !sidebarOpen"
-                class="mr-4 bg-white text-green-700 p-2 rounded-full shadow hover:bg-green-600 hover:text-white transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
-            @endauth
+        <!-- Logo -->
+        <h1 class="text-2xl md:text-3xl font-bold">Bgd <span class="font-light">Hydrofarm</span></h1>
 
-
-            <!-- Logo -->
-            <h1 class="text-2xl font-bold">Bgd <span class="font-light">hydrofarm.</span></h1>
-        </div>
-
-        <!-- Mobile Menu Toggle Button -->
-        <button class="md:hidden focus:outline-none" @click="mobileMenuOpen = !mobileMenuOpen">
-            <svg class="w-6 h-6" fill="none" stroke="white" viewBox="0 0 24 24">
-                <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 6h16M4 12h16M4 18h16" />
-                <path x-show="mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12" />
+        <!-- Mobile Menu Toggle -->
+        <button class="md:hidden focus:outline-none"
+            @click="mobileMenuOpen = !mobileMenuOpen"
+            :aria-expanded="mobileMenuOpen"
+            aria-label="Toggle navigation"
+            title="Menu Navigasi">
+            <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" 
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            <svg x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" 
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M6 18L18 6M6 6l12 12"/>
             </svg>
         </button>
 
         <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center space-x-6 text-white font-medium">
-            <a href="/" class="hover:text-green-200">Beranda</a>
-            <a href="{{ route('produk.user') }}" class="hover:text-green-200">Produk</a>
-            <a href="/artikel" class="hover:text-green-200">Artikel</a>
-            <a href="/kontak" class="hover:text-green-200">Kontak</a>
-            <a href="/tentang" class="hover:text-green-200">Tentang Kami</a>
-            <a href="/keranjang" class="flex items-center hover:text-green-200">
+            <a href="/" class="hover:text-green-200 transition-colors">Beranda</a>
+            <a href="{{ route('produk.user') }}" class="hover:text-green-200 transition-colors">Produk</a>
+            <a href="/artikel" class="hover:text-green-200 transition-colors">Artikel</a>
+            <a href="/kontak" class="hover:text-green-200 transition-colors">Kontak</a>
+            <a href="/tentang" class="hover:text-green-200 transition-colors">Tentang Kami</a>
+
+            <!-- Keranjang dengan Badge -->
+            <a href="/keranjang" class="relative flex items-center hover:text-green-200 transition-colors">
                 <i class="fas fa-shopping-bag mr-1"></i>
+                @if($uniqueProductCount > 0)
+                    <span class="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold rounded-full px-1.5">
+                        {{ $uniqueProductCount }}
+                    </span>
+                @endif
             </a>
-            <a href="/profile" class="flex items-center hover:text-green-200">
+
+            <!-- Profile -->
+            <a href="/profile" class="flex items-center hover:text-green-200 transition-colors">
                 <i class="fas fa-user mr-1"></i>
             </a>
         </nav>
     </div>
 
     <!-- Mobile Navigation -->
-    <div class="md:hidden" x-show="mobileMenuOpen" x-transition x-cloak>
-        <div class="pt-4 pb-4 px-6 space-y-2 bg-green-700 text-white font-medium">
-            <a href="/" class="block py-2 hover:text-green-200">Beranda</a>
-            <a href="{{ route('produk.user') }}" class="block py-2 hover:text-green-200">Produk</a>
-            <a href="/artikel" class="block py-2 hover:text-green-200">Artikel</a>
-            <a href="/kontak" class="block py-2 hover:text-green-200">Kontak</a>
-            <a href="/tentang" class="block py-2 hover:text-green-200">Tentang Kami</a>
-            <a href="/keranjang" class="flex items-center py-2 hover:text-green-200">
-                <i class="fas fa-shopping-bag mr-2"></i> <span>Keranjang</span>
+    <div class="md:hidden bg-green-600" 
+         x-show="mobileMenuOpen" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         x-cloak>
+        <div class="pt-4 pb-4 px-6 space-y-2 text-white font-medium">
+            <a href="/" class="block py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">Beranda</a>
+            <a href="{{ route('produk.user') }}" class="block py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">Produk</a>
+            <a href="/artikel" class="block py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">Artikel</a>
+            <a href="/kontak" class="block py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">Kontak</a>
+            <a href="/tentang" class="block py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">Tentang Kami</a>
+
+            <a href="/keranjang" class="flex items-center py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">
+                <i class="fas fa-shopping-bag mr-2"></i>
+                <span>Keranjang</span>
+                @if($uniqueProductCount > 0)
+                    <span class="ml-2 bg-red-500 text-white text-xs font-bold rounded-full px-1.5">
+                        {{ $uniqueProductCount }}
+                    </span>
+                @endif
             </a>
-            <a href="/profile" class="flex items-center py-2 hover:text-green-200">
-                <i class="fas fa-user mr-2"></i> <span>Profil</span>
+
+            <a href="/profile" class="flex items-center py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">
+                <i class="fas fa-user mr-2"></i> 
+                <span>Profil</span>
             </a>
         </div>
     </div>
@@ -237,8 +257,28 @@
         </form>
         @endauth
 
-        <!-- Main Content -->
+<!-- Main Content -->
 <main class="flex-1 px-6 py-6">
+    @auth
+        <!-- Toggle Button with Arrow Animation -->
+        <button 
+            @click="sidebarOpen = !sidebarOpen"
+            class="mr-4 bg-white text-green-700 p-2 rounded-full shadow hover:bg-green-600 hover:text-white transition-all duration-200 transform"
+            :class="{ 'rotate-180': sidebarOpen }"
+            aria-label="Toggle sidebar"
+            title="Toggle Menu"
+        >
+            <svg class="w-6 h-6 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round" 
+                    stroke-width="2" 
+                    d="M13 5l7 7-7 7M5 5l7 7-7 7" 
+                />
+            </svg>
+        </button>
+    @endauth
+    
     @yield('content')
 </main>
 

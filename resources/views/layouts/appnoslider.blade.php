@@ -53,29 +53,58 @@
                 </svg>
             </button>
 
-            {{-- Desktop Navigation --}}
-            <nav class="hidden md:flex space-x-6 font-medium">
-                <a href="/" class="hover:text-green-300">Beranda</a>
-                <a href="{{ route('produk.user') }}" class="hover:text-green-300">Produk</a>
-                <a href="/artikel" class="hover:text-green-300">Artikel</a>
-                <a href="/kontak" class="hover:text-green-300">Kontak</a>
-                <a href="/tentang" class="hover:text-green-300">Tentang Kami</a>
-                <a href="/keranjang"><i class="fas fa-shopping-bag"></i></a>
-                <a href="/profile"><i class="fas fa-user"></i></a>
-            </nav>
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center space-x-6 text-white font-medium">
+            <a href="/" class="hover:text-green-200">Beranda</a>
+            <a href="{{ route('produk.user') }}" class="hover:text-green-200">Produk</a>
+            <a href="/artikel" class="hover:text-green-200">Artikel</a>
+            <a href="/kontak" class="hover:text-green-200">Kontak</a>
+            <a href="/tentang" class="hover:text-green-200">Tentang Kami</a>
+
+            <!-- Keranjang dengan Badge -->
+            <a href="/keranjang" class="relative flex items-center hover:text-green-200">
+                <i class="fas fa-shopping-bag mr-1"></i>
+                @if($uniqueProductCount > 0)
+                    <span class="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold rounded-full px-1.5">
+                        {{ $uniqueProductCount }}
+                    </span>
+                @endif
+            </a>
+
+            <!-- Profile -->
+            <a href="/profile" class="flex items-center hover:text-green-200">
+                <i class="fas fa-user mr-1"></i>
+            </a>
+        </nav>
         </div>
 
         {{-- Mobile Navigation --}}
         <nav x-show="open" x-transition x-cloak class="md:hidden bg-green-600">
-            <div class="flex flex-col space-y-2 px-4 py-2 text-white font-medium">
-                <a href="/" class="hover:text-green-200">Beranda</a>
-                <a href="{{ route('produk.user') }}" class="hover:text-green-200">Produk</a>
-                <a href="/artikel" class="hover:text-green-200">Artikel</a>
-                <a href="/kontak" class="hover:text-green-200">Kontak</a>
-                <a href="/tentang" class="hover:text-green-200">Tentang Kami</a>
-                <a href="/keranjang" class="hover:text-green-200"><i class="fas fa-shopping-bag mr-1"></i> Keranjang</a>
-                <a href="/profile" class="hover:text-green-200"><i class="fas fa-user mr-1"></i> Profil</a>
+        <!-- Mobile Navigation -->
+        <div class="md:hidden" x-show="mobileMenuOpen" x-transition x-cloak>
+            <div class="pt-4 pb-4 px-6 space-y-2 bg-green-700 text-white font-medium">
+                <a href="/" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Beranda</a>
+                <a href="{{ route('produk.user') }}" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Produk</a>
+                <a href="/artikel" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Artikel</a>
+                <a href="/kontak" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Kontak</a>
+                <a href="/tentang" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Tentang Kami</a>
+
+                <a href="/keranjang" class="flex items-center py-2 hover:text-green-200" @click="mobileMenuOpen = false">
+                    <i class="fas fa-shopping-bag mr-2"></i>
+                    <span>Keranjang</span>
+                    @if($uniqueProductCount > 0)
+                        <span class="ml-2 bg-red-500 text-white text-xs font-bold rounded-full px-1.5">
+                            {{ $uniqueProductCount }}
+                        </span>
+                    @endif
+                </a>
+
+                <a href="/profile" class="flex items-center py-2 hover:text-green-200" @click="mobileMenuOpen = false">
+                    <i class="fas fa-user mr-2"></i> 
+                    <span>Profil</span>
+                </a>
             </div>
+        </div>
         </nav>
     </header>
 

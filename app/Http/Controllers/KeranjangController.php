@@ -18,9 +18,14 @@ use Midtrans\Snap;
 
 class KeranjangController extends Controller
 {
-    /**
-     * Menampilkan halaman keranjang belanja pengguna.
-     */
+    public function jumlahCart()
+    {
+        $cart = session()->get('cart', []);
+        return count($cart);
+    }
+
+
+    // Menampilkan halaman keranjang
     public function index()
     {
         $keranjangs = Keranjang::with('produk.kategori')
