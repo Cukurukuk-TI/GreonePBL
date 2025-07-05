@@ -31,14 +31,6 @@
 </style>
 @endpush
 
-{{-- Script Midtrans Snap.js --}}
-@push('scripts')
-    <script type="text/javascript"
-      src="https://app.sandbox.midtrans.com/snap/snap.js"
-      data-client-key="{{ config('midtrans.client_key') }}"></script>
-@endpush
-
-
 @section('content')
 <div class="max-w-6xl mx-auto p-4 md:p-6">
     <div class="flex justify-between items-center mb-6">
@@ -65,15 +57,11 @@
         </div>
     @endif
 
-    {{-- =============================================== --}}
-    {{-- PERUBAHAN 1: Tambahkan tag <form> pembungkus   --}}
-    {{-- =============================================== --}}
     <form id="checkout-form" method="POST" action="{{ route('keranjang.process') }}">
         @csrf
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
 
-                <!-- Step 1: Detail Pesanan -->
                 <div class="bg-white rounded-xl shadow-lg step-card active">
                     <div class="step-header p-6">
                         <div class="flex items-center">
@@ -96,7 +84,6 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Alamat Pengiriman -->
                 <div class="bg-white rounded-xl shadow-lg step-card active">
                     <div class="step-header p-6">
                         <div class="flex items-center">
@@ -129,7 +116,6 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Metode Pengiriman -->
                 <div class="bg-white rounded-xl shadow-lg step-card active">
                     <div class="step-header p-6">
                         <div class="flex items-center">
@@ -157,7 +143,6 @@
                     </div>
                 </div>
 
-                <!-- Step 4: Metode Pembayaran -->
                 <div class="bg-white rounded-xl shadow-lg step-card active">
                     <div class="step-header p-6">
                         <div class="flex items-center">
@@ -185,7 +170,6 @@
                     </div>
                 </div>
 
-                <!-- Step 5: Catatan -->
                 <div class="bg-white rounded-xl shadow-lg step-card active">
                     <div class="step-header p-6">
                         <div class="flex items-center">
@@ -201,10 +185,15 @@
                 </div>
             </div>
 
-            <!-- Sidebar Ringkasan -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-lg p-6 sticky top-24">
                     <h2 class="text-xl font-bold mb-6 text-gray-800">Ringkasan Belanja</h2>
+                    
+                    {{-- NOTIFIKASI ERROR/INFO BARU --}}
+                    <div id="checkout-notification" class="hidden mb-4 p-4 text-sm rounded-lg" role="alert">
+                        <span id="notification-message"></span>
+                    </div>
+
                     <div class="mb-6">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Punya Kode Promo?</label>
                         <select name="promo_id" id="promo-select" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
@@ -222,12 +211,9 @@
                         <div class="border-t pt-3 mt-3"><div class="flex justify-between items-center"><span class="text-lg font-bold text-gray-800">Total</span><span id="grand-total" class="text-xl font-bold text-green-600">Rp {{ number_format($totalHarga + 10000, 0, ',', '.') }}</span></div></div>
                     </div>
 
-                    {{-- =============================================== --}}
-                    {{-- PERUBAHAN 2: Ubah tombol menjadi type="button"  --}}
-                    {{-- =============================================== --}}
-                    <button type="button" id="pay-button" class="w-full mt-8 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-6 rounded-lg transition-all transform hover:scale-105 disabled:bg-gray-400 disabled:transform-none" {{ $alamats->count() == 0 ? 'disabled' : '' }}>
-                        {{ $alamats->count() == 0 ? 'Tambah Alamat Dulu' : 'Selesaikan Pesanan' }}
-                        @if($alamats->count() > 0) <i class="fas fa-arrow-right ml-2"></i> @endif
+                    <button type="submit" id="process-checkout-btn" class="w-full mt-8 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-6 rounded-lg transition-all transform hover:scale-105 disabled:bg-gray-400 disabled:transform-none" {{ $alamats->count() == 0 ? 'disabled' : '' }}>
+                        <span id="button-text">{{ $alamats->count() == 0 ? 'Tambah Alamat Dulu' : 'Selesaikan Pesanan' }}</span>
+                        <div id="button-spinner" class="hidden w-5 h-5 border-t-2 border-r-2 border-white rounded-full animate-spin mx-auto"></div>
                     </button>
                 </div>
             </div>
@@ -235,21 +221,39 @@
     </form>
 </div>
 
-{{-- ========================================================= --}}
-{{-- PERUBAHAN 3: Logika JavaScript yang telah diperbarui     --}}
-{{-- ========================================================= --}}
 @push('scripts')
+<script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('checkout-form');
+    const processButton = document.getElementById('process-checkout-btn');
+    const buttonText = document.getElementById('button-text');
+    const buttonSpinner = document.getElementById('button-spinner');
+
     const subtotalEl = document.getElementById('subtotal');
     const ongkirEl = document.getElementById('ongkir');
     const diskonEl = document.getElementById('diskon');
     const grandTotalEl = document.getElementById('grand-total');
     const promoSelect = document.getElementById('promo-select');
     const promoErrorEl = document.getElementById('promo-error');
-    const payButton = document.getElementById('pay-button');
-    const originalButtonHtml = payButton.innerHTML; // Simpan teks asli tombol
+
+    // Fungsi untuk menampilkan notifikasi
+    function showNotification(message, type = 'error') {
+        const notificationDiv = document.getElementById('checkout-notification');
+        const messageSpan = document.getElementById('notification-message');
+        
+        notificationDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-yellow-100', 'text-yellow-700');
+        
+        if (type === 'error') {
+            notificationDiv.classList.add('bg-red-100', 'text-red-700');
+            messageSpan.textContent = 'Error! ' + message;
+        } else if (type === 'warning') {
+            notificationDiv.classList.add('bg-yellow-100', 'text-yellow-700');
+            messageSpan.textContent = 'Peringatan! ' + message;
+        }
+
+        notificationDiv.classList.remove('hidden');
+    }
 
     function formatRupiah(angka) {
         return 'Rp ' + Math.round(angka).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -290,73 +294,74 @@ document.addEventListener('DOMContentLoaded', function() {
     promoSelect.addEventListener('change', calculateTotal);
     calculateTotal();
 
-    payButton.addEventListener('click', function(e) {
-        e.preventDefault();
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
 
-        // --- TAMBAHAN: Umpan Balik Visual ---
-        payButton.disabled = true;
-        payButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
-        // ------------------------------------
+        buttonText.classList.add('hidden');
+        buttonSpinner.classList.remove('hidden');
+        processButton.disabled = true;
 
-        const paymentMethod = document.querySelector('input[name="metode_pembayaran"]:checked').value;
+        const formData = new FormData(form);
+        const plainFormData = Object.fromEntries(formData.entries());
+        const formDataJsonString = JSON.stringify(plainFormData);
 
-        if (paymentMethod === 'cod') {
-            form.submit();
-        } else if (paymentMethod === 'transfer') {
-            const formData = new FormData(form);
-            // --- FIX URL Redirect: Gunakan URL Relatif ---
-            // Saya asumsikan route 'keranjang.process' Anda mengarah ke '/checkout'
-            fetch("{{ route('keranjang.process') }}", {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.error || 'Terjadi kesalahan pada server.');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.snap_token) {
-                    window.snap.pay(data.snap_token, {
-                        onSuccess: function(result){
-                             // --- PERUBAHAN: Tambah query parameter status & fix URL ---
-                             // Pastikan route 'pesanans.success' ada di web.php
-                            window.location.href = `/pesanan/success/${result.order_id}?status=success`;
-                        },
-                        onPending: function(result){
-                             // --- PERUBAHAN: Tambah query parameter status & fix URL ---
-                            window.location.href = `/pesanan/success/${result.order_id}?status=pending`;
-                        },
-                        onError: function(result){
-                            alert('Pembayaran gagal. Silakan coba lagi.');
-                            payButton.disabled = false;
-                            payButton.innerHTML = originalButtonHtml; // Kembalikan teks tombol
-                        },
-                        onClose: function(){
-                           alert('Anda menutup pop-up tanpa menyelesaikan pembayaran.');
-                           payButton.disabled = false;
-                           payButton.innerHTML = originalButtonHtml; // Kembalikan teks tombol
-                        }
-                    });
-                } else {
-                    throw new Error(data.error || 'Gagal mendapatkan token pembayaran.');
-                }
-            })
-            .catch(error => {
-                console.error('Fetch Error:', error);
-                alert('Terjadi kesalahan: ' + error.message);
-                payButton.disabled = false;
-                payButton.innerHTML = originalButtonHtml; // Kembalikan teks tombol jika error
-            });
-        }
+        fetch('{{ route("keranjang.process") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: formDataJsonString
+        })
+        .then(response => {
+             if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Terjadi kesalahan pada server.');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            buttonText.classList.remove('hidden');
+            buttonSpinner.classList.add('hidden');
+            processButton.disabled = false;
+
+            if (data.snap_token) {
+                window.snap.pay(data.snap_token, {
+                    onSuccess: function(result) {
+                        window.location.href = `/pesanan/success/${data.order_id}?status=success`;
+                    },
+                    onPending: function(result) {
+                        window.location.href = `/pesanan/success/${data.order_id}?status=pending`;
+                    },
+                    onError: function(result) {
+                        showNotification('Pembayaran gagal. Silakan coba lagi atau periksa detail pembayaran Anda.', 'error');
+                    },
+                    onClose: function() {
+                        showNotification('Anda menutup jendela pembayaran. Pesanan Anda disimpan dengan status pending.', 'warning');
+                    }
+                });
+            } else if (data.redirect_url) {
+                window.location.href = data.redirect_url;
+            } else if (data.error) {
+                showNotification(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            buttonText.classList.remove('hidden');
+            buttonSpinner.classList.add('hidden');
+            processButton.disabled = false;
+            
+            console.error('Error:', error);
+            showNotification(error.message || 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.', 'error');
+        });
+    });
+
+    // Mengubah tombol 'Selesaikan Pesanan' dari type="button" menjadi type="submit" agar event listener di atas bisa berjalan.
+    const payButton = document.getElementById('process-checkout-btn');
+    payButton.addEventListener('click', function() {
+        form.dispatchEvent(new Event('submit', { cancelable: true }));
     });
 });
 </script>
