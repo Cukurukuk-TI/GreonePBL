@@ -19,67 +19,60 @@ class MidtransController extends Controller
         Config::$isProduction = config('midtrans.is_production');
 
         try {
-            // 2. Buat instance notifikasi dari data JSON yang dikirim Midtrans
             $notification = new Notification();
         } catch (\Exception $e) {
             Log::error('Gagal membuat instance Notifikasi Midtrans: ' . $e->getMessage());
             return response()->json(['message' => 'Invalid notification'], 400);
         }
 
-        // 3. Ambil ID pesanan dan status transaksi
         $orderId = $notification->order_id;
         $transactionStatus = $notification->transaction_status;
         $fraudStatus = $notification->fraud_status;
 
-        // Log notifikasi untuk debugging
-        Log::info("Notifikasi Midtrans diterima untuk order_id: {$orderId} dengan status: {$transactionStatus}");
+        Log::info("Notifikasi Midtrans diterima untuk kode_pesanan: {$orderId} dengan status: {$transactionStatus}");
 
-        // 4. Cari pesanan di database Anda
-        $order = Pesanan::find($orderId);
+        // --- CARI PESANAN BERDASARKAN KODE PESANAN ---
+        $pesanan = Pesanan::with('details.produk')->where('kode_pesanan', $orderId)->first();
 
-        if (!$order) {
-            Log::warning("Pesanan dengan ID: {$orderId} tidak ditemukan.");
+        if (!$pesanan) {
+            Log::warning("Pesanan dengan Kode: {$orderId} tidak ditemukan.");
             return response()->json(['message' => 'Order not found'], 404);
         }
 
-        // Jangan proses jika status pesanan sudah final (selesai/dibatalkan)
-        if ($order->status === 'completed' || $order->status === 'cancelled') {
+        // Jangan proses jika status sudah final (selesai, diproses, atau dibatalkan)
+        if (in_array($pesanan->status, ['diproses', 'selesai', 'dibatalkan'])) {
             Log::info("Pesanan {$orderId} sudah dalam status final, notifikasi diabaikan.");
             return response()->json(['message' => 'Notification ignored for final order status.']);
         }
 
-        // 5. Update status pesanan berdasarkan notifikasi
-        if ($transactionStatus == 'capture') {
-            if ($fraudStatus == 'accept') {
-                $order->status = 'processed';
-            }
-        } else if ($transactionStatus == 'settlement') {
-            $order->status = 'processed';
-
-        } else if (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
-            $order->status = 'cancelled';
-
-            // --- TAMBAHAN: LOGIKA PENGEMBALIAN STOK PRODUK ---
-            // Gunakan DB::transaction untuk memastikan semua operasi berhasil
-            DB::transaction(function () use ($order) {
-                foreach ($order->details as $detail) {
-                    // Temukan produk terkait
-                    $produk = Produk::find($detail->produk_id);
-                    if ($produk) {
-                        // Kembalikan stoknya
-                        $produk->increment('stok_produk', $detail->jumlah);
-                        Log::info("Stok untuk produk ID: {$produk->id} dikembalikan sebanyak {$detail->jumlah}.");
+        // Gunakan DB::transaction untuk memastikan semua operasi berhasil
+        return DB::transaction(function () use ($transactionStatus, $fraudStatus, $pesanan) {
+            if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
+                if ($fraudStatus == 'accept') {
+                    // --- LOGIKA BARU ---
+                    // 1. Update status pesanan ke 'diproses'
+                    $pesanan->status = 'diproses';
+                    
+                    // 2. Kurangi stok produk
+                    foreach ($pesanan->details as $detail) {
+                        if ($detail->produk) {
+                            $detail->produk->decrement('stok_produk', $detail->jumlah);
+                            Log::info("Stok untuk produk ID: {$detail->produk->id} dikurangi sebanyak {$detail->jumlah}.");
+                        }
                     }
                 }
-            });
-        }
+            } else if (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
+                // --- LOGIKA BARU ---
+                // Ubah status ke 'dibatalkan'. Stok tidak perlu dikembalikan karena belum dikurangi.
+                $pesanan->status = 'dibatalkan';
+            }
 
-        // 6. Simpan perubahan status ke database
-        $order->save();
+            // Simpan perubahan ke database
+            $pesanan->save();
 
-        Log::info("Status pesanan {$orderId} berhasil diupdate menjadi: {$order->status}");
-
-        return response()->json(['message' => 'Notification successfully processed.']);
+            Log::info("Status pesanan {$pesanan->kode_pesanan} berhasil diupdate menjadi: {$pesanan->status}");
+            return response()->json(['message' => 'Notification successfully processed.']);
+        });
     }
 
     public function handle(Request $request)

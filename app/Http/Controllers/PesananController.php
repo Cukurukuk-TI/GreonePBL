@@ -329,4 +329,76 @@ class PesananController extends Controller
         // Implementasi export jika diperlukan
         // Bisa menggunakan package seperti Laravel Excel
     }
+
+    // Method baru untuk menampilkan halaman pembayaran
+    public function showPaymentPage($id)
+    {
+        $pesanan = Pesanan::where('id', $id)
+            ->where('user_id', Auth::id())
+            // Hanya tampilkan jika statusnya 'unpaid' atau 'pending' dari pembayaran sebelumnya yg gagal
+            ->whereIn('status', ['unpaid', 'pending'])
+            ->firstOrFail();
+
+        // Pastikan ini adalah pesanan transfer
+        if ($pesanan->metode_pembayaran !== 'transfer') {
+            return redirect()->route('user.pesanan')->with('error', 'Pesanan ini tidak memerlukan pembayaran online.');
+        }
+
+        return view('pesanans.payment', compact('pesanan'));
+    }
+
+    // Method baru untuk generate Snap Token via AJAX
+    public function generateSnapToken(Request $request, $id)
+    {
+        $pesanan = Pesanan::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // 1. Otorisasi dan validasi
+        if ($pesanan->metode_pembayaran !== 'transfer' || !in_array($pesanan->status, ['unpaid', 'pending'])) {
+            return response()->json(['error' => 'Pesanan ini tidak dapat diproses.'], 403);
+        }
+
+        // 2. Konfigurasi Midtrans
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = config('midtrans.is_production', false);
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
+
+        // 3. Buat parameter untuk Snap
+        $params = [
+            'transaction_details' => [
+                'order_id' => $pesanan->kode_pesanan,
+                'gross_amount' => $pesanan->total_harga,
+            ],
+            'customer_details' => [
+                'first_name' => Auth::user()->name,
+                'email' => Auth::user()->email,
+            ],
+        ];
+
+        try {
+            DB::beginTransaction();
+            
+            // 4. Dapatkan Snap Token
+            $snapToken = Snap::getSnapToken($params);
+
+            // 5. Update pesanan: simpan token dan ubah status ke 'pending'
+            // Status diubah ke pending untuk menandakan user sudah mencoba bayar.
+            $pesanan->snap_token = $snapToken;
+            $pesanan->status = 'pending'; 
+            $pesanan->save();
+
+            DB::commit();
+
+            // 6. Kirim token ke client
+            return response()->json(['snap_token' => $snapToken]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Midtrans Snap Token Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Gagal memulai sesi pembayaran. Silakan coba lagi.'], 500);
+        }
+    }
+    
 }
