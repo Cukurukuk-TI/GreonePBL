@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use Midtrans\Config;
+use Midtrans\Snap;
+use Illuminate\Support\Facades\Log;
 
 class PesananController extends Controller
 {
@@ -20,7 +23,7 @@ class PesananController extends Controller
         $paymentStatus = $request->query('status', 'success');
         $pesanan = Pesanan::with(['details.produk', 'promo', 'user'])->findOrFail($id);
 
-        return view('pesanans.success', compact('pesanan', 'paymentStatus'));
+        return view('pesanans.sukses', compact('pesanan', 'paymentStatus'));
     }
 
     // Index untuk admin (daftar pesanan aktif saja - TIDAK termasuk cancelled)
@@ -191,33 +194,32 @@ class PesananController extends Controller
     // Method untuk user membatalkan pesanan
     public function cancelByUser(Pesanan $pesanan)
     {
-        // 1. Otorisasi: Pastikan pesanan ini milik pengguna yang sedang login
         if ($pesanan->user_id !== Auth::id()) {
-            abort(403, 'Akses Ditolak.');
+            return back()->with('error', 'Anda tidak memiliki izin untuk mengakses pesanan ini.');
         }
 
-        // 2. Validasi: Hanya pesanan dengan status 'pending' yang bisa dibatalkan
-        if ($pesanan->status !== 'pending') {
-            return back()->with('error', 'Pesanan ini sudah diproses dan tidak dapat dibatalkan.');
+        if (!in_array($pesanan->status, ['unpaid', 'pending'])) {
+            return back()->with('error', 'Pesanan yang sedang diproses atau sudah selesai tidak dapat dibatalkan.');
         }
 
         try {
-            // 3. Mulai Transaksi Database untuk menjaga konsistensi data
             DB::transaction(function () use ($pesanan) {
-                // 4. Kembalikan stok untuk setiap item detail pesanan
-                foreach ($pesanan->details as $detail) {
-                    if ($detail->produk) {
-                        $detail->produk->increment('stok_produk', $detail->jumlah);
+                if ($pesanan->metode_pembayaran == 'cod' && $pesanan->status == 'pending') {
+                    foreach ($pesanan->details as $detail) {
+                        if ($detail->produk) {
+                            $detail->produk->increment('stok_produk', $detail->jumlah);
+                        }
                     }
                 }
-
-                // 5. Ubah status pesanan menjadi 'cancelled'
-                $pesanan->update(['status' => 'cancelled']);
+                
+                $pesanan->status = 'dibatalkan';
+                $pesanan->save();
             });
 
             return redirect()->route('user.pesanan')->with('success', 'Pesanan dengan kode ' . $pesanan->kode_pesanan . ' berhasil dibatalkan.');
 
         } catch (\Exception $e) {
+            Log::error('Gagal membatalkan pesanan: ' . $e->getMessage());
             return back()->with('error', 'Terjadi kesalahan saat membatalkan pesanan. Silakan coba lagi.');
         }
     }
@@ -335,11 +337,9 @@ class PesananController extends Controller
     {
         $pesanan = Pesanan::where('id', $id)
             ->where('user_id', Auth::id())
-            // Hanya tampilkan jika statusnya 'unpaid' atau 'pending' dari pembayaran sebelumnya yg gagal
-            ->whereIn('status', ['unpaid', 'pending'])
+            ->where('status', 'unpaid') // Hanya izinkan bayar jika statusnya 'unpaid'
             ->firstOrFail();
 
-        // Pastikan ini adalah pesanan transfer
         if ($pesanan->metode_pembayaran !== 'transfer') {
             return redirect()->route('user.pesanan')->with('error', 'Pesanan ini tidak memerlukan pembayaran online.');
         }
@@ -352,53 +352,73 @@ class PesananController extends Controller
     {
         $pesanan = Pesanan::where('id', $id)
             ->where('user_id', Auth::id())
-            ->firstOrFail();
+            ->first();
 
-        // 1. Otorisasi dan validasi
-        if ($pesanan->metode_pembayaran !== 'transfer' || !in_array($pesanan->status, ['unpaid', 'pending'])) {
-            return response()->json(['error' => 'Pesanan ini tidak dapat diproses.'], 403);
+        if (!$pesanan) {
+            return response()->json(['error' => 'Pesanan tidak ditemukan.'], 404);
         }
 
-        // 2. Konfigurasi Midtrans
-        Config::$serverKey = config('midtrans.server_key');
-        Config::$isProduction = config('midtrans.is_production', false);
-        Config::$isSanitized = true;
-        Config::$is3ds = true;
-
-        // 3. Buat parameter untuk Snap
-        $params = [
-            'transaction_details' => [
-                'order_id' => $pesanan->kode_pesanan,
-                'gross_amount' => $pesanan->total_harga,
-            ],
-            'customer_details' => [
-                'first_name' => Auth::user()->name,
-                'email' => Auth::user()->email,
-            ],
-        ];
+        if ($pesanan->metode_pembayaran !== 'transfer' || !in_array($pesanan->status, ['unpaid', 'pending'])) {
+            return response()->json(['error' => 'Pesanan ini tidak dapat diproses untuk pembayaran.'], 403);
+        }
 
         try {
+            // Konfigurasi Midtrans
+            Config::$serverKey = config('midtrans.server_key');
+            if (empty(Config::$serverKey)) {
+                throw new \Exception('Server Key Midtrans belum diatur di file .env');
+            }
+            Config::$isProduction = config('midtrans.is_production', false);
+            Config::$isSanitized = true;
+            Config::$is3ds = true;
+
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $pesanan->kode_pesanan,
+                    'gross_amount' => (int) $pesanan->total_harga,
+                ],
+                'customer_details' => [
+                    'first_name' => Auth::user()->name,
+                    'email' => Auth::user()->email,
+                ],
+            ];
+
             DB::beginTransaction();
             
-            // 4. Dapatkan Snap Token
+            // Simpan status pending SEBELUM memanggil Midtrans
+            $pesanan->status = 'pending';
+            $pesanan->save();
+            
             $snapToken = Snap::getSnapToken($params);
 
-            // 5. Update pesanan: simpan token dan ubah status ke 'pending'
-            // Status diubah ke pending untuk menandakan user sudah mencoba bayar.
+            // Simpan snap token jika berhasil
             $pesanan->snap_token = $snapToken;
-            $pesanan->status = 'pending'; 
             $pesanan->save();
 
             DB::commit();
 
-            // 6. Kirim token ke client
             return response()->json(['snap_token' => $snapToken]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Midtrans Snap Token Error: ' . $e->getMessage());
-            return response()->json(['error' => 'Gagal memulai sesi pembayaran. Silakan coba lagi.'], 500);
+            
+            // Catat error yang SANGAT DETAIL ke log Laravel
+            Log::error('GAGAL MEMBUAT SNAP TOKEN MIDTRANS', [
+                'pesanan_id' => $pesanan->kode_pesanan,
+                'error_class' => get_class($e),
+                'error_message' => $e->getMessage(),
+                'error_trace' => $e->getTraceAsString() // Ini akan sangat panjang, tapi sangat membantu
+            ]);
+            
+            // Kirim pesan error yang lebih informatif ke frontend
+            $errorMessage = 'Gagal memulai sesi pembayaran. Silakan hubungi admin.';
+            if (str_contains($e->getMessage(), '401')) {
+                $errorMessage = 'Gagal: Autentikasi Midtrans Gagal. Periksa kembali Server Key Anda.';
+            }
+
+            return response()->json(['error' => $errorMessage], 500);
         }
     }
+
     
 }

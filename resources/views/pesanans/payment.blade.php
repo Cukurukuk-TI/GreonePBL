@@ -3,8 +3,8 @@
 @section('title', 'Lakukan Pembayaran')
 
 @push('scripts_head')
-    {{-- Muat skrip Midtrans di head agar siap digunakan --}}
-    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+    {{-- Memuat skrip Midtrans di head agar siap digunakan --}}
+    <script type="text/javascript" src="{{ config('midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
 @endpush
 
 @section('content')
@@ -16,7 +16,7 @@
             <p class="text-gray-500 mt-1">Pesanan Anda telah dibuat. Segera lakukan pembayaran.</p>
         </div>
 
-        {{-- Notifikasi --}}
+        {{-- Notifikasi akan muncul di sini --}}
         <div id="payment-notification" class="hidden mb-4 p-4 text-sm rounded-lg" role="alert"></div>
 
         {{-- Rincian Pesanan --}}
@@ -50,6 +50,7 @@
     </div>
 </div>
 
+{{-- SCRIPT YANG DIPERBAIKI --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const payButton = document.getElementById('pay-button');
@@ -58,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const notificationDiv = document.getElementById('payment-notification');
 
     function showNotification(message, type = 'error') {
-        notificationDiv.className = 'mb-4 p-4 text-sm rounded-lg'; // Reset class
+        notificationDiv.className = 'mb-4 p-4 text-sm rounded-lg';
         if (type === 'error') {
             notificationDiv.classList.add('bg-red-100', 'text-red-700');
         } else {
@@ -68,8 +69,13 @@ document.addEventListener('DOMContentLoaded', function () {
         notificationDiv.classList.remove('hidden');
     }
 
+    function resetButton() {
+        buttonText.classList.remove('hidden');
+        buttonSpinner.classList.add('hidden');
+        payButton.disabled = false;
+    }
+
     payButton.addEventListener('click', function () {
-        // Tampilkan loading
         buttonText.classList.add('hidden');
         buttonSpinner.classList.remove('hidden');
         payButton.disabled = true;
@@ -82,43 +88,55 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Accept': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.error || `Terjadi kesalahan: ${response.statusText}`);
+                }).catch(() => {
+                    throw new Error(`Terjadi kesalahan pada server (Status: ${response.status})`);
+                });
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.error) {
                 throw new Error(data.error);
             }
-            
+
             if (data.snap_token) {
-                window.snap.pay(data.snap_token, {
-                    onSuccess: function(result) {
-                        window.location.href = `/pesanan/success/{{$pesanan->id}}?status=success`;
-                    },
-                    onPending: function(result) {
-                        window.location.href = `/pesanan/success/{{$pesanan->id}}?status=pending`;
-                    },
-                    onError: function(result) {
-                        showNotification('Pembayaran gagal. Silakan coba lagi.', 'error');
-                        resetButton();
-                    },
-                    onClose: function() {
-                        showNotification('Anda menutup jendela pembayaran.', 'warning');
-                        // Arahkan ke halaman riwayat pesanan agar status 'pending' terlihat
-                        setTimeout(() => window.location.href = '{{ route("user.pesanan") }}', 2000);
-                    }
-                });
+                // *** INTI PERBAIKAN DI SINI ***
+                // Memastikan 'window.snap' sudah ada sebelum memanggil '.pay()'
+                if (window.snap) {
+                    window.snap.pay(data.snap_token, {
+                        onSuccess: function(result) {
+                            window.location.href = `{{ route('pesanan.sukses', $pesanan->id) }}?status=success`;
+                        },
+                        onPending: function(result) {
+                            window.location.href = `{{ route('user.pesanan') }}`;
+                        },
+                        onError: function(result) {
+                            showNotification('Pembayaran gagal. Silakan coba lagi.', 'error');
+                            resetButton();
+                        },
+                        onClose: function() {
+                            showNotification('Anda menutup jendela pembayaran.', 'warning');
+                            setTimeout(() => window.location.href = '{{ route("user.pesanan") }}', 2000);
+                        }
+                    });
+                } else {
+                    // Jika window.snap tidak ada, berarti skrip Midtrans gagal dimuat
+                    throw new Error('Gagal memuat gateway pembayaran. Periksa koneksi internet Anda dan coba lagi.');
+                }
+            } else {
+                throw new Error('Token pembayaran tidak diterima dari server.');
             }
         })
         .catch(error => {
+            console.error('Payment Error:', error);
             showNotification(error.message, 'error');
             resetButton();
         });
     });
-
-    function resetButton() {
-        buttonText.classList.remove('hidden');
-        buttonSpinner.classList.add('hidden');
-        payButton.disabled = false;
-    }
 });
 </script>
 @endsection

@@ -74,14 +74,12 @@ Route::middleware('auth')->group(function () {
     // Pesanan user
     // Route::get('/pesanan/create/{produk}', [PesananController::class, 'create'])->name('pesanans.create');
     // Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanans.store');
-    Route::get('/pesanan/success/{id}', [PesananController::class, 'success'])->name('pesanans.success');
-    Route::get('/pesananuser', [PesananController::class, 'pesanan'])->name('user.pesanan');
-    Route::post('/pesanan/{pesanan}/cancel', [PesananController::class, 'cancelByUser'])->name('pesanan.user.cancel');
-    Route::get('/pesanan-detail/{pesanan}', [App\Http\Controllers\PesananController::class, 'showAjax'])->name('pesanan.detail.ajax');
-    Route::patch('/pesanans/{id}/restore', [PesananController::class, 'restore'])->name('pesanans.restore');
-    Route::delete('/pesanans/{id}/force-delete', [PesananController::class, 'forceDelete'])->name('pesanans.force-delete');
+    Route::get('/pesanan/sukses/{id}', [PesananController::class, 'success'])->name('pesanan.sukses');
+    Route::get('/pesanan', [PesananController::class, 'pesanan'])->name('user.pesanan');
+    Route::post('/pesanan/batal/{pesanan}', [PesananController::class, 'cancelByUser'])->name('pesanan.user.cancel'); // Rute Pembatalan
+    Route::get('/pesanan/detail-ajax/{pesanan}', [PesananController::class, 'showAjax'])->name('pesanan.detail.ajax');
     Route::get('/pesanan/{id}/pembayaran', [PesananController::class, 'showPaymentPage'])->name('pesanan.payment');
-    Route::post('/pesanan/{id}/bayar', [PesananController::class, 'generateSnapToken'])->name('pesanan.pay');
+    Route::post('/pesanan/{id}/bayar', [PesananController::class, 'generateSnapToken'])->name('pesanan.pay'); // Rute Pembayaran
 
     // Testimoni routes for user
     Route::get('/testimoni/create/{pesanan_id}', [TestimoniController::class, 'create'])->name('testimoni.create');
