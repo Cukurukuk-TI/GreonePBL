@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->validateCsrfTokens(except: [
-            '/midtrans/notification' // URL webhook Anda
+            '/midtrans/*' // URL webhook Anda
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

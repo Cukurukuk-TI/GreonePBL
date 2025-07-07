@@ -18,9 +18,12 @@ use Midtrans\Snap;
 
 class KeranjangController extends Controller
 {
-    /**
-     * Menampilkan halaman keranjang belanja pengguna.
-     */
+    public function jumlahCart()
+    {
+        $cart = session()->get('cart', []);
+        return count($cart);
+    }
+
     public function index()
     {
         $keranjangs = Keranjang::with('produk.kategori')
@@ -32,9 +35,6 @@ class KeranjangController extends Controller
         return view('keranjang.index', compact('keranjangs', 'totalHarga'));
     }
 
-    /**
-     * Menambah produk ke keranjang.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -63,11 +63,9 @@ class KeranjangController extends Controller
                 $jumlahBaru = $keranjangExisting->jumlah + $request->jumlah;
 
                 if ($jumlahBaru > $produk->stok_produk) {
-                    // Jangan kirim JSON, tapi redirect dengan pesan error
                     return redirect()->back()->with('error', 'Total jumlah di keranjang melebihi stok!');
                 }
 
-                // Gunakan increment untuk menambah jumlah, ini lebih efisien
                 $keranjangExisting->increment('jumlah', $request->jumlah);
 
             } else {
@@ -80,7 +78,6 @@ class KeranjangController extends Controller
             }
 
             DB::commit();
-            // Pastikan baris ini ada dan tidak diubah
             return redirect()->route('keranjang.index')->with('success', 'Produk berhasil ditambahkan ke keranjang!');
 
         } catch (\Exception $e) {
@@ -89,9 +86,6 @@ class KeranjangController extends Controller
         }
     }
 
-    /**
-     * Update jumlah produk di keranjang .
-     */
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -117,27 +111,18 @@ class KeranjangController extends Controller
             ->with('success', 'Jumlah produk berhasil diupdate!');
     }
 
-    /**
-     * Menghapus satu item dari keranjang.
-     */
     public function destroy($id)
     {
         Keranjang::where('id', $id)->where('user_id', Auth::id())->firstOrFail()->delete();
         return redirect()->back()->with('success', 'Produk berhasil dihapus dari keranjang!');
     }
 
-    /**
-     * Mengosongkan seluruh isi keranjang.
-     */
     public function clear()
     {
         Keranjang::where('user_id', Auth::id())->delete();
         return redirect()->back()->with('success', 'Keranjang berhasil dikosongkan!');
     }
 
-    /**
-     * Menampilkan halaman checkout dengan validasi stok tahap pertama.
-     */
     public function checkout()
     {
         $user = Auth::user();
@@ -147,7 +132,6 @@ class KeranjangController extends Controller
             return redirect()->route('keranjang.index')->with('error', 'Keranjang Anda kosong!');
         }
 
-        // Validasi Stok Tahap 1: Sebelum menampilkan halaman checkout.
         try {
             $this->_validateStockInCart($keranjangs);
         } catch (Exception $e) {
@@ -164,12 +148,8 @@ class KeranjangController extends Controller
         return view('keranjang.checkout', compact('keranjangs', 'totalHarga', 'alamats', 'promos'));
     }
 
-    /**
-     * Memproses pesanan dari keranjang.
-     */
     public function processCheckout(Request $request)
     {
-        // Validasi dasar tetap sama
         $request->validate([
             'alamat_id' => 'required|exists:alamats,id,user_id,' . Auth::id(),
             'metode_pengiriman' => 'required|string|in:diantar,jemput',
@@ -179,24 +159,19 @@ class KeranjangController extends Controller
 
         $keranjangs = Keranjang::with('produk')->where('user_id', Auth::id())->get();
         if ($keranjangs->isEmpty()) {
-            // Jika request dari AJAX, kirim JSON. Jika tidak, redirect.
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'Keranjang kosong!'], 400);
             }
             return redirect()->route('keranjang.index')->with('error', 'Keranjang kosong!');
         }
 
-        // --- LOGIKA UTAMA BARU ---
         try {
-            $orderData = $this->_prepareOrderData($request, $keranjangs); // Siapkan data pesanan
+            $this->_validateStockInCart($keranjangs, true);
+            $orderData = $this->_prepareOrderData($request, $keranjangs);
 
             if ($request->metode_pembayaran == 'transfer') {
-                // ============ ALUR UNTUK MIDTRANS ============
                 $pesanan = DB::transaction(function () use ($orderData, $keranjangs) {
-                    $this->_validateStockInCart($keranjangs, true); // Validasi stok
-                    $pesanan = Pesanan::create($orderData['pesanan']); // Buat pesanan di DB
-
-                    // Pindahkan item keranjang ke detail pesanan
+                    $pesanan = Pesanan::create($orderData['pesanan']);
                     foreach ($keranjangs as $item) {
                         DetailPesanan::create([
                             'pesanan_id' => $pesanan->id,
@@ -205,22 +180,18 @@ class KeranjangController extends Controller
                             'harga_satuan' => $item->harga_satuan,
                             'subtotal' => $item->subtotal,
                         ]);
-                        $item->produk->decrement('stok_produk', $item->jumlah);
                     }
-                    Keranjang::where('user_id', Auth::id())->delete(); // Kosongkan keranjang
                     return $pesanan;
                 });
 
-                // Konfigurasi Midtrans
                 Config::$serverKey = config('midtrans.server_key');
                 Config::$isProduction = config('midtrans.is_production', false);
                 Config::$isSanitized = true;
                 Config::$is3ds = true;
 
-                // Buat parameter untuk Snap
                 $params = [
                     'transaction_details' => [
-                        'order_id' => $pesanan->id,
+                        'order_id' => $pesanan->kode_pesanan,
                         'gross_amount' => $pesanan->total_harga,
                     ],
                     'customer_details' => [
@@ -230,19 +201,21 @@ class KeranjangController extends Controller
                 ];
 
                 $snapToken = Snap::getSnapToken($params);
-
-                // Simpan snap_token dan kembalikan sebagai JSON
                 $pesanan->snap_token = $snapToken;
                 $pesanan->save();
 
-                return response()->json(['snap_token' => $snapToken]); // Kembalikan JSON
+                Keranjang::where('user_id', Auth::id())->delete();
+                
+                // **KIRIM JSON UNTUK DI-HANDLE JAVASCRIPT**
+                return response()->json([
+                    'snap_token' => $snapToken,
+                    'order_id' => $pesanan->id
+                ]);
 
             } else {
-                // ============ ALUR UNTUK COD (LOGIKA LAMA ANDA) ============
-                return DB::transaction(function () use ($orderData, $keranjangs) {
-                    $this->_validateStockInCart($keranjangs, true);
+                // **ALUR UNTUK COD**
+                $pesanan = DB::transaction(function() use ($orderData, $keranjangs) {
                     $pesanan = Pesanan::create($orderData['pesanan']);
-
                     foreach ($keranjangs as $item) {
                         DetailPesanan::create([
                             'pesanan_id' => $pesanan->id,
@@ -251,15 +224,26 @@ class KeranjangController extends Controller
                             'harga_satuan' => $item->harga_satuan,
                             'subtotal' => $item->subtotal,
                         ]);
-                        $item->produk->decrement('stok_produk', $item->jumlah);
                     }
-
-                    Keranjang::where('user_id', Auth::id())->delete();
-                    return redirect()->route('pesanans.success', $pesanan->id)->with('success', 'Pesanan berhasil dibuat!');
+                    $pesanan->update(['status' => 'proses']);
+                    foreach($pesanan->details as $item) {
+                        if ($item->produk) {
+                            $item->produk->decrement('stok_produk', $item->jumlah);
+                        }
+                    }
+                    return $pesanan;
                 });
+                
+                Keranjang::where('user_id', Auth::id())->delete();
+
+                // **KIRIM JSON UNTUK DI-HANDLE JAVASCRIPT**
+                return response()->json([
+                    'redirect_url' => route('pesanans.success', $pesanan->id)
+                ]);
             }
+
         } catch (Exception $e) {
-            // Tangani semua jenis error
+            // **PENGEMBALIAN ERROR SEBAGAI JSON**
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
             }
@@ -267,14 +251,6 @@ class KeranjangController extends Controller
         }
     }
 
-
-    /**
-     * Memvalidasi stok untuk semua item di keranjang.
-     *
-     * @param  \Illuminate\Support\Collection $keranjangs
-     * @param  bool $lockForUpdate Mengunci baris data untuk mencegah race condition.
-     * @throws \Exception
-     */
     private function _validateStockInCart(Collection $keranjangs, bool $lockForUpdate = false): void
     {
         foreach ($keranjangs as $item) {
@@ -288,16 +264,10 @@ class KeranjangController extends Controller
         }
     }
 
-    /**
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Illuminate\Support\Collection $keranjangs
-     * @return array
-     */
     private function _prepareOrderData(Request $request, Collection $keranjangs): array
     {
         $alamat = Alamat::findOrFail($request->alamat_id);
-        $alamat_pengiriman = "{$alamat->label}: {$alamat->nama_penerima}, {$alamat->nomor_hp}, {$alamat->detail_alamat}, {$alamat->kota}, {$alamat->provinsi}, {$alamat->kode_pos}";
+        $alamat_pengiriman = "{$alamat->label}: {$alamat->nama_penerima}, {$alamat->nomor_hp}, {$alamat->detail_alamat}, {$alamat->kota}, {$alamat->provinsi}";
         $subtotal = $keranjangs->sum('subtotal');
         $ongkos_kirim = ($request->metode_pengiriman == 'diantar') ? 10000 : 0;
         $diskon = 0;
@@ -305,7 +275,7 @@ class KeranjangController extends Controller
 
         if ($request->promo_id) {
             $promo = Promo::find($request->promo_id);
-            if ($promo && $promo->is_active && $subtotal >= $promo->minimum_belanja) {
+            if ($promo && $promo->isValid() && $subtotal >= $promo->minimum_belanja) {
                 $diskon = ($subtotal * $promo->besaran_potongan) / 100;
                 $promoId = $promo->id;
             }

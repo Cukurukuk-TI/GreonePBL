@@ -6,115 +6,145 @@
     <title>Bgd Hydrofarm</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    {{-- Font Awesome --}}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    {{-- Leaflet --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
-    <!-- Tailwind CSS -->
+    {{-- Tailwind CSS --}}
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Alpine.js -->
+    {{-- Alpine.js --}}
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    {{-- Custom CSS --}}
     <style>
-        .carousel-wrapper {
-            padding-top: 60px;
+        /* Animasi pulse untuk produk baru */
+        .pulse-animation {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
     </style>
 </head>
 
 <body class="flex flex-col min-h-screen bg-gray-50">
 
-    <!-- Header -->
+    {{-- Header --}}
     <header class="bg-green-700 text-white fixed top-0 w-full z-50 shadow-md" x-data="{ open: false }">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold">Bgd <span class="font-light">hydrofarm.</span></h1>
+        <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-5">
+            <h1 class="text-2xl md:text-3xl font-bold">Bgd <span class="font-light">Hydrofarm</span></h1>
 
-            <!-- Toggle Button -->
-            <button class="md:hidden focus:outline-none" @click="open = !open">
-                <svg class="w-6 h-6" fill="none" stroke="white" viewBox="0 0 24 24">
-                    <path x-show="!open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 6h16M4 12h16M4 18h16" />
-                    <path x-show="open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12" />
+            {{-- Mobile Toggle --}}
+            <button @click="open = !open" class="md:hidden focus:outline-none">
+                <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
 
-            <!-- Desktop Navigation -->
-            <nav class="hidden md:flex space-x-6 text-white font-medium">
-                <a href="/" class="hover:text-green-200">Beranda</a>
-                <a href="{{ route('produk.user') }}" class="hover:text-green-200">Produk</a>
-                <a href="/artikel" class="hover:text-green-200">Artikel</a>
-                <a href="/kontak" class="hover:text-green-200">Kontak</a>
-                <a href="/tentang" class="hover:text-green-200">Tentang Kami</a>
-                <a class="nav-link" href="/keranjang"><i class="fas fa-shopping-bag"></i></a>
-                <a class="nav-link" href="/profile"><i class="fas fa-user"></i></a>
-            </nav>
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center space-x-6 text-white font-medium">
+            <a href="/" class="hover:text-green-200">Beranda</a>
+            <a href="{{ route('produk.user') }}" class="hover:text-green-200">Produk</a>
+            <a href="/artikel" class="hover:text-green-200">Artikel</a>
+            <a href="/kontak" class="hover:text-green-200">Kontak</a>
+            <a href="/tentang" class="hover:text-green-200">Tentang Kami</a>
+
+            <!-- Keranjang dengan Badge -->
+            <a href="/keranjang" class="relative flex items-center hover:text-green-200">
+                <i class="fas fa-shopping-bag mr-1"></i>
+                @if($uniqueProductCount > 0)
+                    <span class="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold rounded-full px-1.5">
+                        {{ $uniqueProductCount }}
+                    </span>
+                @endif
+            </a>
+
+            <!-- Profile -->
+            <a href="/profile" class="flex items-center hover:text-green-200">
+                <i class="fas fa-user mr-1"></i>
+            </a>
+        </nav>
         </div>
 
+        {{-- Mobile Navigation --}}
+        <nav x-show="open" x-transition x-cloak class="md:hidden bg-green-600">
         <!-- Mobile Navigation -->
-        <div class="md:hidden" x-show="open" x-transition x-cloak>
-            <div class="pt-4 space-y-2">
-                <a href="/" class="block py-2 hover:text-green-600">Beranda</a>
-                <a href="/produk" class="block py-2 hover:text-green-600">Produk</a>
-                <a href="/artikel" class="block py-2 hover:text-green-600">Artikel</a>
-                <a href="/kontak" class="block py-2 hover:text-green-600">Kontak</a>
-                <a href="/tentang" class="block py-2 hover:text-green-600">Tentang Kami</a>
+        <div class="md:hidden" x-show="mobileMenuOpen" x-transition x-cloak>
+            <div class="pt-4 pb-4 px-6 space-y-2 bg-green-700 text-white font-medium">
+                <a href="/" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Beranda</a>
+                <a href="{{ route('produk.user') }}" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Produk</a>
+                <a href="/artikel" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Artikel</a>
+                <a href="/kontak" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Kontak</a>
+                <a href="/tentang" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Tentang Kami</a>
+
+                <a href="/keranjang" class="flex items-center py-2 hover:text-green-200" @click="mobileMenuOpen = false">
+                    <i class="fas fa-shopping-bag mr-2"></i>
+                    <span>Keranjang</span>
+                    @if($uniqueProductCount > 0)
+                        <span class="ml-2 bg-red-500 text-white text-xs font-bold rounded-full px-1.5">
+                            {{ $uniqueProductCount }}
+                        </span>
+                    @endif
+                </a>
+
+                <a href="/profile" class="flex items-center py-2 hover:text-green-200" @click="mobileMenuOpen = false">
+                    <i class="fas fa-user mr-2"></i> 
+                    <span>Profil</span>
+                </a>
             </div>
         </div>
+        </nav>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow text-center py-20 px-6">
+    {{-- Main Content --}}
+    <main class="flex-grow py-20 px-4 sm:px-6 lg:px-8">
         @yield('content')
     </main>
 
-    <!-- Footer -->
+    {{-- Footer --}}
     <footer class="bg-gray-100 py-6">
-        <div class="max-w-7xl mx-auto px-6 text-center text-gray-600">
-            <p>© 2025 Bgd Hydrofarm. All rights reserved.</p>
+        <div class="max-w-7xl mx-auto px-4 text-center text-gray-600 text-sm">
+            © {{ date('Y') }} Bgd Hydrofarm. All rights reserved.
         </div>
     </footer>
 
-    <!-- JavaScript Animations -->
+    {{-- Javascript --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Add interactive effects to category cards
-            const categoryCards = document.querySelectorAll('.category-card');
-
-            categoryCards.forEach(card => {
-                card.addEventListener('mouseenter', function () {
-                    this.style.transform = 'translateY(-10px)';
-                    this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.15)';
+            // Hover effect untuk card kategori
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-8px)';
+                    card.style.boxShadow = '0 12px 24px rgba(0,0,0,0.15)';
                 });
-
-                card.addEventListener('mouseleave', function () {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
-                });
-
-                card.addEventListener('mousedown', function () {
-                    this.style.transform = 'translateY(2px) scale(0.98)';
-                });
-
-                card.addEventListener('mouseup', function () {
-                    this.style.transform = 'translateY(-10px) scale(1)';
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = '';
+                    card.style.boxShadow = '';
                 });
             });
 
-            const newProducts = document.querySelectorAll('[data-new]');
-            newProducts.forEach(product => {
+            // Efek pulse untuk produk baru
+            document.querySelectorAll('[data-new]').forEach(product => {
                 product.classList.add('pulse-animation');
-                setTimeout(() => {
-                    product.classList.remove('pulse-animation');
-                }, 6000);
+                setTimeout(() => product.classList.remove('pulse-animation'), 6000);
             });
         });
     </script>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     @stack('scripts')
 
 </body>
-
 </html>

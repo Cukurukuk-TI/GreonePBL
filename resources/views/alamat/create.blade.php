@@ -1,53 +1,86 @@
-{{-- resources/views/alamat/create.blade.php --}}
 @extends('layouts.alamat')
 
 @section('alamat-content')
-<div class="max-w-xl bg-white p-6 rounded shadow">
-    <h2 class="text-lg font-bold mb-4">Tambah Alamat Baru</h2>
+<div class="w-full max-w-4xl bg-white p-6 rounded-md shadow-md mx-auto">
+    <h2 class="text-2xl font-bold mb-4 text-gray-800">Tambah Alamat Baru</h2>
+
     <form action="{{ route('alamat.store') }}" method="POST">
         @csrf
 
         @include('alamat.form')
 
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded mt-3">Simpan</button>
+        <div class="mt-6">
+            <button type="submit"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md shadow transition">
+                Simpan
+            </button>
+        </div>
     </form>
 </div>
 @endsection
 
+@push('styles')
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-sA+e2eZb10nM58n38DxtS+w4ja0Ithk1QNYu1l7gRlA=" crossorigin="" />
+
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+</style>
+@endpush
+
+@push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+</style>
+@endpush
+
 @push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-    // Inisialisasi peta
-    const lat = parseFloat(document.getElementById('latitude').value) || -0.949242;
-    const lng = parseFloat(document.getElementById('longitude').value) || 100.354263;
+    const defaultLat = -0.949242;  // Titik tengah Kota Padang
+    const defaultLng = 100.354263;
 
-    const map = L.map('map').setView([lat, lng], 15);
+    const lat = parseFloat(document.getElementById('latitude').value) || defaultLat;
+    const lng = parseFloat(document.getElementById('longitude').value) || defaultLng;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const map = L.map('map').setView([lat, lng], 14);
+
+    // Tile Style mirip Google Maps
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+        subdomains: 'abcd',
         maxZoom: 19,
-        attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    const marker = L.marker([lat, lng], {
-        draggable: true
-    }).addTo(map);
+    // Marker
+    const marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+    marker.bindPopup("Geser marker untuk menentukan lokasi").openPopup();
 
-    // --- BAGIAN SINKRONISASI PETA KE FORM ---
-    marker.on('dragend', function (e) {
+    marker.on('dragend', function () {
         const position = marker.getLatLng();
         const newLat = position.lat;
         const newLng = position.lng;
 
-        // 1. Update input hidden dengan koordinat baru
         document.getElementById('latitude').value = newLat.toFixed(6);
         document.getElementById('longitude').value = newLng.toFixed(6);
 
-        // 2. Lakukan Reverse Geocoding untuk mendapatkan detail alamat
-        // Menggunakan API gratis Nominatim
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}`)
             .then(response => response.json())
             .then(data => {
                 if (data && data.address) {
-                    // 3. Isi field form dengan data dari peta
                     document.querySelector('[name="detail_alamat"]').value = data.display_name || '';
                     document.querySelector('[name="kota"]').value = data.address.city || data.address.town || data.address.county || '';
                     document.querySelector('[name="provinsi"]').value = data.address.state || '';

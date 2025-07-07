@@ -78,10 +78,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesananuser', [PesananController::class, 'pesanan'])->name('user.pesanan');
     Route::post('/pesanan/{pesanan}/cancel', [PesananController::class, 'cancelByUser'])->name('pesanan.user.cancel');
     Route::get('/pesanan-detail/{pesanan}', [App\Http\Controllers\PesananController::class, 'showAjax'])->name('pesanan.detail.ajax');
+    Route::patch('/pesanans/{id}/restore', [PesananController::class, 'restore'])->name('pesanans.restore');
+    Route::delete('/pesanans/{id}/force-delete', [PesananController::class, 'forceDelete'])->name('pesanans.force-delete');
 
     // Testimoni routes for user
     Route::get('/testimoni/create/{pesanan_id}', [TestimoniController::class, 'create'])->name('testimoni.create');
     Route::post('/testimoni/store', [TestimoniController::class, 'store'])->name('testimoni.store');
+    Route::delete('/testimoni/{testimoni}', [TestimoniController::class, 'destroy'])->name('testimoni.destroy');
 });
 
 // Admin route
@@ -182,4 +185,6 @@ Route::post('reset-password', function (Request $request) {
                 : back()->withErrors(['email' => __($status)]);
 })->middleware('guest')->name('password.update');
 
-Route::post('/midtrans/notification', [MidtransController::class, 'notificationHandler'])->name('midtrans.notification');
+    // Route untuk menangani notifikasi dari Midtrans
+    Route::post('/midtrans/callback', [MidtransController::class, 'handle'])->name('midtrans.callback');
+    Route::post('/midtrans/notification', [MidtransController::class, 'notificationHandler'])->name('midtrans.notification');

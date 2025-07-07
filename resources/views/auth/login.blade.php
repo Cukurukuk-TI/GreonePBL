@@ -37,9 +37,8 @@
                         <input id="remember_me" type="checkbox" name="remember" class="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green">
                         <span class="ms-2 text-sm text-brand-text-muted">Ingat saya</span>
                     </label>
-                    <a href=
-                    {{-- "{{ route('password.request') }}"  --}}
-                    class="text-sm font-medium text-green-600 hover:text-brand-green hover:underline">
+                    <a href="{{ route('password.request') }}"
+                       class="text-sm font-medium text-green-600 hover:text-brand-green hover:underline">
                         Lupa Password?
                     </a>
                 </div>
