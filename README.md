@@ -12,7 +12,7 @@ Selamat datang di repository project kami!
 | 🛠️ Penyesuaian UI Admin | 🟡 ON PROCESS | Admin panel sedang dalam pengembangan  |
 | 🧠 Logic Web            | 🟡 ON PROCESS | Proses login, registrasi, dan proteksi |
 | 📝 Penyesuaian Backlog  | 🟡 ON PROCESS | Revisi dan penyesuaian daftar tugas    |
-| 💳 API Midtrans         | 🟠 ON GOING   | Selesaikan hal lain diatas dulu        |
+| 💳 API Midtrans         | 🟠 ON FIXING  | DALAM PERBAIKAN APALAHHHHH             |
 
 ---
 
