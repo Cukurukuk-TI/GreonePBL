@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('alamat_pengiriman');
             $table->string('metode_pembayaran');
             $table->string('metode_pengiriman');
-            $table->enum('status', ['unpaid', 'pending', 'paid', 'proses', 'dikirim', 'selesai', 'dibatalkan', 'expired'])->default('unpaid');
+            $table->enum('status', ['unpaid', 'menunggu_konfirmasi', 'diproses', 'dikirim', 'selesai', 'dibatalkan', 'expired'])->default('unpaid');
             $table->string('snap_token')->nullable();
             $table->text('catatan')->nullable();
             $table->timestamps();
