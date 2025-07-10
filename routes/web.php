@@ -16,6 +16,7 @@ use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\PublicArtikelController;
 use App\Http\Controllers\Admin\PelangganController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\KategoriArtikelController;
 use App\Http\Controllers\Auth\PasswordController;
@@ -156,8 +157,8 @@ Route::post('forgot-password', function (Request $request) {
     $status = Password::sendResetLink($request->only('email'));
 
     return $status === Password::RESET_LINK_SENT
-                ? back()->with('status', __($status))
-                : back()->withErrors(['email' => __($status)]);
+        ? back()->with('status', __($status))
+        : back()->withErrors(['email' => __($status)]);
 })->middleware('guest')->name('password.email');
 
 Route::get('reset-password/{token}', function (string $token) {
@@ -181,10 +182,34 @@ Route::post('reset-password', function (Request $request) {
     );
 
     return $status === Password::PASSWORD_RESET
-                ? redirect()->route('login')->with('status', __($status))
-                : back()->withErrors(['email' => __($status)]);
+        ? redirect()->route('login')->with('status', __($status))
+        : back()->withErrors(['email' => __($status)]);
 })->middleware('guest')->name('password.update');
 
-    // Route untuk menangani notifikasi dari Midtrans
-    Route::post('/midtrans/callback', [MidtransController::class, 'handle'])->name('midtrans.callback');
-    Route::post('/midtrans/notification', [MidtransController::class, 'notificationHandler'])->name('midtrans.notification');
+// Route untuk menangani notifikasi dari Midtrans
+Route::post('/midtrans/callback', [MidtransController::class, 'handle'])->name('midtrans.callback');
+Route::post('/midtrans/notification', [MidtransController::class, 'notificationHandler'])->name('midtrans.notification');
+Route::get('/admin/dashboard/daily-order-stats', [DashboardController::class, 'getDailyOrderStats'])->name('admin.dashboard.daily-order-stats');
+Route::get('/dashboard/daily-order-stats', [DashboardController::class, 'getDailyOrderStatsApi']);
+Route::get('/dashboard/status-pesanan', [DashboardController::class, 'getStatusPesananData']);
+Route::get('/dashboard/pendapatan-harian', [DashboardController::class, 'getPendapatanHarian']);
+Route::get('/produk-terlaris', [DashboardController::class, 'getProdukTerlaris']);
+Route::get('/dashboard/produk-terlaris', [DashboardController::class, 'produkTerlaris'])->name('dashboard.produk-terlaris');
+
+Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
+
+
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard'); // <-- INI PERBAIKANNYA
+    Route::get('/produk-terlaris-ajax', [AdminController::class, 'getProdukTerlarisAjax'])->name('produk-terlaris-ajax');
+    Route::get('/pesanans/cancelled', [AdminController::class, 'cancelledPesanans'])->name('pesanans.cancelled');
+    Route::patch('/pesanans/{pesanan}/restore', [AdminController::class, 'restorePesanan'])->name('pesanans.restore');
+    Route::delete('/pesanans/{pesanan}/force-delete', [AdminController::class, 'forceDeletePesanan'])->name('pesanans.force-delete');
+});
+
+
+Route::get('/produk-terlaris-ajax', [DashboardController::class, 'getProdukTerlarisAjax'])->name('produk-terlaris-ajax');
+Route::get('/admin/grafik-pendapatan-ajax', [DashboardController::class, 'ajaxPendapatan']);
+Route::get('/admin/grafik-pesanan-ajax', [DashboardController::class, 'ajaxPesanan']);
+Route::get('/admin/produk-terlaris-ajax', [DashboardController::class, 'getProdukTerlarisData']);
