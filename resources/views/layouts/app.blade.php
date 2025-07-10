@@ -163,7 +163,7 @@
     @endif
 
     <!-- Main Content -->
-    <main class="flex-grow py-20 px-4 sm:px-6 lg:px-8">
+    <main class="flex-grow py-10 px-4 sm:px-6 lg:px-8">
         @yield('content')
     </main>
 
