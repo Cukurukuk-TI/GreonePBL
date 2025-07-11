@@ -9,7 +9,7 @@
     @else
         <div class="flex flex-wrap justify-center gap-8">
             @foreach($kategoris as $kategori)
-                <a href="{{route('produk.user')}}"
+                <a href="{{ route('produk.kategori', $kategori->id) }}"
                    class="w-80 bg-white shadow-md rounded-xl overflow-hidden transform transition duration-150 hover:scale-105 hover:shadow-xl">
                     
                     @if ($kategori->gambar_kategori)
