@@ -99,13 +99,38 @@ class ProdukController extends Controller
     }
 
     //untuk menampilkan halaman produk yang nantinya akan diakses oleh user dalam bentuk chart
-    public function showToUser()
-    {
-        $produks = Produk::with('kategori')->latest()->get();
-        $kategoris = Kategori::all();
+public function showToUser(Request $request)
+{
+    $query = Produk::with('kategori');
 
-        return view('user.produk', compact('produks', 'kategoris'));
+    if ($request->filled('kategori')) {
+        $query->where('id_kategori', $request->kategori);
     }
+
+    if ($request->filled('search')) {
+        $query->where('nama_produk', 'like', '%' . $request->search . '%');
+    }
+
+    $produks = $query->latest()->get();
+    $kategoris = Kategori::all();
+
+    return view('user.produk', compact('produks', 'kategoris'));
+}
+
+
+public function showByKategori($id)
+{
+    $kategoris = Kategori::all();
+    $kategori = Kategori::findOrFail($id);
+    $produks = Produk::with('kategori')->where('id_kategori', $id)->latest()->get();
+
+    return view('user.produk', [
+        'produks' => $produks,
+        'kategoris' => $kategoris, // jika masih perlu
+        'nama_kategori' => $kategori->nama_kategori,
+    ]);
+}
+
 
     //unutk menampilkan halaman detail produk 
     public function show($id)
