@@ -18,7 +18,7 @@
                 <a href="/" class="hover:text-green-200">Beranda</a>
                 <a href="{{ route('produk.user') }}" class="hover:text-green-200">Produk</a>
                 <a href="/artikel" class="hover:text-green-200">Artikel</a>
-                <a href="/kontak" class="hover:text-green-200">Kontak</a>
+                {{-- <a href="/kontak" class="hover:text-green-200">Kontak</a> --}}
                 <a href="/tentang" class="hover:text-green-200">Tentang Kami</a>
                 <a class="nav-link" href="/keranjang"><i class="fas fa-shopping-bag"></i></a>
                 <a class="nav-link" href="/profile"><i class="fas fa-user"></i></a>
@@ -31,7 +31,7 @@
                 <a href="/" class="block py-2 hover:text-green-600">Beranda</a>
                 <a href="/produk" class="block py-2 hover:text-green-600">Produk</a>
                 <a href="/artikel" class="block py-2 hover:text-green-600">Artikel</a>
-                <a href="/kontak" class="block py-2 hover:text-green-600">Kontak</a>
+                {{-- <a href="/kontak" class="block py-2 hover:text-green-600">Kontak</a> --}}
                 <a href="/tentang" class="block py-2 hover:text-green-600">Tentang Kami</a>
             </div>
         </div>

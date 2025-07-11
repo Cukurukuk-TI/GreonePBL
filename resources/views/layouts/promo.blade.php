@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Promo - Sistem Manajemen')</title>
+     <!-- Favicon -->
+    <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
     
     {{-- Tailwind CSS --}}
     <script src="https://cdn.tailwindcss.com"></script>
