@@ -240,4 +240,26 @@ class TestimoniController extends Controller
         $user = Auth::user();
         return $user && isset($user->role) && $user->role === 'admin';
     }
+
+    public function approve(Testimoni $testimoni)
+    {
+        if ($this->isAdmin()) {
+            $testimoni->update(['status' => 'approved']);
+            return redirect()->route('admin.testimoni.index')->with('success', 'Testimoni telah disetujui dan ditampilkan.');
+        }
+        return redirect()->back()->with('error', 'Akses ditolak.');
+    }
+
+    /**
+     * Reject the specified testimoni.
+     */
+    public function reject(Testimoni $testimoni)
+    {
+        if ($this->isAdmin()) {
+            $testimoni->update(['status' => 'rejected']);
+            return redirect()->route('admin.testimoni.index')->with('success', 'Testimoni telah ditolak.');
+        }
+        return redirect()->back()->with('error', 'Akses ditolak.');
+    }
+
 }
