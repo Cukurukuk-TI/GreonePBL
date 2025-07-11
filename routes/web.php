@@ -34,7 +34,7 @@ Route::get('/produk', [ProdukController::class, 'showToUser'])->name('produk.use
 Route::get('/deskripsi-produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
 
 // Halaman statis - boleh diakses tanpa login
-Route::view('/tentang', 'user.aboutus');
+Route::view('/tentang', 'tentang');
 Route::view('/kontak', 'kontak');
 
 // Guest-only routes (login/register)
