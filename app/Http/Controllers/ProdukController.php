@@ -135,7 +135,17 @@ public function showByKategori($id)
     //unutk menampilkan halaman detail produk 
     public function show($id)
     {
-        $produk = Produk::with(['kategori', 'testimonis.user'])->findOrFail($id); // Load testimonis beserta user-nya
-        return view('user.deskripsiproduk', compact('produk'));
+        // Langkah 1: Ambil data produk utama berdasarkan ID-nya.
+        $produk = Produk::with('kategori')->findOrFail($id);
+
+        // Langkah 2: Ambil data testimoni secara terpisah, HANYA yang sudah disetujui (approved).
+        $testimonis = Testimoni::where('produk_id', $produk->id)
+                               ->where('status', 'approved') // Filter krusial untuk kontrol kualitas
+                               ->with('user')                // Ambil juga data user-nya
+                               ->latest()                    // Tampilkan yang terbaru di atas
+                               ->paginate(5);                 // Batasi 5 ulasan per halaman (baik untuk performa)
+
+        // Langkah 3: Kirim kedua variabel ('produk' dan 'testimonis') ke view.
+        return view('user.deskripsiproduk', compact('produk', 'testimonis'));
     }
 }

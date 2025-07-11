@@ -74,11 +74,15 @@
                             $produk = $firstDetail ? $firstDetail->produk : null;
                             
                             // Cek apakah sudah ada testimoni untuk pesanan ini
-                            $produkIds = $pesanan->details->pluck('produk_id');
-                            $hasTestimoni = App\Models\Testimoni::where('user_id', auth()->id())
-                                                ->whereIn('produk_id', $produkIds)
-                                                ->exists();
-                        @endphp
+                            $produkId = $pesanan->details->first()->produk_id ?? null;
+                            $testimoni = null;
+                            if ($produkId) {
+                                $testimoni = App\Models\Testimoni::where('user_id', auth()->id())
+                                                                ->where('produk_id', $produkId)
+                                                                ->first();
+                            }
+
+                            @endphp
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4">
                                 <div class="flex items-center space-x-4">
@@ -153,16 +157,28 @@
                                     
                                     {{-- Tombol Testimoni untuk pesanan yang sudah selesai --}}
                                     @if($pesanan->status === 'complete')
-                                        @if($hasTestimoni)
-                                            <button disabled class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-gray-400 text-white text-xs font-medium rounded-md cursor-not-allowed opacity-60">
-                                                <i class="fas fa-check mr-1"></i> Sudah Ditestimoni
-                                            </button>
+                                        @if($testimoni)
+                                            @php
+                                                // Logika untuk menentukan style badge berdasarkan status
+                                                $statusInfo = [
+                                                    'pending' => ['text' => 'Menunggu Persetujuan', 'class' => 'bg-yellow-100 text-yellow-800'],
+                                                    'approved' => ['text' => 'Ulasan Diterbitkan', 'class' => 'bg-green-100 text-green-800'],
+                                                    'rejected' => ['text' => 'Ulasan Ditolak', 'class' => 'bg-red-100 text-red-800'],
+                                                ];
+                                                $currentStatus = $statusInfo[$testimoni->status] ?? ['text' => 'Status Tidak Diketahui', 'class' => 'bg-gray-100 text-gray-800'];
+                                            @endphp
+                                            {{-- Tampilkan badge status, bukan tombol disabled --}}
+                                            <div class="px-3 py-1.5 text-xs font-medium rounded-md text-center {{ $currentStatus['class'] }}">
+                                                {{ $currentStatus['text'] }}
+                                            </div>
                                         @else
+                                            {{-- Tombol untuk memberi testimoni tetap sama --}}
                                             <button onclick="showTestimoniModal('{{ route('testimoni.create', ['pesanan_id' => $pesanan->id]) }}')" class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium rounded-md transition duration-200">
                                                 <i class="fas fa-star mr-1"></i> Beri Testimoni
                                             </button>
                                         @endif
                                     @endif
+
                                 </div>
                             </td>
                         </tr>

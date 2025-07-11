@@ -128,6 +128,8 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
     // Testimoni admin
     Route::get('/testimonis', [TestimoniController::class, 'index'])->name('testimoni.index');
     Route::delete('/testimonis/{testimoni}', [TestimoniController::class, 'destroy'])->name('testimoni.destroy');
+    Route::patch('/testimonis/{testimoni}/approve', [TestimoniController::class, 'approve'])->name('testimoni.approve');
+    Route::patch('/testimonis/{testimoni}/reject', [TestimoniController::class, 'reject'])->name('testimoni.reject');
 });
 
 // Route untuk Verifikasi Email
