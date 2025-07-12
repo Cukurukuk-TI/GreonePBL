@@ -240,4 +240,12 @@ class TestimoniController extends Controller
         $user = Auth::user();
         return $user && isset($user->role) && $user->role === 'admin';
     }
+
+    public function notif()
+    {
+        // Ambil 5 testimoni terbaru
+        $testimoniBaru = Testimoni::with('user')->latest()->take(5)->get();
+
+        return view('admin.dashboard', compact('testimoniBaru'));
+    }
 }
