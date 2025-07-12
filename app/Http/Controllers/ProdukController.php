@@ -111,7 +111,11 @@ public function showToUser(Request $request)
         $query->where('nama_produk', 'like', '%' . $request->search . '%');
     }
 
-    $produks = $query->latest()->get();
+    $produks = Produk::with('kategori')
+        ->withCount('approvedTestimonis') // Menghasilkan kolom 'approved_testimonis_count'
+        ->withAvg('approvedTestimonis', 'rating') // Menghasilkan 'approved_testimonis_avg_rating'
+        ->latest()
+        ->get();
     $kategoris = Kategori::all();
 
     return view('user.produk', compact('produks', 'kategoris'));
@@ -136,7 +140,10 @@ public function showByKategori($id)
     public function show($id)
     {
         // Langkah 1: Ambil data produk utama berdasarkan ID-nya.
-        $produk = Produk::with('kategori')->findOrFail($id);
+        $produk = Produk::with('kategori')
+            ->withCount('approvedTestimonis')
+            ->withAvg('approvedTestimonis', 'rating')
+            ->findOrFail($id);
 
         // Langkah 2: Ambil data testimoni secara terpisah, HANYA yang sudah disetujui (approved).
         $testimonis = Testimoni::where('produk_id', $produk->id)
