@@ -86,6 +86,8 @@ Route::middleware('auth')->group(function () {
     // Testimoni routes for user
     Route::get('/testimoni/create/{pesanan_id}', [TestimoniController::class, 'create'])->name('testimoni.create');
     Route::post('/testimoni/store', [TestimoniController::class, 'store'])->name('testimoni.store');
+    Route::get('/testimoni/{testimoni}/edit', [TestimoniController::class, 'edit'])->name('testimoni.edit');
+    Route::put('/testimoni/{testimoni}', [TestimoniController::class, 'update'])->name('testimoni.update');
     Route::delete('/testimoni/{testimoni}', [TestimoniController::class, 'destroy'])->name('testimoni.destroy');
 });
 
