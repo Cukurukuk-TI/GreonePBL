@@ -81,11 +81,15 @@
                             {{ $user->created_at->isoFormat('D MMMM YYYY') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
-                            <form action="{{ route('admin.pelanggan.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus pelanggan ini?');">
+                            <form action="{{ route('admin.pelanggan.destroy', $user->id) }}" 
+                                method="POST">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900 transition duration-150 ease-in-out">Hapus</button>
                             </form>
+                            <button onclick="confirmDelete({{ $user->id }})" type="submit" 
+                            class="text-red-600 hover:text-red-900 transition duration-150 ease-in-out">
+                                    Hapus
+                            </button>
                         </td>
                     </tr>
                     @empty
@@ -103,4 +107,24 @@
         </div>
     </div>
 </div>
+
+<script>
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: "Data yang dihapus tidak bisa dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    }
+</script>
+
 @endsection

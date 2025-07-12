@@ -97,10 +97,13 @@
                                     </a>
 
                                     {{-- Tombol Hapus --}}
-                                    <form action="{{ route('admin.promos.destroy', $promo->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus promo ini?')">
+                                    <form id="delete-form-{{ $promo->id }}" action="{{ route('admin.promos.destroy', $promo->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-2 rounded-full text-red-600 hover:bg-red-100" title="Hapus">
+                                        <button type="button" 
+                                            onclick="confirmDelete('{{ $promo->id }}')" 
+                                            class="p-2 rounded-full text-red-600 hover:bg-red-100" 
+                                            title="Hapus">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>
@@ -121,4 +124,22 @@
             </table>
         </div>
     </div>
+<script>
+        function confirmDelete(id) {
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: "Data yang dihapus tidak bisa dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    }
+</script>
 @endsection
