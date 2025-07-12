@@ -127,108 +127,94 @@ class TestimoniController extends Controller
         }
     }
 
+    public function edit(Testimoni $testimoni)
+    {
+        // Otorisasi: Pastikan hanya pemilik testimoni yang bisa mengedit
+        if ($testimoni->user_id !== Auth::id()) {
+            return response('Akses ditolak.', 403);
+        }
+
+        // Kirim data testimoni ke view form edit
+        return view('testimoni.edit', compact('testimoni'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Testimoni $testimoni)
+    {
+        // Otorisasi: Pastikan hanya pemilik testimoni yang bisa mengupdate
+        if ($testimoni->user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk mengubah testimoni ini.');
+        }
+
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'komentar' => 'required|string|max:500',
+            'foto_testimoni' => 'nullable|image|max:2048',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $data = $request->only(['rating', 'komentar']);
+
+            // Jika ada foto baru yang di-upload
+            if ($request->hasFile('foto_testimoni')) {
+                // Hapus foto lama jika ada
+                if ($testimoni->foto_testimoni && Storage::disk('public')->exists($testimoni->foto_testimoni)) {
+                    Storage::disk('public')->delete($testimoni->foto_testimoni);
+                }
+                $data['foto_testimoni'] = $request->file('foto_testimoni')->store('testimoni_photos', 'public');
+            }
+
+            // PENTING: Reset status menjadi 'pending' agar admin mereview ulang
+            $data['status'] = 'pending';
+
+            $testimoni->update($data);
+
+            DB::commit();
+
+            return redirect()->route('user.pesanan')->with('success', 'Testimoni berhasil diperbarui dan akan ditinjau ulang oleh admin.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating testimoni: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui testimoni.');
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Testimoni $testimoni)
     {
         try {
-            // Cek apakah testimoni masih ada
-            if (!$testimoni || !$testimoni->exists) {
-                if (request()->expectsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Testimoni tidak ditemukan.'
-                    ], 404);
-                }
-                return redirect()->back()->with('error', 'Testimoni tidak ditemukan.');
-            }
-
-            // Cek autentikasi user
+            // Otorisasi: Pastikan hanya pemilik atau admin yang bisa menghapus
             $user = Auth::user();
-            if (!$user) {
-                if (request()->expectsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Anda harus login terlebih dahulu.'
-                    ], 401);
-                }
-                return redirect()->route('login');
-            }
-
-            // Cek otorisasi
-            $isAdmin = $this->isAdmin();
-            $isOwner = $user->id === $testimoni->user_id;
-
-            // Jika bukan admin dan bukan pemilik testimoni, tolak akses
-            if (!$isAdmin && !$isOwner) {
-                if (request()->expectsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Anda tidak memiliki izin untuk menghapus testimoni ini.'
-                    ], 403);
-                }
+            if (!$user || ($testimoni->user_id !== $user->id && $user->role !== 'admin')) {
                 return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menghapus testimoni ini.');
             }
 
             DB::beginTransaction();
 
-            // Simpan path foto sebelum menghapus record
-            $fotoPath = $testimoni->foto_testimoni;
-
-            // Hapus record testimoni dari database
-            $testimoni->delete();
-
-            // Hapus foto testimoni jika ada
-            if ($fotoPath && Storage::disk('public')->exists($fotoPath)) {
-                Storage::disk('public')->delete($fotoPath);
+            // Hapus foto jika ada
+            if ($testimoni->foto_testimoni && Storage::disk('public')->exists($testimoni->foto_testimoni)) {
+                Storage::disk('public')->delete($testimoni->foto_testimoni);
             }
+            
+            // Hapus record dari database
+            $testimoni->delete();
 
             DB::commit();
 
-            // Tentukan pesan berdasarkan role
-            $message = $isAdmin ? 'Testimoni berhasil dihapus oleh admin.' : 'Testimoni Anda berhasil dihapus.';
-
-            // Log aktivitas penghapusan
-            Log::info('Testimoni deleted successfully', [
-                'deleted_testimoni_id' => $testimoni->id,
-                'deleted_by_user_id' => $user->id,
-                'deleted_by_role' => $isAdmin ? 'admin' : 'user',
-                'original_testimoni_user_id' => $testimoni->user_id
-            ]);
-
-            // Jika request dari AJAX, return JSON response
-            if (request()->expectsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => $message
-                ]);
-            }
-
-            // Tentukan redirect berdasarkan role
-            if ($isAdmin) {
-                return redirect()->route('testimoni.index')->with('success', $message);
-            } else {
-                return redirect()->back()->with('success', $message);
-            }
+            // Redirect kembali ke halaman sebelumnya dengan pesan sukses
+            return redirect()->back()->with('success', 'Testimoni Anda berhasil dihapus.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            Log::error('Error deleting testimoni: ' . $e->getMessage(), [
-                'testimoni_id' => $testimoni->id ?? 'unknown',
-                'user_id' => Auth::id(),
-                'error' => $e->getTraceAsString()
-            ]);
-
-            if (request()->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Terjadi kesalahan saat menghapus testimoni.'
-                ], 500);
-            }
-
-            return redirect()->back()->with('success', 'Testimoni Berhasil Dihapus.');
+            Log::error('Error deleting testimoni: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus testimoni.');
         }
     }
 
