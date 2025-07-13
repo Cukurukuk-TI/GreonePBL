@@ -58,7 +58,7 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $this->updateUserProfile($request);
-        return Redirect::route('profile.index')->with('status', 'profile-updated');
+        return Redirect::route('profile.content')->with('status', 'profile-updated');
     }
 
     /**
