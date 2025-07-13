@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Models\Keranjang;
+use App\Models\Pesanan;
 use App\Models\Testimoni;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
@@ -38,6 +39,10 @@ class AppServiceProvider extends ServiceProvider
 
     View::composer('layouts.admindashboard', function ($view) {
         $view->with('testimoniBaru', Testimoni::latest()->take(5)->get());
+    });
+
+    View::composer('layouts.admindashboard', function ($view) {
+        $view->with('pesananBaru', Pesanan::latest()->take(5)->get());
     });
 
     }
