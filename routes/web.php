@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\KategoriArtikelController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\TestimoniController;
 use App\Http\Controllers\MidtransController;
+use App\Http\Controllers\Admin\Notification;
 
 // Home (Boleh Diakses Guest)
 Route::get('/', [KategoriController::class, 'indexUser'])->name('home');
@@ -127,6 +128,11 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
     // Testimoni admin
     Route::get('/testimonis', [TestimoniController::class, 'index'])->name('testimoni.index');
     Route::delete('/testimonis/{testimoni}', [TestimoniController::class, 'destroy'])->name('testimoni.destroy');
+
+    // Untuk notif
+    Route::post('/notifications/mark-read', [Notification::class, 'markAsRead'])
+    ->name('notifications.mark-read');
+
 });
 
 // Route untuk Verifikasi Email
