@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>@yield('title') - Bgd Hydrofarm</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <!-- Favicon -->
+    <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
 
     {{-- Font Awesome --}}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">

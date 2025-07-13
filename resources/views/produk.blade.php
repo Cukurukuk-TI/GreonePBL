@@ -1,4 +1,4 @@
-@extends('layouts.app') {{-- atau 'layouts.app' jika file-nya ada di resources/views/layouts --}}
+@extends('layouts.app')
 
 @section('content')
     <div class="py-8 px-4">

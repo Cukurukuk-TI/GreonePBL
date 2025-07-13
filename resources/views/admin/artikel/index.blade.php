@@ -3,13 +3,11 @@
 @section('content')
 <div class="container mx-auto px-4 sm:px-8">
     <div class="py-8">
-        <!-- Header Halaman -->
         <div>
             <h2 class="text-2xl font-semibold leading-tight">Manajemen Artikel</h2>
             <p class="text-gray-600">Kelola semua artikel dan kategori yang ada di sistem.</p>
         </div>
 
-        <!-- Card Statistik -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 my-6">
             <div class="bg-white p-5 rounded-lg shadow">
                 <div class="flex items-center">
@@ -35,37 +33,38 @@
             </div>
         </div>
 
-        <!-- Notifikasi Sukses (Untuk Artikel & Kategori) -->
         @if (session('success'))
-            <div id="success-alert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <div id="alert-notification" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
                 <strong class="font-bold">Sukses!</strong>
                 <span class="block sm:inline">{{ session('success') }}</span>
-                <span class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="document.getElementById('success-alert').style.display='none';">
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="document.getElementById('alert-notification').style.display='none';">
                     <svg class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
                 </span>
             </div>
         @endif
-         <div id="category-success-alert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4 hidden" role="alert"></div>
+        {{-- Div ini akan diisi oleh AJAX untuk notifikasi kategori --}}
+        <div id="ajax-alert-container"></div>
 
-        <!-- Tabel Daftar Artikel -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-8">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-semibold">Daftar Postingan Artikel</h3>
-                <a href="{{ route('admin.artikel.trash') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">
-                    <i class="fas fa-archive mr-2"></i>Lihat Arsip
-                </a>
-                <a href="{{ route('admin.artikel.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">
-                    <i class="fas fa-plus mr-2"></i>Create Post Artikel
-                </a>
+                <div class="flex space-x-2">
+                    <a href="{{ route('admin.artikel.trash') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                        <i class="fas fa-archive mr-2"></i>Arsip
+                    </a>
+                    <a href="{{ route('admin.artikel.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                        <i class="fas fa-plus mr-2"></i>Buat Artikel
+                    </a>
+                </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full bg-white">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artikel</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                            <th class="px-6 py-3 text-left">Artikel</th>
+                            <th class="px-6 py-3 text-left">Kategori</th>
+                            <th class="px-6 py-3 text-left">Status</th>
+                            <th class="px-6 py-3 text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -74,7 +73,9 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">
-                                        <img class="h-10 w-10 rounded-full object-cover" src="{{ $artikel->gambar ? asset('storage/' . $artikel->gambar) : 'https://placehold.co/40x40/e2e8f0/e2e8f0' }}" alt="">
+                                        <img class="h-10 w-10 rounded-full object-cover"
+                                             src="{{ $artikel->gambar ? asset('storage/' . $artikel->gambar) : 'https://placehold.co/40x40/e2e8f0/e2e8f0' }}"
+                                             alt="Gambar Artikel">
                                     </div>
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-gray-900">{{ Str::limit($artikel->judul, 40) }}</div>
@@ -82,23 +83,26 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $artikel->kategoriArtikel->nama ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($artikel->status == 'published')
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Published</span>
+                            <td class="px-6 py-4 text-sm text-gray-700">{{ $artikel->kategoriArtikel->nama ?? '-' }}</td>
+                            <td class="px-6 py-4">
+                                @if ($artikel->status === 'published')
+                                    <span class="px-2 inline-flex text-xs font-semibold leading-5 rounded-full bg-green-100 text-green-800">Published</span>
                                 @else
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Draft</span>
+                                    <span class="px-2 inline-flex text-xs font-semibold leading-5 rounded-full bg-gray-100 text-gray-800">Draft</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('admin.artikel.edit', $artikel->id) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                <button onclick="openDeleteModal('{{ route('admin.artikel.destroy', $artikel->id) }}', 'Anda yakin ingin mengarsipkan artikel ini?')"
-                                        class="text-red-600 hover:text-red-900 ml-4">Hapus</button>
+                            <td class="px-6 py-4 text-right text-sm font-medium">
+                                <a href="{{ route('admin.artikel.edit', $artikel->id) }}" class="text-indigo-600 hover:text-indigo-900 transition">Edit</a>
+                                <form action="{{ route('admin.artikel.destroy', $artikel->id) }}" method="POST" class="inline delete-form ml-4">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="text-red-600 hover:text-red-900 btn-delete transition" data-title="Anda yakin ingin memindahkan artikel ini ke arsip?">Hapus</button>
+                                </form>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="text-center py-4">Belum ada artikel yang diposting.</td>
+                            <td colspan="4" class="text-center py-6 text-sm text-gray-500">Belum ada artikel yang diposting.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -109,164 +113,230 @@
             </div>
         </div>
 
-        <!-- Tabel Daftar Kategori -->
-<div class="bg-white p-6 rounded-lg shadow-md">
-    <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-semibold">Daftar Kategori Artikel</h3>
-        <button onclick="openCreateCategoryModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
-            <i class="fas fa-plus mr-2"></i>Create Kategori
-        </button>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-white" id="kategori-table">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Kategori</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @forelse ($kategoriArtikels as $kategori)
-                <tr id="kategori-row-{{ $kategori->id }}">  {{-- Tambahkan ID unik untuk setiap baris --}}
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 nama-kategori">{{ $kategori->nama }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 slug-kategori">{{ $kategori->slug }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        {{-- Perbarui tombol Edit --}}
-                        <button onclick="openEditCategoryModal({{ $kategori->id }}, '{{ $kategori->nama }}')" class="text-indigo-600 hover:text-indigo-900">Edit</button>
-                        <button onclick="openDeleteModal('{{ route('admin.kategori-artikel.destroy', $kategori->id) }}', 'Anda yakin ingin menghapus kategori ini secara permanen?')"
-                                class="text-red-600 hover:text-red-900 ml-4">Hapus</button>
-                    </td>
-                </tr>
-                @empty
-                <tr id="no-kategori-row">
-                    <td colspan="3" class="text-center py-4">Belum ada kategori.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    <div class="mt-4">
-        {{ $kategoriArtikels->links() }}
-    </div>
-</div>
-<div id="edit-category-modal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <form id="edit-category-form" onsubmit="handleCategoryUpdate(event)">
-                @csrf
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Kategori</h3>
-                    <div class="mt-4">
-                        <label for="edit-kategori-nama" class="block text-sm font-medium text-gray-700">Nama Kategori</label>
-                        <input type="text" name="nama" id="edit-kategori-nama" required class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                        <p id="edit-kategori-error" class="text-red-500 text-xs mt-1 hidden"></p>
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm">
-                        Update
-                    </button>
-                    <button type="button" onclick="closeEditCategoryModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Batal
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">Daftar Kategori Artikel</h3>
 
-<!-- Modal untuk Create Kategori -->
-<div id="create-category-modal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <form id="create-category-form" onsubmit="handleCategorySubmit(event)">
-                @csrf
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                        Buat Kategori Baru
-                    </h3>
-                    <div class="mt-4">
-                        <label for="kategori-nama" class="block text-sm font-medium text-gray-700">Nama Kategori</label>
-                        <input type="text" name="nama" id="kategori-nama" required class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                        <p id="kategori-error" class="text-red-500 text-xs mt-1 hidden"></p>
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                        Simpan
-                    </button>
-                    <button type="button" onclick="closeCreateCategoryModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Batal
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal untuk Konfirmasi Hapus -->
-<div id="delete-confirm-modal" class="fixed z-20 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="sm:flex sm:items-start">
-                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                        <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                            Konfirmasi Penghapusan
-                        </h3>
-                        <div class="mt-2">
-                            <p class="text-sm text-gray-500" id="delete-confirm-message">
-                                Apakah Anda yakin? Aksi ini tidak bisa dibatalkan.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <form id="delete-confirm-form" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 sm:ml-3 sm:w-auto sm:text-sm">
-                        Hapus
-                    </button>
-                </form>
-                <button type="button" onclick="closeDeleteModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                    Batal
+                <button onclick="openCreateCategoryPrompt()" class="bg-blue-600 text-white px-4 py-2 rounded">
+                    <i class="fas fa-plus mr-2"></i> Tambah Kategori
                 </button>
+
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white" id="kategori-table">
+                    <thead class="bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <tr>
+                            <th class="px-6 py-3 text-left">Nama Kategori</th>
+                            <th class="px-6 py-3 text-left">Unique Keyword (Slug)</th>
+                            <th class="px-6 py-3 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse ($kategoriArtikels as $kategori)
+                        <tr id="kategori-row-{{ $kategori->id }}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 nama-kategori">{{ $kategori->nama }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 slug-kategori">{{ $kategori->slug }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <!-- Tombol Edit -->
+                                <button 
+                                    onclick="openEditCategoryModal({{ $kategori->id }}, '{{ $kategori->nama }}')" 
+                                    class="text-indigo-600 hover:text-indigo-900">
+                                    Edit
+                                </button>
+
+                                <!-- Tombol Hapus dengan SweetAlert -->
+                                <form 
+                                    action="{{ route('admin.kategori-artikel.destroy', $kategori->id) }}" 
+                                    method="POST" 
+                                    class="inline delete-form ml-4">
+                                    
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button 
+                                        type="button" 
+                                        class="text-red-600 hover:text-red-900 btn-delete"
+                                        data-title="Yakin ingin menghapus kategori ini permanen?">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr id="no-kategori-row">
+                            <td colspan="3" class="text-center py-4 text-gray-500">Belum ada kategori.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4">
+                {{ $kategoriArtikels->links() }}
             </div>
         </div>
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
 <script>
-    // Fungsi untuk membuka modal
-    function openCreateCategoryModal() {
-        document.getElementById('create-category-modal').classList.remove('hidden');
+    /**
+     * Menampilkan notifikasi AJAX universal.
+     * @param {string} message - Pesan yang akan ditampilkan.
+     * @param {string} type - Tipe notifikasi ('success', 'error').
+     */
+    function showAjaxAlert(message, type = 'success') {
+        const container = document.getElementById('ajax-alert-container');
+        const alertColor = type === 'success' ? 'green' : 'red';
+        
+        container.innerHTML = `
+            <div class="bg-${alertColor}-100 border border-${alertColor}-400 text-${alertColor}-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <strong class="font-bold">${type === 'success' ? 'Sukses!' : 'Error!'}</strong>
+                <span class="block sm:inline">${message}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.remove();">
+                    &times;
+                </span>
+            </div>
+        `;
     }
 
-    // Fungsi untuk menutup modal
-    function closeCreateCategoryModal() {
-        document.getElementById('create-category-modal').classList.add('hidden');
-        document.getElementById('create-category-form').reset();
-        document.getElementById('kategori-error').classList.add('hidden');
-    }
+    function openCreateCategoryPrompt() {
+        Swal.fire({
+            title: 'Buat Kategori Baru',
+            html:
+                `<input id="swal-input-kategori" type="text" placeholder="Nama kategori" class="swal2-input">`,
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#2563eb', // Tailwind blue-600
+            cancelButtonColor: '#9ca3af',  // Tailwind gray-400
+            preConfirm: () => {
+                const nama = document.getElementById('swal-input-kategori').value;
+                if (!nama) {
+                    Swal.showValidationMessage('Nama kategori harus diisi');
+                    return false;
+                }
 
-    // Fungsi untuk menangani submit form kategori via AJAX
+                return fetch("{{ route('admin.kategori-artikel.store') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ nama: nama })
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Gagal menambahkan kategori');
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.success) throw new Error(data.message || 'Gagal menyimpan kategori');
+                    return data;
+                })
+                .catch(error => {
+                    Swal.showValidationMessage(error.message);
+                });
+            }
+        }).then((result) => {
+        if (result.isConfirmed && result.value?.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: result.value.message
+            });
+
+            const kategori = result.value.data;
+            const tableBody = document.querySelector('#kategori-table tbody');
+
+            // Hapus row kosong jika ada
+            const emptyRow = document.getElementById('no-kategori-row');
+            if (emptyRow) emptyRow.remove();
+
+            // Buat baris baru
+            const newRow = document.createElement('tr');
+            newRow.id = `kategori-row-${kategori.id}`;
+            newRow.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 nama-kategori">${kategori.nama}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 slug-kategori">${kategori.slug}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button onclick="openEditCategoryModal(${kategori.id}, '${kategori.nama}')" class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                    <button onclick="openDeleteModal('/admin/kategori-artikel/${kategori.id}', 'Anda yakin ingin menghapus kategori ini secara permanen?')" class="text-red-600 hover:text-red-900 ml-4">Hapus</button>
+                </td>
+            `;
+            tableBody.prepend(newRow);
+        }
+    });
+};
+
+    // --- Modal Edit ---
+function openEditCategoryModal(id, currentNama) {
+    Swal.fire({
+        title: 'Edit Kategori',
+        html:
+            `<input id="swal-input-edit" type="text" value="${currentNama}" class="swal2-input" placeholder="Nama kategori">`,
+        showCancelButton: true,
+        confirmButtonText: 'Simpan',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#2563eb', // Tailwind blue
+        cancelButtonColor: '#9ca3af',
+        preConfirm: () => {
+            const newNama = document.getElementById('swal-input-edit').value.trim();
+            if (!newNama) {
+                Swal.showValidationMessage('Nama kategori tidak boleh kosong');
+                return false;
+            }
+
+            return fetch(`/admin/kategori-artikel/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ nama: newNama })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Gagal mengupdate kategori');
+                return response.json();
+            })
+            .then(data => {
+                if (!data.success) throw new Error(data.message || 'Update gagal');
+                return data;
+            })
+            .catch(error => {
+                Swal.showValidationMessage(error.message);
+            });
+        }
+    }).then(result => {
+        if (result.isConfirmed && result.value?.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: result.value.message,
+                timer: 1500,
+                showConfirmButton: false
+            });
+
+            // Update nama dan slug di tabel
+            const row = document.getElementById(`kategori-row-${id}`);
+            if (row) {
+                row.querySelector('.nama-kategori').textContent = result.value.data.nama;
+                row.querySelector('.slug-kategori').textContent = result.value.data.slug;
+            }
+        }
+    });
+}
+
+
+    /*
+    --- KODE JAVASCRIPT DI BAWAH INI DIJADIKAN KOMENTAR (REDUNDAN) ---
+    Fungsi ini tidak diperlukan lagi karena konfirmasi hapus sudah ditangani oleh SweetAlert.
+    
+    function openDeleteModal(deleteUrl, message) { ... }
+    function closeDeleteModal() { ... }
+    */
+
+    // --- Logika AJAX untuk Form Kategori ---
+
     async function handleCategorySubmit(event) {
         event.preventDefault();
         const form = event.target;
@@ -278,49 +348,24 @@
             const response = await fetch("{{ route('admin.kategori-artikel.store') }}", {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                }
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
 
             const result = await response.json();
 
             if (!response.ok) {
-                // Tampilkan error validasi
                 if(result.errors && result.errors.nama) {
                     errorP.textContent = result.errors.nama[0];
                     errorP.classList.remove('hidden');
                 }
-                throw new Error('Network response was not ok');
+                throw new Error('Validasi gagal');
             }
 
-            // Tampilkan notifikasi sukses
-            const successAlert = document.getElementById('category-success-alert');
-            successAlert.innerHTML = `<strong>Sukses!</strong> ${result.message} <span class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none';">&times;</span>`;
-            successAlert.classList.remove('hidden');
-
-            // Tambahkan data baru ke tabel
-            const tableBody = document.querySelector('#kategori-table tbody');
-            const noDataRow = document.getElementById('no-kategori-row');
-            if(noDataRow) {
-                noDataRow.remove();
-            }
-
-            const newRow = `
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${result.data.nama}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${result.data.slug}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                        <a href="#" class="text-red-600 hover:text-red-900 ml-4">Hapus</a>
-                    </td>
-                </tr>
-            `;
-            tableBody.insertAdjacentHTML('beforeend', newRow);
-
-            // Tutup modal
+            // Tampilkan notifikasi dan reload halaman agar data konsisten
+            showAjaxAlert(result.message);
             closeCreateCategoryModal();
+            // Reload halaman untuk menampilkan data terbaru (termasuk paginasi)
+            setTimeout(() => window.location.reload(), 1500);
 
         } catch (error) {
             console.error('Error:', error);
@@ -329,78 +374,50 @@
         }
     }
 
-    // Fungsi untuk membuka modal EDIT
-    function openEditCategoryModal(id, currentName) {
-        const modal = document.getElementById('edit-category-modal');
-        const form = document.getElementById('edit-category-form');
-        const nameInput = document.getElementById('edit-kategori-nama');
-
-        // Set action form ke URL update yang benar
-        let url = "{{ route('admin.kategori-artikel.update', ':id') }}";
-        url = url.replace(':id', id);
-        form.action = url;
-
-        // Isi form dengan nama saat ini
-        nameInput.value = currentName;
-
-        modal.classList.remove('hidden');
-    }
-
-    // Fungsi untuk menutup modal EDIT
-    function closeEditCategoryModal() {
-        document.getElementById('edit-category-modal').classList.add('hidden');
-        document.getElementById('edit-category-form').reset();
-        document.getElementById('edit-kategori-error').classList.add('hidden');
-    }
-
-    // Fungsi untuk menangani submit form UPDATE kategori via AJAX
     async function handleCategoryUpdate(event) {
         event.preventDefault();
         const form = event.target;
-        const url = form.action; // URL sudah benar dari fungsi openEditCategoryModal
+        const url = form.action;
         const errorP = document.getElementById('edit-kategori-error');
-        const csrfToken = document.querySelector('input[name="_token"]').value;
-        const categoryName = document.getElementById('edit-kategori-nama').value;
-
         errorP.classList.add('hidden');
+        
+        // Menggunakan FormData untuk kemudahan
+        const formData = new FormData(form);
+        // Kita perlu menambahkan _method secara manual karena FormData tidak mengambilnya dari @method('PUT')
+        formData.append('_method', 'PUT');
 
         try {
             const response = await fetch(url, {
-                method: 'PUT', // <-- Perubahan 1: Kita kirim sebagai PUT langsung
+                method: 'POST', // Fetch API tidak mendukung PUT secara langsung dalam form-data, jadi kita 'tunnel' melalui POST
+                body: formData,
                 headers: {
-                    'Content-Type': 'application/json', // <-- Perubahan 2: Tentukan tipe konten adalah JSON
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({ // <-- Perubahan 3: Kirim data sebagai string JSON
-                    nama: categoryName
-                })
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                }
             });
 
             const result = await response.json();
 
             if (!response.ok) {
-                // Logika untuk menampilkan error validasi dari server
                 if(result.errors && result.errors.nama) {
                     errorP.textContent = result.errors.nama[0];
                     errorP.classList.remove('hidden');
                 } else {
-                    errorP.textContent = 'Terjadi kesalahan saat update.';
+                    errorP.textContent = result.message || 'Terjadi kesalahan saat update.';
                     errorP.classList.remove('hidden');
                 }
                 throw new Error('Update failed');
             }
 
-            // --- Logika jika sukses (tetap sama) ---
-            const successAlert = document.getElementById('category-success-alert');
-            successAlert.innerHTML = `<strong>Sukses!</strong> ${result.message} <span class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none';">&times;</span>`;
-            successAlert.classList.remove('hidden');
-
+            // Update baris tabel secara dinamis
             const row = document.getElementById(`kategori-row-${result.data.id}`);
-            row.querySelector('.nama-kategori').textContent = result.data.nama;
-            row.querySelector('.slug-kategori').textContent = result.data.slug;
-
+            if (row) {
+                row.querySelector('.nama-kategori').textContent = result.data.nama;
+                row.querySelector('.slug-kategori').textContent = result.data.slug;
+            }
+            
+            showAjaxAlert(result.message);
             closeEditCategoryModal();
 
         } catch (error) {
@@ -408,25 +425,34 @@
         }
     }
 
-    // Fungsi untuk membuka modal konfirmasi hapus
-    function openDeleteModal(deleteUrl, message) {
-        const modal = document.getElementById('delete-confirm-modal');
-        const form = document.getElementById('delete-confirm-form');
-        const confirmMessage = document.getElementById('delete-confirm-message');
+    // --- Konfirmasi Hapus dengan SweetAlert ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Event listener ini berlaku untuk SEMUA tombol dengan class .btn-delete
+        document.body.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-delete')) {
+                const button = e.target;
+                const form = button.closest('form');
+                const title = button.dataset.title || 'Anda yakin ingin menghapus data ini?';
 
-        // Set action form ke URL hapus yang benar
-        form.action = deleteUrl;
+                e.preventDefault(); // Mencegah form submit langsung
 
-        // Set pesan konfirmasi
-        confirmMessage.textContent = message;
-
-        modal.classList.remove('hidden');
-    }
-
-    // Fungsi untuk menutup modal konfirmasi hapus
-    function closeDeleteModal() {
-        document.getElementById('delete-confirm-modal').classList.add('hidden');
-    }
+                Swal.fire({
+                    title: title,
+                    text: "Aksi ini tidak dapat dibatalkan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e3342f',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); // Lanjutkan submit form jika dikonfirmasi
+                    }
+                });
+            }
+        });
+    });
 
 </script>
 @endpush

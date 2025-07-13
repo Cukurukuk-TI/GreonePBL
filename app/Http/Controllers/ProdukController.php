@@ -99,44 +99,39 @@ class ProdukController extends Controller
     }
 
     //untuk menampilkan halaman produk yang nantinya akan diakses oleh user dalam bentuk chart
-public function showToUser(Request $request)
-{
-    $query = Produk::with('kategori');
+    public function showToUser(Request $request)
+    {
+        $query = Produk::with('kategori');
 
-    if ($request->filled('kategori')) {
-        $query->where('id_kategori', $request->kategori);
+        if ($request->filled('kategori')) {
+            $query->where('id_kategori', $request->kategori);
+        }
+
+        if ($request->filled('search')) {
+            $query->where('nama_produk', 'like', '%' . $request->search . '%');
+        }
+
+        $produks = $query->latest()->get();
+        $kategoris = Kategori::all();
+
+        return view('user.produk', compact('produks', 'kategoris'));
     }
 
-    if ($request->filled('search')) {
-        $query->where('nama_produk', 'like', '%' . $request->search . '%');
+
+    public function showByKategori($id)
+    {
+        $kategoris = Kategori::all();
+        $kategori = Kategori::findOrFail($id);
+        $produks = Produk::with('kategori')->where('id_kategori', $id)->latest()->get();
+
+        return view('user.produk', [
+            'produks' => $produks,
+            'kategoris' => $kategoris, // jika masih perlu
+            'nama_kategori' => $kategori->nama_kategori,
+        ]);
     }
 
-    $produks = Produk::with('kategori')
-        ->withCount('approvedTestimonis') // Menghasilkan kolom 'approved_testimonis_count'
-        ->withAvg('approvedTestimonis', 'rating') // Menghasilkan 'approved_testimonis_avg_rating'
-        ->latest()
-        ->get();
-    $kategoris = Kategori::all();
-
-    return view('user.produk', compact('produks', 'kategoris'));
-}
-
-
-public function showByKategori($id)
-{
-    $kategoris = Kategori::all();
-    $kategori = Kategori::findOrFail($id);
-    $produks = Produk::with('kategori')->where('id_kategori', $id)->latest()->get();
-
-    return view('user.produk', [
-        'produks' => $produks,
-        'kategoris' => $kategoris, // jika masih perlu
-        'nama_kategori' => $kategori->nama_kategori,
-    ]);
-}
-
-
-    //unutk menampilkan halaman detail produk 
+    //unutk menampilkan halaman detail produk
     public function show($id)
     {
         // Langkah 1: Ambil data produk utama berdasarkan ID-nya.

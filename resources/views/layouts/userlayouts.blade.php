@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Bgd Hydrofarm')</title>
+     <!-- Favicon -->
+    <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
     
     <!-- External CSS & JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -48,7 +50,7 @@
                 <a href="/" class="hover:text-green-200 transition-colors">Beranda</a>
                 <a href="{{ route('produk.user') }}" class="hover:text-green-200 transition-colors">Produk</a>
                 <a href="/artikel" class="hover:text-green-200 transition-colors">Artikel</a>
-                <a href="/kontak" class="hover:text-green-200 transition-colors">Kontak</a>
+                {{-- <a href="/kontak" class="hover:text-green-200 transition-colors">Kontak</a> --}}
                 <a href="/tentang" class="hover:text-green-200 transition-colors">Tentang Kami</a>
 
                 <!-- Cart with Badge -->
@@ -82,7 +84,7 @@
                 <a href="/" class="block py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">Beranda</a>
                 <a href="{{ route('produk.user') }}" class="block py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">Produk</a>
                 <a href="/artikel" class="block py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">Artikel</a>
-                <a href="/kontak" class="block py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">Kontak</a>
+                {{-- <a href="/kontak" class="block py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">Kontak</a> --}}
                 <a href="/tentang" class="block py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">Tentang Kami</a>
 
                 <a href="/keranjang" class="flex items-center py-2 hover:text-green-200 transition-colors" @click="mobileMenuOpen = false">

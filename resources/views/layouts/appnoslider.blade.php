@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <title>Bgd Hydrofarm</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <!-- Favicon -->
+    <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
 
     {{-- Font Awesome --}}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
@@ -64,7 +66,7 @@
             <a href="/" class="hover:text-green-200">Beranda</a>
             <a href="{{ route('produk.user') }}" class="hover:text-green-200">Produk</a>
             <a href="/artikel" class="hover:text-green-200">Artikel</a>
-            <a href="/kontak" class="hover:text-green-200">Kontak</a>
+            {{-- <a href="/kontak" class="hover:text-green-200">Kontak</a> --}}
             <a href="/tentang" class="hover:text-green-200">Tentang Kami</a>
 
             <!-- Keranjang dengan Badge -->
@@ -90,7 +92,7 @@
                 <a href="/" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Beranda</a>
                 <a href="{{ route('produk.user') }}" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Produk</a>
                 <a href="/artikel" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Artikel</a>
-                <a href="/kontak" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Kontak</a>
+                {{-- <a href="/kontak" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Kontak</a> --}}
                 <a href="/tentang" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Tentang Kami</a>
 
                 <a href="/keranjang" class="flex items-center py-2 hover:text-green-200" @click="mobileMenuOpen = false">

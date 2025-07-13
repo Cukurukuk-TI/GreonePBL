@@ -69,17 +69,19 @@
                             <td class="px-6 py-4 text-center font-medium">{{ $kategori->produks_count ?? 0 }}</td>
                             <td class="px-6 py-4 text-center">
                                 <div class="flex items-center justify-center gap-4">
-                                    {{-- PENYESUAIAN UI: Tombol aksi dibuat lebih minimalis --}}
                                     <a href="{{ route('admin.kategoris.edit', $kategori->id) }}" class="font-medium text-blue-600 hover:text-blue-800" title="Edit">
                                         Edit
                                     </a>
-                                    <form action="{{ route('admin.kategoris.destroy', $kategori->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus kategori ini?')">
+                                    <form id="delete-form-{{ $kategori->id }}" action="{{ route('admin.kategoris.destroy', $kategori->id) }}" method="POST" style="display: none;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="font-medium text-red-600 hover:text-red-800" title="Hapus">
-                                            Hapus
-                                        </button>
                                     </form>
+
+                                    <button type="button"
+                                        onclick="confirmDelete({{ $kategori->id }})"
+                                        class="font-medium text-red-600 hover:text-red-800" title="Hapus">
+                                        Hapus
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -97,4 +99,22 @@
             </table>
         </div>
     </div>
+<script>
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: "Data yang dihapus tidak bisa dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    }
+</script>
 @endsection

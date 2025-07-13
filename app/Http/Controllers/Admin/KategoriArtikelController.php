@@ -77,10 +77,15 @@ class KategoriArtikelController extends Controller
     {
         $kategoriArtikel->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Kategori berhasil dihapus.'
-        ]);
-    }
+        // Cek apakah request berasal dari form biasa (bukan fetch/ajax)
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kategori berhasil dihapus.'
+            ]);
+        }
 
+        // Kalau bukan JSON, kembalikan ke index dengan flash message
+        return redirect()->back()->with('success', 'Kategori berhasil dihapus.');
+    }
 }
