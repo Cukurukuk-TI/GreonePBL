@@ -32,7 +32,7 @@ Route::get('/artikel/{artikel:slug}', [PublicArtikelController::class, 'show'])-
 
 // Produk - BOLEH DILIHAT TANPA LOGIN
 Route::get('/produk', [ProdukController::class, 'showToUser'])->name('produk.user');
-Route::get('/produk/kategori/{id}', [ProdukController::class, 'showByKategori'])->name('produk.kategori');
+Route::get('/produk/kategori/{id?}', [ProdukController::class, 'showToUser'])->name('produk.kategori');
 Route::get('/deskripsi-produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
 
 // Halaman statis - boleh diakses tanpa login

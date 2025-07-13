@@ -99,22 +99,36 @@ class ProdukController extends Controller
     }
 
     //untuk menampilkan halaman produk yang nantinya akan diakses oleh user dalam bentuk chart
-    public function showToUser(Request $request)
+    public function showToUser(Request $request, $kategori_id = null)
     {
-        $query = Produk::with('kategori');
+        // Ambil semua kategori untuk ditampilkan sebagai tombol filter
+        $kategoris = Kategori::all();
+        $nama_kategori_aktif = 'Semua Produk'; // Default title
 
-        if ($request->filled('kategori')) {
-            $query->where('id_kategori', $request->kategori);
+        // Query dasar untuk produk
+        $query = Produk::with('kategori')->latest();
+
+        // Jika ada ID kategori yang diberikan (baik dari URL atau filter)
+        if ($kategori_id) {
+            $kategoriAktif = Kategori::findOrFail($kategori_id);
+            $nama_kategori_aktif = $kategoriAktif->nama_kategori;
+            $query->where('id_kategori', $kategori_id);
         }
 
+        // Pencarian berdasarkan nama produk
         if ($request->filled('search')) {
             $query->where('nama_produk', 'like', '%' . $request->search . '%');
+            $nama_kategori_aktif = 'Hasil Pencarian'; // Update title jika sedang mencari
         }
 
-        $produks = $query->latest()->get();
-        $kategoris = Kategori::all();
+        $produks = $query->get();
 
-        return view('user.produk', compact('produks', 'kategoris'));
+        return view('user.produk', [
+            'produks' => $produks,
+            'kategoris' => $kategoris,
+            'nama_kategori' => $nama_kategori_aktif,
+            'kategori_aktif_id' => $kategori_id // Kirim ID kategori aktif ke view
+        ]);
     }
 
 
