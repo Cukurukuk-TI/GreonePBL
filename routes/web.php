@@ -49,12 +49,20 @@ Route::middleware('guest')->group(function () {
 
 // Semua route ini HANYA untuk user yang sudah login
 Route::middleware('auth')->group(function () {
-    // Profile - HARUS LOGIN
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.content');
+    // Halaman Profil Utama (Tampilan Ringkasan)
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+
+    // Halaman Edit Profil
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Halaman Ganti Password
+    Route::get('/profile/password', [ProfileController::class, 'editPassword'])->name('password.edit');
+    Route::put('/password', [App\Http\Controllers\Auth\PasswordController::class, 'update'])->name('password.update');
+
+    // Halaman Hapus Akun
+    Route::get('/profile/delete', [ProfileController::class, 'delete'])->name('profile.delete');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
     // Alamat
     Route::resource('alamat', AlamatController::class);

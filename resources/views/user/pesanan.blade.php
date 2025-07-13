@@ -1,8 +1,8 @@
-@extends('layouts.userlayouts')
+@extends('layouts.profile')
 
 @section('title', 'Pesanan Saya')
 
-@section('content')
+@section('profile-content')
 <div class="max-w-7xl mx-auto px-4 py-6 pt-16">
     {{-- Header Halaman --}}
     <div class="flex items-center justify-between mb-6">
@@ -72,7 +72,7 @@
                         @php
                             $firstDetail = $pesanan->details->first();
                             $produk = $firstDetail ? $firstDetail->produk : null;
-                            
+
                             // Cek apakah sudah ada testimoni untuk pesanan ini
                             $produkId = $pesanan->details->first()->produk_id ?? null;
                             $testimoni = null;
@@ -145,7 +145,7 @@
                                     <button onclick="showOrderDetail('{{ $pesanan->id }}')" class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition duration-200">
                                         <i class="fas fa-eye mr-1"></i> Detail
                                     </button>
-                                    
+
                                     @if ($pesanan->status == 'pending')
                                         <form action="{{ route('pesanan.user.cancel', $pesanan->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
                                             @csrf
@@ -154,7 +154,7 @@
                                             </button>
                                         </form>
                                     @endif
-                                    
+
                                     {{-- Tombol Testimoni untuk pesanan yang sudah selesai --}}
                                     @if($pesanan->status === 'complete')
                                         @if($testimoni)
@@ -380,8 +380,8 @@ function showTestimoniCard(testimoni) {
         starsHtml += `<svg class="w-5 h-5 ${starClass}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.92 8.72c-.783-.57-.381-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>`;
     }
 
-    const fotoHtml = testimoni.foto_testimoni 
-        ? `<img src="/storage/${testimoni.foto_testimoni}" class="mt-2 w-24 h-24 object-cover rounded-md border">` 
+    const fotoHtml = testimoni.foto_testimoni
+        ? `<img src="/storage/${testimoni.foto_testimoni}" class="mt-2 w-24 h-24 object-cover rounded-md border">`
         : '';
 
     const cardHtml = `
