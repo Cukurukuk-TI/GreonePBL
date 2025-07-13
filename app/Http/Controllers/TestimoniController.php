@@ -202,7 +202,7 @@ class TestimoniController extends Controller
             if ($testimoni->foto_testimoni && Storage::disk('public')->exists($testimoni->foto_testimoni)) {
                 Storage::disk('public')->delete($testimoni->foto_testimoni);
             }
-            
+
             // Hapus record dari database
             $testimoni->delete();
 
@@ -248,4 +248,11 @@ class TestimoniController extends Controller
         return redirect()->back()->with('error', 'Akses ditolak.');
     }
 
+    public function notif()
+    {
+        // Ambil 5 testimoni terbaru
+        $testimoniBaru = Testimoni::with('user')->latest()->take(5)->get();
+
+        return view('admin.dashboard', compact('testimoniBaru'));
+    }
 }
