@@ -73,13 +73,6 @@ php artisan serve
 -   👤 iwd – TW
 -   👤 ivere – TW
 
-## 🙌 Honourable mention:
-
--   🤖 **ChatGPT (OpenAI)** – main
--   🔮 **Gemini (Google)** – sec
--   💡 **Claude (Anthropic)** – backburner
--   🧠 **DeepSeek** – backburner too
-
 ---
 
 ## 📌 Lisensi
