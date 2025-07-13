@@ -99,18 +99,69 @@ class ProdukController extends Controller
     }
 
     //untuk menampilkan halaman produk yang nantinya akan diakses oleh user dalam bentuk chart
-    public function showToUser()
+    public function showToUser(Request $request, $kategori_id = null)
     {
-        $produks = Produk::with('kategori')->latest()->get();
+        // Ambil semua kategori untuk ditampilkan sebagai tombol filter
         $kategoris = Kategori::all();
+        $nama_kategori_aktif = 'Semua Produk'; // Default title
 
-        return view('user.produk', compact('produks', 'kategoris'));
+        // Query dasar untuk produk
+        $query = Produk::with('kategori')->latest();
+
+        // Jika ada ID kategori yang diberikan (baik dari URL atau filter)
+        if ($kategori_id) {
+            $kategoriAktif = Kategori::findOrFail($kategori_id);
+            $nama_kategori_aktif = $kategoriAktif->nama_kategori;
+            $query->where('id_kategori', $kategori_id);
+        }
+
+        // Pencarian berdasarkan nama produk
+        if ($request->filled('search')) {
+            $query->where('nama_produk', 'like', '%' . $request->search . '%');
+            $nama_kategori_aktif = 'Hasil Pencarian'; // Update title jika sedang mencari
+        }
+
+        $produks = $query->get();
+
+        return view('user.produk', [
+            'produks' => $produks,
+            'kategoris' => $kategoris,
+            'nama_kategori' => $nama_kategori_aktif,
+            'kategori_aktif_id' => $kategori_id // Kirim ID kategori aktif ke view
+        ]);
     }
 
-    //unutk menampilkan halaman detail produk 
+
+    public function showByKategori($id)
+    {
+        $kategoris = Kategori::all();
+        $kategori = Kategori::findOrFail($id);
+        $produks = Produk::with('kategori')->where('id_kategori', $id)->latest()->get();
+
+        return view('user.produk', [
+            'produks' => $produks,
+            'kategoris' => $kategoris, // jika masih perlu
+            'nama_kategori' => $kategori->nama_kategori,
+        ]);
+    }
+
+    //unutk menampilkan halaman detail produk
     public function show($id)
     {
-        $produk = Produk::with(['kategori', 'testimonis.user'])->findOrFail($id); // Load testimonis beserta user-nya
-        return view('user.deskripsiproduk', compact('produk'));
+        // Langkah 1: Ambil data produk utama berdasarkan ID-nya.
+        $produk = Produk::with('kategori')
+            ->withCount('approvedTestimonis')
+            ->withAvg('approvedTestimonis', 'rating')
+            ->findOrFail($id);
+
+        // Langkah 2: Ambil data testimoni secara terpisah, HANYA yang sudah disetujui (approved).
+        $testimonis = Testimoni::where('produk_id', $produk->id)
+                               ->where('status', 'approved') // Filter krusial untuk kontrol kualitas
+                               ->with('user')                // Ambil juga data user-nya
+                               ->latest()                    // Tampilkan yang terbaru di atas
+                               ->paginate(5);                 // Batasi 5 ulasan per halaman (baik untuk performa)
+
+        // Langkah 3: Kirim kedua variabel ('produk' dan 'testimonis') ke view.
+        return view('user.deskripsiproduk', compact('produk', 'testimonis'));
     }
 }

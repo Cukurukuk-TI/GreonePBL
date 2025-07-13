@@ -3,18 +3,20 @@
 @section('title', 'Tentang Kami')
 
 @section('content')
-<div class="bg-white">
+<div class="container mx-auto px-4 py-5">
 
-    {{-- Hero Section --}}
-    <section class="text-center py-16 sm:py-20 px-4">
-        <h1 class="text-base font-semibold text-green-600">Tentang Kami</h1>
+<div class="px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-base font-semibold text-green-600 tracking-wide uppercase">Tentang Kami</h1>
         <p class="mt-2 text-4xl sm:text-5xl font-extrabold text-gray-800">
             Membawa Kesegaran Hidroponik ke Meja Anda
         </p>
         <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-600">
             Kami percaya bahwa makanan sehat dan segar adalah hak semua orang. Pelajari lebih lanjut tentang perjalanan dan misi kami di Bgd Hydrofarm.
         </p>
-    </section>
+    </div>
+</div>
+
 
     {{-- Visi & Solusi Section --}}
     <section class="bg-gray-50 py-16 sm:py-20">

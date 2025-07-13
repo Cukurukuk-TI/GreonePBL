@@ -5,13 +5,23 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Kategori;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Artikel;
 
 class KategoriController extends Controller
 {
     public function indexUser()
     {
-        $kategoris = Kategori::withCount('produks')->get();
-        return view('home', compact('kategoris'));
+        // Ambil 4 kategori produk untuk ditampilkan
+        $kategoris = Kategori::withCount('produks')->latest()->take(4)->get();
+
+        // Ambil 3 artikel terbaru yang sudah di-publish
+        $artikels = Artikel::where('status', 'published')
+                           ->latest('tanggal_post')
+                           ->take(3)
+                           ->get();
+
+        // Kirim kedua data ke view
+        return view('home', compact('kategoris', 'artikels'));
     }
 
     // ✅ Menampilkan form tambah & daftar kategori

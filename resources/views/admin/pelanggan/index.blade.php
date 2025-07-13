@@ -81,10 +81,16 @@
                             {{ $user->created_at->isoFormat('D MMMM YYYY') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
-                            <form action="{{ route('admin.pelanggan.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus pelanggan ini?');">
+                            {{-- Form ini sekarang memiliki ID dinamis yang dicari oleh Javascript --}}
+                            <form id="delete-form-{{ $user->id }}" action="{{ route('admin.pelanggan.destroy', $user->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900 transition duration-150 ease-in-out">Hapus</button>
+
+                                {{-- Tombol "Hapus" sekarang menjadi bagian dari form --}}
+                                <button type="button" onclick="confirmDelete({{ $user->id }})"
+                                class="text-red-600 hover:text-red-900 transition duration-150 ease-in-out">
+                                    Hapus
+                                </button>
                             </form>
                         </td>
                     </tr>
@@ -103,4 +109,24 @@
         </div>
     </div>
 </div>
+
+<script>
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: "Data yang dihapus tidak bisa dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    }
+</script>
+
 @endsection

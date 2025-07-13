@@ -1,344 +1,282 @@
 @extends('layouts.admindashboard')
 
 @section('content')
-    <h1 class="text-2xl font-bold mb-4 pt-14">Dashboard</h1>
+    <h1 class="text-2xl font-bold mb-4 ">Dashboard</h1>
     <p>Selamat datang di halaman dashboard admin.</p>
 
-     <table class="table-fixed w-full border-collapse pt-4">
-        <tr>
-            <!-- Total Pendapatan -->
-            <td class="w-[24%] p-2">
-                <div class="bg-white shadow rounded-lg p-4 h-20">
-                    <div class="flex items-center h-full">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-xs font-medium text-gray-500">Total Pendapatan</p>
-                            <p class="text-lg font-bold text-gray-900">Rp{{ number_format($stats['total_pendapatan'], 0, ',', '.') }}</p>
-                        </div>
-                    </div>
-                </div>
-            </td>
-            
-            <!-- Total Pelanggan -->
-            <td class="w-[24%] p-2">
-                <div class="bg-white shadow rounded-lg p-4 h-20">
-                    <div class="flex items-center h-full">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-xs font-medium text-gray-500">Total Pelanggan</p>
-                            <p class="text-lg font-bold text-gray-900">{{ $stats['total_pelanggan'] }}</p>
-                        </div>
-                    </div>
-                </div>
-            </td>
-            
-            <!-- Total Produk -->
-            <td class="w-[24%] p-2">
-                <div class="bg-white shadow rounded-lg p-4 h-20">
-                    <div class="flex items-center h-full">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-xs font-medium text-gray-500">Produk Saat Ini</p>
-                            <p class="text-lg font-bold text-gray-900">{{ $stats['total_produk'] }}</p>
-                        </div>
-                    </div>
-                </div>
-            </td>
-            
-            <div class="grid grid-cols-2 gap-4 mt-6">
-            <div class="bg-white shadow p-4 rounded-lg">
-                <h3 class="text-sm font-semibold mb-2 text-gray-700">Grafik Pendapatan Harian</h3>
-                <canvas id="pendapatanChart"></canvas>
-            </div>
-            <div class="bg-white shadow p-4 rounded-lg">
-                <h3 class="text-sm font-semibold mb-2 text-gray-700">Grafik Jumlah Pesanan Harian</h3>
-                <canvas id="pesananChart"></canvas>
-            </div>
+    {{-- Baris statistik --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {{-- Total Pendapatan --}}
+        <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"><i class="fas fa-money-bill-wave fa-lg text-green-600"></i></div>
+            <div><p class="text-sm text-gray-500">Total Pendapatan</p><p class="text-xl font-bold text-gray-900">Rp{{ number_format($stats['total_pendapatan'], 0, ',', '.') }}</p></div>
         </div>
-        </tr>
-
-            <!-- Pesanan Dikirim -->
-            <td class="p-2">
-                <div class="bg-white shadow rounded-lg p-4 h-20">
-                    <div class="flex items-center h-full">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-xs font-medium text-gray-500">Pesanan Dikirim</p>
-                            <p class="text-lg font-bold text-gray-900">{{ $stats['pesanan_dikirim'] }}</p>
-                        </div>
-                    </div>
-                </div>
-            </td>
-            
-            <!-- Pesanan Dibatalkan -->
-            <td class="p-2">
-                <div class="bg-white shadow rounded-lg p-4 h-20">
-                    <div class="flex items-center h-full">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-xs font-medium text-gray-500">Pesanan Dibatalkan</p>
-                            <p class="text-lg font-bold text-gray-900">{{ $stats['pesanan_dibatalkan'] }}</p>
-                        </div>
-                    </div>
-                </div>
-            </td>
-            
-            <!-- Total Pesanan -->
-            <td class="p-2">
-                <div class="bg-white shadow rounded-lg p-4 h-20">
-                    <div class="flex items-center h-full">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-xs font-medium text-gray-500">Total Pesanan</p>
-                            <p class="text-lg font-bold text-gray-900">{{ $stats['total_pesanan'] }}</p>
-                        </div>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-
-    <!-- Produk Terlaris Section -->
-    <div class="mt-8">
-        <div class="flex justify-between items-center mb-4">
-            <div>
-                <h2 class="text-xl font-bold text-gray-800">Produk Paling Laris</h2>
-                <p class="text-sm text-gray-500" id="periode-text">
-                    @if(isset($currentMonth))
-                        {{ $currentMonth }}
-                    @else
-                        Bulan sekarang
-                    @endif
-                </p>
-            </div>
-            <div class="relative">
-                <select id="periode-filter" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="monthly">Bulanan</option>
-                    <option value="weekly">Mingguan</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                    </svg>
-                </div>
-            </div>
+        {{-- Total Pelanggan --}}
+        <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"><i class="fas fa-users fa-lg text-blue-600"></i></div>
+            <div><p class="text-sm text-gray-500">Total Pelanggan</p><p class="text-xl font-bold text-gray-900">{{ $stats['total_pelanggan'] ?? 0 }}</p></div>
         </div>
-
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex space-x-4 overflow-x-auto" id="produk-container">
-                @if(isset($produkTerlaris) && $produkTerlaris->count() > 0)
-                    @foreach($produkTerlaris as $produk)
-                        <div class="flex-shrink-0 w-48 bg-gray-50 rounded-lg p-4 produk-card" data-periode="monthly">
-                            <div class="w-full h-32 bg-gray-200 rounded-lg mb-3 overflow-hidden">
-                                @if($produk->gambar_produk)
-                                    <img src="{{ asset('storage/' . $produk->gambar_produk) }}" 
-                                         alt="{{ $produk->nama_produk }}" 
-                                         class="w-full h-full object-cover">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center">
-                                        <span class="text-gray-400 text-xs">No Image</span>
-                                    </div>
-                                @endif
-                            </div>
-                            <h3 class="font-semibold text-sm text-gray-800 mb-1 truncate">{{ $produk->nama_produk }}</h3>
-                            <p class="text-xs text-gray-500">{{ $produk->total_terjual }} item</p>
-                        </div>
-                    @endforeach
-                @else
-                    <div class="w-full text-center py-8">
-                        <p class="text-gray-500">Belum ada data produk terlaris</p>
-                    </div>
-                @endif
-            </div>
+        {{-- Produk Saat Ini --}}
+        <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center"><i class="fas fa-box-open fa-lg text-purple-600"></i></div>
+            <div><p class="text-sm text-gray-500">Produk Saat Ini</p><p class="text-xl font-bold text-gray-900">{{ $stats['total_produk'] ?? 0 }}</p></div>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {{-- Total Pesanan --}}
+        <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4">
+            <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center"><i class="fas fa-receipt fa-lg text-indigo-600"></i></div>
+            <div><p class="text-sm text-gray-500">Total Pesanan</p><p class="text-xl font-bold text-gray-900">{{ $stats['total_pesanan'] ?? 0 }}</p></div>
+        </div>
+        {{-- Pesanan Dikirim --}}
+        <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4">
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center"><i class="fas fa-truck fa-lg text-yellow-600"></i></div>
+            <div><p class="text-sm text-gray-500">Pesanan Dikirim</p><p class="text-xl font-bold text-gray-900">{{ $stats['pesanan_dikirim'] ?? 0 }}</p></div>
+        </div>
+        {{-- Pesanan Dibatalkan --}}
+        <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center"><i class="fas fa-times-circle fa-lg text-red-600"></i></div>
+            <div><p class="text-sm text-gray-500">Pesanan Dibatalkan</p><p class="text-xl font-bold text-gray-900">{{ $stats['pesanan_dibatalkan'] ?? 0 }}</p></div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js">
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const periodeFilter = document.getElementById('periode-filter');
-            const periodeText = document.getElementById('periode-text');
+    <hr class="my-8 border-gray-200">
+
+    {{-- GRAFIK BARIS PERTAMA (FILTER DINAMIS) --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <div class="bg-white shadow p-4 rounded-lg">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-lg font-bold text-gray-800">Grafik Pendapatan</h3>
+                <div class="flex items-center gap-2">
+                    <div class="relative">
+                        <select id="pendapatan-periode-filter" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="monthly">Bulanan</option>
+                            <option value="weekly">Mingguan</option>
+                        </select>
+                    </div>
+                    <div class="relative">
+                        <div id="pendapatan-month-container">
+                            <select id="pendapatan-month-selector" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                @for ($i = 1; $i <= 12; $i++)
+                                    <option value="{{ $i }}" {{ $i == now()->month ? 'selected' : '' }}>{{ \Carbon\Carbon::create(null, $i, 1)->translatedFormat('F') }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div id="pendapatan-week-container" class="hidden">
+                            <select id="pendapatan-week-selector" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="current">Minggu Ini</option><option value="1">Minggu 1</option><option value="2">Minggu 2</option><option value="3">Minggu 3</option><option value="4">Minggu 4</option><option value="5">Minggu 5</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="relative h-80"><canvas id="pendapatanChart"></canvas></div>
+        </div>
+        <div class="bg-white shadow p-4 rounded-lg">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-lg font-bold text-gray-800">Grafik Pesanan</h3>
+                 <div class="flex items-center gap-2">
+                    <div class="relative">
+                        <select id="pesanan-periode-filter" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="monthly">Bulanan</option>
+                            <option value="weekly">Mingguan</option>
+                        </select>
+                    </div>
+                    <div class="relative">
+                        <div id="pesanan-month-container">
+                            <select id="pesanan-month-selector" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                 @for ($i = 1; $i <= 12; $i++)
+                                    <option value="{{ $i }}" {{ $i == now()->month ? 'selected' : '' }}>{{ \Carbon\Carbon::create(null, $i, 1)->translatedFormat('F') }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div id="pesanan-week-container" class="hidden">
+                            <select id="pesanan-week-selector" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="current">Minggu Ini</option><option value="1">Minggu 1</option><option value="2">Minggu 2</option><option value="3">Minggu 3</option><option value="4">Minggu 4</option><option value="5">Minggu 5</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="relative h-80"><canvas id="orderStatusChart"></canvas></div>
+        </div>
+    </div>
+
+    <hr class="my-8 border-gray-200">
+
+    {{-- Produk Paling Laris --}}
+    <div class="mt-8">
+        <div class="flex justify-between items-center mb-4">
+            <div><h2 class="text-xl font-bold text-gray-800">Produk Paling Laris</h2><p class="text-sm text-gray-500" id="periode-text-produk">{{ $currentPeriodName }}</p></div>
             
-            // Fungsi untuk mengkonversi nomor bulan ke nama bulan Indonesia
-            function getMonthName(monthNumber) {
-                const months = {
-                    1: 'Januari',
-                    2: 'Februari', 
-                    3: 'Maret',
-                    4: 'April',
-                    5: 'Mei',
-                    6: 'Juni',
-                    7: 'Juli',
-                    8: 'Agustus',
-                    9: 'September',
-                    10: 'Oktober',
-                    11: 'November',
-                    12: 'Desember'
-                };
-                return months[monthNumber] || 'Bulan tidak valid';
-            }
-            
-            periodeFilter.addEventListener('change', function() {
-                const selectedValue = this.value;
-                
-                if (selectedValue === 'monthly') {
-                    // Ambil bulan dari backend atau gunakan bulan saat ini
-                    @if(isset($currentMonth))
-                        periodeText.textContent = '{{ $currentMonth }}';
-                    @else
-                        const currentMonth = new Date().getMonth() + 1;
-                        periodeText.textContent = getMonthName(currentMonth);
-                    @endif
-                } else if (selectedValue === 'weekly') {
-                    periodeText.textContent = 'Minggu sekarang';
-                }
-                
-                // AJAX call untuk mengambil data baru berdasarkan filter
-                fetchProdukTerlaris(selectedValue);
-            });
-            
-            function fetchProdukTerlaris(periode) {
-                console.log('Fetching data for periode:', periode);
-                
-                // Implementasi AJAX untuk mengambil data produk terlaris
-                fetch(`/admin/produk-terlaris?periode=${periode}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        updateProdukContainer(data);
-                        
-                        // Update text periode berdasarkan response
-                        if (data.currentPeriod) {
-                            periodeText.textContent = data.currentPeriod;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            }
-            
-            function updateProdukContainer(data) {
-                const container = document.getElementById('produk-container');
-                
-                if (data.products && data.products.length > 0) {
-                    let html = '';
-                    data.products.forEach(produk => {
-                        html += `
-                            <div class="flex-shrink-0 w-48 bg-gray-50 rounded-lg p-4 produk-card">
-                                <div class="w-full h-32 bg-gray-200 rounded-lg mb-3 overflow-hidden">
-                                    ${produk.gambar_produk ? 
-                                        `<img src="/storage/${produk.gambar_produk}" alt="${produk.nama_produk}" class="w-full h-full object-cover">` :
-                                        '<div class="w-full h-full flex items-center justify-center"><span class="text-gray-400 text-xs">No Image</span></div>'
-                                    }
-                                </div>
-                                <h3 class="font-semibold text-sm text-gray-800 mb-1 truncate">${produk.nama_produk}</h3>
-                                <p class="text-xs text-gray-500">${produk.total_terjual} item</p>
-                            </div>
-                        `;
-                    });
-                    container.innerHTML = html;
-                } else {
-                    container.innerHTML = '<div class="w-full text-center py-8"><p class="text-gray-500">Belum ada data produk terlaris</p></div>';
-                }
-            }
-        });
-
-        // Inisialisasi grafik pendapatan harian
-        document.addEventListener('DOMContentLoaded', function () {
-    if (!window.dailyStats) return;
-
-    const labels = dailyStats.map(item => item.tanggal);
-    const pendapatanData = dailyStats.map(item => item.pendapatan);
-    const pesananData = dailyStats.map(item => item.jumlah_pesanan);
-
-    const ctxPendapatan = document.getElementById('pendapatanChart').getContext('2d');
-    const ctxPesanan = document.getElementById('pesananChart').getContext('2d');
-
-    new Chart(ctxPendapatan, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Rp',
-                data: pendapatanData,
-                backgroundColor: 'rgba(16, 185, 129, 0.6)',
-                borderColor: 'rgba(5, 150, 105, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: value => 'Rp' + value.toLocaleString()
-                    }
-                }
-            }
-        }
-    });
-
-    new Chart(ctxPesanan, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Jumlah Pesanan',
-                data: pesananData,
-                backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                borderColor: 'rgba(37, 99, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-});
-
-    </script>
-    <script src="/path/to/chart.js"></script>
+            {{-- Bagian filter dinonaktifkan sesuai permintaan --}}
+            {{-- 
+            <div class="flex items-center gap-2">
+                <div class="relative">
+                    <select id="produk-periode-filter" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="monthly">Bulanan</option>
+                        <option value="weekly">Mingguan</option>
+                    </select>
+                </div>
+                <div class="relative">
+                    <div id="produk-month-container">
+                        <select id="produk-month-selector" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                             @for ($i = 1; $i <= 12; $i++)
+                                <option value="{{ $i }}" {{ $i == now()->month ? 'selected' : '' }}>{{ \Carbon\Carbon::create(null, $i, 1)->translatedFormat('F') }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div id="produk-week-container" class="hidden">
+                        <select id="produk-week-selector" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="current">Minggu Ini</option><option value="1">Minggu 1</option><option value="2">Minggu 2</option><option value="3">Minggu 3</option><option value="4">Minggu 4</option><option value="5">Minggu 5</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            --}}
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex space-x-4 overflow-x-auto" id="produk-container">
+                @forelse($produkTerlaris as $produk)
+                    <div class="flex-shrink-0 w-48 bg-gray-50 rounded-lg p-4 produk-card">
+                        <div class="w-full h-32 bg-gray-200 rounded-lg mb-3 overflow-hidden">
+                            @if($produk->gambar_produk)
+                                <img src="{{ asset('storage/' . $produk->gambar_produk) }}" alt="{{ $produk->nama_produk }}" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center"><span class="text-gray-400 text-xs">No Image</span></div>
+                            @endif
+                        </div>
+                        <h3 class="font-semibold text-sm text-gray-800 mb-1 truncate">{{ $produk->nama_produk }}</h3>
+                        <p class="text-xs text-gray-500">{{ $produk->total_terjual }} item</p>
+                    </div>
+                @empty
+                    <div class="w-full text-center py-8" id="no-produk-message"><p class="text-gray-500">Belum ada data produk terlaris.</p></div>
+                @endforelse
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let pendapatanChartInstance = null;
+    let orderStatusChartInstance = null;
+    
+    // --- KONFIGURASI TOOLTIP ---
+    const tooltipConfig = { mode: 'index', intersect: false };
+    const tooltipLineCallback = { ...tooltipConfig, callbacks: { label: function(c) { return `${c.dataset.label}: Rp${c.parsed.y.toLocaleString('id-ID')}`; } } };
+
+    // --- FUNGSI-FUNGSI UTAMA (LENGKAP) ---
+    function renderChartError(canvasId, message) {
+        const ctx = document.getElementById(canvasId)?.getContext('2d');
+        if (!ctx) return;
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.font = '16px Arial'; ctx.fillStyle = '#ef4444'; ctx.textAlign = 'center';
+        ctx.fillText(message, ctx.canvas.width / 2, ctx.canvas.height / 2);
+    }
+    function createLineChart(canvasId, chartData) {
+        const ctx = document.getElementById(canvasId); if (!ctx) return null;
+        if (!chartData || !chartData.labels || chartData.labels.length === 0) { renderChartError(canvasId, 'Tidak ada data.'); return null; }
+        return new Chart(ctx, { type: 'line', data: { labels: chartData.labels, datasets: [{ label: 'Pendapatan (Rp)', data: chartData.pendapatan, borderColor: 'rgb(59, 130, 246)', backgroundColor: 'rgba(59, 130, 246, 0.2)', borderWidth: 2, tension: 0.3, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true }, tooltip: tooltipLineCallback }, scales: { y: { beginAtZero: true, ticks: { callback: v => `Rp${v.toLocaleString('id-ID')}` } } } } });
+    }
+    function createBarChart(canvasId, chartData) {
+        const ctx = document.getElementById(canvasId); if (!ctx) return null;
+        if (!chartData || !chartData.labels || chartData.labels.length === 0) { renderChartError(canvasId, 'Tidak ada data.'); return null; }
+        return new Chart(ctx, { type: 'bar', data: { labels: chartData.labels, datasets: [ { label: 'Total Pesanan', data: chartData.total_orders, backgroundColor: 'rgba(59, 130, 246, 0.8)' }, { label: 'Pesanan Selesai', data: chartData.completed_orders, backgroundColor: 'rgba(34, 197, 94, 0.8)' }, { label: 'Pesanan Dibatalkan', data: chartData.cancelled_orders, backgroundColor: 'rgba(239, 68, 68, 0.8)' } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true }, tooltip: tooltipConfig }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } } });
+    }
+
+    function updateDynamicChart(chartType) {
+        const isPendapatan = chartType === 'pendapatan';
+        const elements = {
+            periodeFilter: document.getElementById(isPendapatan ? 'pendapatan-periode-filter' : 'pesanan-periode-filter'),
+            monthSelector: document.getElementById(isPendapatan ? 'pendapatan-month-selector' : 'pesanan-month-selector'),
+            weekSelector: document.getElementById(isPendapatan ? 'pendapatan-week-selector' : 'pesanan-week-selector'),
+            endpoint: isPendapatan ? '/admin/grafik-pendapatan-ajax' : '/admin/grafik-pesanan-ajax',
+            canvasId: isPendapatan ? 'pendapatanChart' : 'orderStatusChart',
+        };
+        let chartInstance = isPendapatan ? pendapatanChartInstance : orderStatusChartInstance;
+        const createFunction = isPendapatan ? createLineChart : createBarChart;
+        
+        const periode = elements.periodeFilter.value;
+        const timeUnit = (periode === 'monthly') ? elements.monthSelector.value : elements.weekSelector.value;
+        const monthContext = elements.monthSelector.value;
+        let url = `${elements.endpoint}?periode=${periode}&time_unit=${timeUnit}&month_context=${monthContext}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (chartInstance) chartInstance.destroy();
+                const newChart = createFunction(elements.canvasId, data);
+                if (isPendapatan) pendapatanChartInstance = newChart;
+                else orderStatusChartInstance = newChart;
+            })
+            .catch(error => console.error(`Error fetching ${chartType} chart:`, error));
+    }
+
+    function fetchProdukTerlaris() {
+        const produkContainer = document.getElementById('produk-container');
+        const periodeText = document.getElementById('periode-text-produk');
+        const periode = document.getElementById('produk-periode-filter').value;
+        const monthSelector = document.getElementById('produk-month-selector');
+        const weekSelector = document.getElementById('produk-week-selector');
+        const timeUnit = (periode === 'monthly') ? monthSelector.value : weekSelector.value;
+        const monthContext = monthSelector.value;
+
+        produkContainer.innerHTML = '<div class="w-full flex justify-center py-8"><i class="fas fa-spinner fa-spin text-gray-400 text-3xl"></i></div>';
+        let url = `/admin/produk-terlaris-ajax?periode=${periode}&time_unit=${timeUnit}&month_context=${monthContext}`;
+        
+        console.log('[DEBUG-PRODUK] Fetching URL:', url); // <-- Tambahan log debug
+
+        fetch(url).then(r => {
+            if (!r.ok) throw new Error(`HTTP error! Status: ${r.status}`);
+            return r.json();
+        }).then(data => {
+            console.log('[DEBUG-PRODUK] Data diterima:', data); // <-- Tambahan log debug
+            let html = '';
+            if (data.products && data.products.length > 0) {
+                data.products.forEach(p => { html += `<div class="flex-shrink-0 w-48 bg-gray-50 rounded-lg p-4"><div class="w-full h-32 bg-gray-200 rounded-lg mb-3 overflow-hidden">${p.gambar_produk ? `<img src="{{ asset('storage/') }}/${p.gambar_produk}" alt="${p.nama_produk}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center"><span class="text-gray-400 text-xs">No Image</span></div>'}</div><h3 class="font-semibold text-sm text-gray-800 mb-1 truncate">${p.nama_produk}</h3><p class="text-xs text-gray-500">${p.total_terjual} item</p></div>`; });
+            } else { html = '<div class="w-full text-center py-8"><p class="text-gray-500">Belum ada data produk untuk periode ini.</p></div>'; }
+            produkContainer.innerHTML = html;
+            if(data.currentPeriod) periodeText.textContent = data.currentPeriod;
+        }).catch(e => {
+            console.error('[DEBUG-PRODUK] Gagal fetch produk terlaris:', e);
+            produkContainer.innerHTML = '<div class="w-full text-center py-8"><p class="text-red-500">Gagal memuat produk.</p></div>';
+        });
+    }
+
+    // --- PENGATURAN EVENT LISTENERS ---
+    function setupFilterListeners(prefix) {
+        const periodeFilter = document.getElementById(`${prefix}-periode-filter`);
+        const monthContainer = document.getElementById(`${prefix}-month-container`);
+        const weekContainer = document.getElementById(`${prefix}-week-container`);
+        const monthSelector = document.getElementById(`${prefix}-month-selector`);
+        const weekSelector = document.getElementById(`${prefix}-week-selector`);
+        
+        // Cek jika elemen filter tidak ditemukan (karena sudah dicomment), maka hentikan fungsi.
+        if (!periodeFilter) return;
+
+        const isProduk = prefix === 'produk';
+        const updateFunction = isProduk ? fetchProdukTerlaris : () => updateDynamicChart(prefix);
+
+        periodeFilter.addEventListener('change', function() {
+            const isMonthly = this.value === 'monthly';
+            monthContainer.classList.toggle('hidden', !isMonthly);
+            weekContainer.classList.toggle('hidden', isMonthly);
+            updateFunction();
+        });
+        monthSelector.addEventListener('change', updateFunction);
+        weekSelector.addEventListener('change', updateFunction);
+    }
+    
+    setupFilterListeners('pendapatan');
+    setupFilterListeners('pesanan');
+    // setupFilterListeners('produk'); // <-- Listener untuk produk dinonaktifkan
+
+    // --- INITIAL LOADS ---
+    pendapatanChartInstance = createLineChart('pendapatanChart', @json($grafikDataPendapatan));
+    orderStatusChartInstance = createBarChart('orderStatusChart', @json($grafikDataPesanan));
+});
+</script>
+@endpush

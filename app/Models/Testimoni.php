@@ -15,6 +15,7 @@ class Testimoni extends Model
         'rating',
         'komentar',
         'foto_testimoni',
+        'status',
     ];
 
     public function user()

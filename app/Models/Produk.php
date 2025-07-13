@@ -35,4 +35,11 @@ class Produk extends Model
     {
         return $this->hasMany(Testimoni::class);
     }
+
+    public function approvedTestimonis()
+    {
+        return $this->hasMany(Testimoni::class)->where('status', 'approved');
+    }
+
+
 }

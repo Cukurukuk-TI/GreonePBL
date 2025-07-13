@@ -1,8 +1,8 @@
-@extends('layouts.userlayouts')
+@extends('layouts.profile')
 
 @section('title', 'Pesanan Saya')
 
-@section('content')
+@section('profile-content')
 <div class="max-w-7xl mx-auto px-4 py-6 pt-16">
     {{-- Header Halaman --}}
     <div class="flex items-center justify-between mb-6">
@@ -72,13 +72,17 @@
                         @php
                             $firstDetail = $pesanan->details->first();
                             $produk = $firstDetail ? $firstDetail->produk : null;
-                            
+
                             // Cek apakah sudah ada testimoni untuk pesanan ini
-                            $produkIds = $pesanan->details->pluck('produk_id');
-                            $hasTestimoni = App\Models\Testimoni::where('user_id', auth()->id())
-                                                ->whereIn('produk_id', $produkIds)
-                                                ->exists();
-                        @endphp
+                            $produkId = $pesanan->details->first()->produk_id ?? null;
+                            $testimoni = null;
+                            if ($produkId) {
+                                $testimoni = App\Models\Testimoni::where('user_id', auth()->id())
+                                                                ->where('produk_id', $produkId)
+                                                                ->first();
+                            }
+
+                            @endphp
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4">
                                 <div class="flex items-center space-x-4">
@@ -141,7 +145,7 @@
                                     <button onclick="showOrderDetail('{{ $pesanan->id }}')" class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition duration-200">
                                         <i class="fas fa-eye mr-1"></i> Detail
                                     </button>
-                                    
+
                                     @if ($pesanan->status == 'pending')
                                         <form action="{{ route('pesanan.user.cancel', $pesanan->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
                                             @csrf
@@ -150,19 +154,22 @@
                                             </button>
                                         </form>
                                     @endif
-                                    
+
                                     {{-- Tombol Testimoni untuk pesanan yang sudah selesai --}}
                                     @if($pesanan->status === 'complete')
-                                        @if($hasTestimoni)
-                                            <button disabled class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-gray-400 text-white text-xs font-medium rounded-md cursor-not-allowed opacity-60">
-                                                <i class="fas fa-check mr-1"></i> Sudah Ditestimoni
+                                        @if($testimoni)
+                                            {{-- Tombol "Lihat Ulasan" yang akan memunculkan card --}}
+                                            <button onclick="showTestimoniCard({{ json_encode($testimoni) }})" class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md">
+                                                <i class="fas fa-comment-alt mr-1"></i> Lihat Ulasan
                                             </button>
                                         @else
-                                            <button onclick="showTestimoniModal('{{ route('testimoni.create', ['pesanan_id' => $pesanan->id]) }}')" class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium rounded-md transition duration-200">
+                                            {{-- Tombol "Beri Testimoni" tetap sama --}}
+                                            <button onclick="showTestimoniModal('{{ route('testimoni.create', ['pesanan_id' => $pesanan->id]) }}')" class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium rounded-md">
                                                 <i class="fas fa-star mr-1"></i> Beri Testimoni
                                             </button>
                                         @endif
                                     @endif
+
                                 </div>
                             </td>
                         </tr>
@@ -330,9 +337,21 @@ document.addEventListener('keydown', function (e) {
 
 // --- Kode untuk Testimoni ---
 function initializeStarRating() {
-    const stars = document.querySelectorAll('#star-rating .star');
-    const ratingValueInput = document.getElementById('rating-value');
-    if(!stars.length || !ratingValueInput) return; // guard clause
+    // Cari elemen rating di dalam modal yang sedang aktif
+    const ratingContainer = document.querySelector('#testimoniModalContainer #star-rating');
+    if (!ratingContainer) return; // Keluar jika tidak ada elemen rating
+
+    const stars = ratingContainer.querySelectorAll('.star');
+    const ratingValueInput = ratingContainer.querySelector('#rating-value');
+
+    if (!stars.length || !ratingValueInput) return;
+
+    function updateStarAppearance(rating) {
+        stars.forEach(s => {
+            s.classList.toggle('text-yellow-400', s.dataset.rating <= rating);
+            s.classList.toggle('text-gray-300', s.dataset.rating > rating);
+        });
+    }
 
     stars.forEach(star => {
         star.addEventListener('click', function() {
@@ -341,66 +360,103 @@ function initializeStarRating() {
         });
     });
 
-    function updateStarAppearance(rating) {
-        stars.forEach(s => {
-            s.classList.toggle('text-yellow-400', s.dataset.rating <= rating);
-            s.classList.toggle('text-gray-300', s.dataset.rating > rating);
-        });
+    // Set tampilan bintang awal berdasarkan nilai yang sudah ada (penting untuk form edit)
+    if (ratingValueInput.value > 0) {
+        updateStarAppearance(ratingValueInput.value);
     }
 }
 
-function showTestimoniModal(testimoniCreateUrl) {
-    fetch(testimoniCreateUrl)
+function showTestimoniCard(testimoni) {
+    const statusInfo = {
+        pending: { text: 'Menunggu Persetujuan', class: 'bg-yellow-100 text-yellow-800' },
+        approved: { text: 'Diterbitkan', class: 'bg-green-100 text-green-800' },
+        rejected: { text: 'Ditolak', class: 'bg-red-100 text-red-800' },
+    };
+    const currentStatus = statusInfo[testimoni.status] || { text: 'Status Tidak Diketahui', class: 'bg-gray-100 text-gray-800' };
+
+    let starsHtml = '';
+    for (let i = 1; i <= 5; i++) {
+        const starClass = i <= testimoni.rating ? 'text-yellow-400' : 'text-gray-300';
+        starsHtml += `<svg class="w-5 h-5 ${starClass}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.92 8.72c-.783-.57-.381-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>`;
+    }
+
+    const fotoHtml = testimoni.foto_testimoni
+        ? `<img src="/storage/${testimoni.foto_testimoni}" class="mt-2 w-24 h-24 object-cover rounded-md border">`
+        : '';
+
+    const cardHtml = `
+        <div id="testimoniCardModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Ulasan Anda</h3>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium ${currentStatus.class}">${currentStatus.text}</span>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex">${starsHtml}</div>
+                    <p class="text-gray-600 bg-gray-50 p-3 rounded-md min-h-[60px]">${testimoni.komentar}</p>
+                    ${fotoHtml}
+                </div>
+                <div class="mt-6 flex justify-between items-center">
+                    <form action="/testimoni/${testimoni.id}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus ulasan ini?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50">Hapus</button>
+                    </form>
+                    <div>
+                        <button onclick="closeTestimoniModal()" class="mr-3 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Tutup</button>
+                        <button onclick="showEditTestimoniModal(${testimoni.id})" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Edit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('testimoniModalContainer').innerHTML = cardHtml;
+}
+
+function showEditTestimoniModal(testimoniId) {
+    const url = `/testimoni/${testimoniId}/edit`;
+    fetch(url)
         .then(response => {
-            if (!response.ok) throw new Error('Gagal memuat form testimoni.');
+            if (!response.ok) throw new Error('Gagal memuat form edit.');
             return response.text();
         })
         .then(html => {
             document.getElementById('testimoniModalContainer').innerHTML = html;
-            const modalElement = document.getElementById('testimoniModal');
-            if (modalElement) {
-                // Inisialisasi bintang setelah modal dimuat
-                initializeStarRating();
-                // Event listener untuk menutup modal
-                modalElement.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        closeTestimoniModal();
-                    }
-                });
-            }
+            // PENTING: Panggil fungsi inisialisasi bintang SETELAH form edit dimuat
+            initializeStarRating();
         })
-        .catch(error => {
-            console.error('Error:', error);
-            // Tampilkan pesan error di modal container
-            document.getElementById('testimoniModalContainer').innerHTML = `
-                <div class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-                    <div class="bg-white rounded-lg p-6 max-w-md mx-4">
-                        <div class="text-center">
-                            <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
-                            <p class="text-gray-700 mb-4">Gagal memuat form testimoni</p>
-                            <button onclick="closeTestimoniModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
-                                Tutup
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
+        .catch(error => console.error('Error:', error));
 }
 
+
+/**
+ * Memuat dan menampilkan modal untuk MEMBUAT testimoni baru.
+ */
+function showTestimoniModal(createUrl) {
+    fetch(createUrl)
+        .then(response => {
+            if (!response.ok) throw new Error('Gagal memuat form create.');
+            return response.text();
+        })
+        .then(html => {
+            document.getElementById('testimoniModalContainer').innerHTML = html;
+            // PENTING: Panggil fungsi inisialisasi bintang SETELAH form create dimuat
+            initializeStarRating();
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+
+/**
+ * Menutup semua modal testimoni.
+ */
 function closeTestimoniModal() {
     const modalContainer = document.getElementById('testimoniModalContainer');
     if (modalContainer) {
-        modalContainer.innerHTML = ''; // Kosongkan container
+        modalContainer.innerHTML = '';
     }
 }
 
-// Fungsi untuk reload halaman setelah testimoni berhasil ditambahkan
-function reloadAfterTestimoni() {
-    closeTestimoniModal();
-    setTimeout(() => {
-        location.reload();
-    }, 500);
-}
 </script>
 @endsection

@@ -32,6 +32,13 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function show(Request $request): View
+    {
+        return view('profile.show', [
+            'user' => $request->user(),
+        ]);
+    }
+
     /**
      * Menampilkan form edit profil untuk admin.
      */
@@ -53,12 +60,46 @@ class ProfileController extends Controller
     }
 
     /**
+     * Menampilkan form untuk mengganti password.
+     */
+    public function editPassword(): View
+    {
+        return view('profile.password');
+    }
+
+    /**
+     * Menampilkan halaman konfirmasi hapus akun.
+     */
+    public function delete(): View
+    {
+        return view('profile.delete');
+    }
+
+    /**
      * Proses update profil untuk user biasa.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $this->updateUserProfile($request);
-        return Redirect::route('profile.index')->with('status', 'profile-updated');
+        $user = $request->user();
+        $user->fill($request->validated());
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        // Handle file upload jika ada
+        if ($request->hasFile('foto')) {
+            // Hapus foto lama jika ada
+            if ($user->foto && Storage::disk('public')->exists($user->foto)) {
+                Storage::disk('public')->delete($user->foto);
+            }
+            // Simpan foto baru
+            $user->foto = $request->file('foto')->store('profile-photos', 'public');
+        }
+
+        $user->save();
+
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
@@ -81,13 +122,13 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        // Hapus file foto profil dari storage
         if ($user->foto) {
-            Storage::delete('public/' . $user->foto);
+            Storage::disk('public')->delete($user->foto);
         }
 
         Auth::logout();
         $user->delete();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

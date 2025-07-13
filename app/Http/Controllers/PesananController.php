@@ -329,4 +329,12 @@ class PesananController extends Controller
         // Implementasi export jika diperlukan
         // Bisa menggunakan package seperti Laravel Excel
     }
+
+        public function notif()
+    {
+        // Ambil 5 testimoni terbaru
+        $pesananBaru = Pesanan::with('user')->latest()->take(5)->get();
+
+        return view('admin.dashboard', compact('pesananBaru'));
+    }
 }

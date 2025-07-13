@@ -18,6 +18,8 @@ return new class extends Migration
             $table->integer('rating')->unsigned()->default(1); // Rating 1-5 bintang
             $table->text('komentar');
             $table->string('foto_testimoni')->nullable(); // Foto opsional
+            $table->string('status', 20)->default('pending'); // 'pending', 'approved', 'rejected'
+            $table->index('status'); // Menambahkan index untuk performa query\
             $table->timestamps();
         });
     }

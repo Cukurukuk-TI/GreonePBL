@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <title>Bgd Hydrofarm</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <!-- Favicon -->
+    <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
 
     {{-- Font Awesome --}}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
@@ -34,22 +36,28 @@
 
 <body class="flex flex-col min-h-screen bg-gray-50">
 
-    {{-- Header --}}
-    <header class="bg-green-700 text-white fixed top-0 w-full z-50 shadow-md" x-data="{ open: false }">
-        <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-5">
-            <h1 class="text-2xl md:text-3xl font-bold">Bgd <span class="font-light">Hydrofarm</span></h1>
+    <!-- Header -->
+    <header class="bg-green-700 text-white fixed top-0 w-full z-50 shadow-md" x-data="{ mobileMenuOpen: false }">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <!-- Logo -->
+                <h1 class="text-2xl font-bold">Bgd <span class="font-light">hydrofarm.</span></h1>
+            </div>
 
-            {{-- Mobile Toggle --}}
-            <button @click="open = !open" class="md:hidden focus:outline-none">
-                <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
+            <!-- Mobile Menu Toggle -->
+            <button class="md:hidden focus:outline-none"
+                @click="mobileMenuOpen = !mobileMenuOpen"
+                :aria-expanded="mobileMenuOpen"
+                title="Menu Navigasi">
+                <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 6h16M4 12h16M4 18h16"/>
+                        d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
-                <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
+                <svg x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"/>
+                        d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
 
@@ -58,7 +66,7 @@
             <a href="/" class="hover:text-green-200">Beranda</a>
             <a href="{{ route('produk.user') }}" class="hover:text-green-200">Produk</a>
             <a href="/artikel" class="hover:text-green-200">Artikel</a>
-            <a href="/kontak" class="hover:text-green-200">Kontak</a>
+            {{-- <a href="/kontak" class="hover:text-green-200">Kontak</a> --}}
             <a href="/tentang" class="hover:text-green-200">Tentang Kami</a>
 
             <!-- Keranjang dengan Badge -->
@@ -78,15 +86,13 @@
         </nav>
         </div>
 
-        {{-- Mobile Navigation --}}
-        <nav x-show="open" x-transition x-cloak class="md:hidden bg-green-600">
         <!-- Mobile Navigation -->
         <div class="md:hidden" x-show="mobileMenuOpen" x-transition x-cloak>
             <div class="pt-4 pb-4 px-6 space-y-2 bg-green-700 text-white font-medium">
                 <a href="/" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Beranda</a>
                 <a href="{{ route('produk.user') }}" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Produk</a>
                 <a href="/artikel" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Artikel</a>
-                <a href="/kontak" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Kontak</a>
+                {{-- <a href="/kontak" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Kontak</a> --}}
                 <a href="/tentang" class="block py-2 hover:text-green-200" @click="mobileMenuOpen = false">Tentang Kami</a>
 
                 <a href="/keranjang" class="flex items-center py-2 hover:text-green-200" @click="mobileMenuOpen = false">
@@ -105,7 +111,6 @@
                 </a>
             </div>
         </div>
-        </nav>
     </header>
 
     {{-- Main Content --}}

@@ -79,11 +79,12 @@
                                         class="font-medium text-blue-600 hover:text-blue-800" title="Edit">
                                         Edit
                                     </a>
-                                    <form action="{{ route('admin.produks.destroy', $produk->id) }}" method="POST"
-                                        onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
+                                    <form id="delete-form-{{ $produk->id }}" action="{{ route('admin.produks.destroy', $produk->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="font-medium text-red-600 hover:text-red-800"
+                                        <button type="button" 
+                                            onclick="confirmDelete('{{ $produk->id }}')" 
+                                            class="font-medium text-red-600 hover:text-red-800" 
                                             title="Hapus">
                                             Hapus
                                         </button>
@@ -105,4 +106,22 @@
             </table>
         </div>
     </div>
+<script>
+        function confirmDelete(id) {
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: "Data yang dihapus tidak bisa dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    }
+</script>
 @endsection

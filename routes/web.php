@@ -16,11 +16,13 @@ use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\PublicArtikelController;
 use App\Http\Controllers\Admin\PelangganController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\KategoriArtikelController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\TestimoniController;
 use App\Http\Controllers\MidtransController;
+use App\Http\Controllers\Admin\Notification;
 
 // Home (Boleh Diakses Guest)
 Route::get('/', [KategoriController::class, 'indexUser'])->name('home');
@@ -30,11 +32,12 @@ Route::get('/artikel/{artikel:slug}', [PublicArtikelController::class, 'show'])-
 
 // Produk - BOLEH DILIHAT TANPA LOGIN
 Route::get('/produk', [ProdukController::class, 'showToUser'])->name('produk.user');
+Route::get('/produk/kategori/{id?}', [ProdukController::class, 'showToUser'])->name('produk.kategori');
 Route::get('/deskripsi-produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
 
 // Halaman statis - boleh diakses tanpa login
-Route::view('/tentang', 'user.aboutus');
-Route::view('/kontak', 'kontak');
+Route::view('/tentang', 'tentang');
+// Route::view('/kontak', 'kontak');
 
 // Guest-only routes (login/register)
 Route::middleware('guest')->group(function () {
@@ -46,12 +49,20 @@ Route::middleware('guest')->group(function () {
 
 // Semua route ini HANYA untuk user yang sudah login
 Route::middleware('auth')->group(function () {
-    // Profile - HARUS LOGIN
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.content');
+    // Halaman Profil Utama (Tampilan Ringkasan)
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+
+    // Halaman Edit Profil
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Halaman Ganti Password
+    Route::get('/profile/password', [ProfileController::class, 'editPassword'])->name('password.edit');
+    Route::put('/password', [App\Http\Controllers\Auth\PasswordController::class, 'update'])->name('password.update');
+
+    // Halaman Hapus Akun
+    Route::get('/profile/delete', [ProfileController::class, 'delete'])->name('profile.delete');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
     // Alamat
     Route::resource('alamat', AlamatController::class);
@@ -84,6 +95,8 @@ Route::middleware('auth')->group(function () {
     // Testimoni routes for user
     Route::get('/testimoni/create/{pesanan_id}', [TestimoniController::class, 'create'])->name('testimoni.create');
     Route::post('/testimoni/store', [TestimoniController::class, 'store'])->name('testimoni.store');
+    Route::get('/testimoni/{testimoni}/edit', [TestimoniController::class, 'edit'])->name('testimoni.edit');
+    Route::put('/testimoni/{testimoni}', [TestimoniController::class, 'update'])->name('testimoni.update');
     Route::delete('/testimoni/{testimoni}', [TestimoniController::class, 'destroy'])->name('testimoni.destroy');
 });
 
@@ -126,6 +139,13 @@ Route::middleware(['auth', 'admin', 'admin.timeout', 'verified'])->prefix('admin
     // Testimoni admin
     Route::get('/testimonis', [TestimoniController::class, 'index'])->name('testimoni.index');
     Route::delete('/testimonis/{testimoni}', [TestimoniController::class, 'destroy'])->name('testimoni.destroy');
+    Route::patch('/testimonis/{testimoni}/approve', [TestimoniController::class, 'approve'])->name('testimoni.approve');
+    Route::patch('/testimonis/{testimoni}/reject', [TestimoniController::class, 'reject'])->name('testimoni.reject');
+
+    // Untuk notif
+    Route::post('/notifications/mark-read', [Notification::class, 'markAsRead'])
+    ->name('notifications.mark-read');
+
 });
 
 // Route untuk Verifikasi Email
@@ -156,8 +176,8 @@ Route::post('forgot-password', function (Request $request) {
     $status = Password::sendResetLink($request->only('email'));
 
     return $status === Password::RESET_LINK_SENT
-                ? back()->with('status', __($status))
-                : back()->withErrors(['email' => __($status)]);
+        ? back()->with('status', __($status))
+        : back()->withErrors(['email' => __($status)]);
 })->middleware('guest')->name('password.email');
 
 Route::get('reset-password/{token}', function (string $token) {
@@ -181,10 +201,34 @@ Route::post('reset-password', function (Request $request) {
     );
 
     return $status === Password::PASSWORD_RESET
-                ? redirect()->route('login')->with('status', __($status))
-                : back()->withErrors(['email' => __($status)]);
+        ? redirect()->route('login')->with('status', __($status))
+        : back()->withErrors(['email' => __($status)]);
 })->middleware('guest')->name('password.update');
 
-    // Route untuk menangani notifikasi dari Midtrans
-    Route::post('/midtrans/callback', [MidtransController::class, 'handle'])->name('midtrans.callback');
-    Route::post('/midtrans/notification', [MidtransController::class, 'notificationHandler'])->name('midtrans.notification');
+// Route untuk menangani notifikasi dari Midtrans
+Route::post('/midtrans/callback', [MidtransController::class, 'handle'])->name('midtrans.callback');
+Route::post('/midtrans/notification', [MidtransController::class, 'notificationHandler'])->name('midtrans.notification');
+Route::get('/admin/dashboard/daily-order-stats', [DashboardController::class, 'getDailyOrderStats'])->name('admin.dashboard.daily-order-stats');
+Route::get('/dashboard/daily-order-stats', [DashboardController::class, 'getDailyOrderStatsApi']);
+Route::get('/dashboard/status-pesanan', [DashboardController::class, 'getStatusPesananData']);
+Route::get('/dashboard/pendapatan-harian', [DashboardController::class, 'getPendapatanHarian']);
+Route::get('/produk-terlaris', [DashboardController::class, 'getProdukTerlaris']);
+Route::get('/dashboard/produk-terlaris', [DashboardController::class, 'produkTerlaris'])->name('dashboard.produk-terlaris');
+
+Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
+
+
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard'); // <-- INI PERBAIKANNYA
+    Route::get('/produk-terlaris-ajax', [AdminController::class, 'getProdukTerlarisAjax'])->name('produk-terlaris-ajax');
+    Route::get('/pesanans/cancelled', [AdminController::class, 'cancelledPesanans'])->name('pesanans.cancelled');
+    Route::patch('/pesanans/{pesanan}/restore', [AdminController::class, 'restorePesanan'])->name('pesanans.restore');
+    Route::delete('/pesanans/{pesanan}/force-delete', [AdminController::class, 'forceDeletePesanan'])->name('pesanans.force-delete');
+});
+
+
+Route::get('/produk-terlaris-ajax', [DashboardController::class, 'getProdukTerlarisAjax'])->name('produk-terlaris-ajax');
+Route::get('/admin/grafik-pendapatan-ajax', [DashboardController::class, 'ajaxPendapatan']);
+Route::get('/admin/grafik-pesanan-ajax', [DashboardController::class, 'ajaxPesanan']);
+Route::get('/admin/produk-terlaris-ajax', [DashboardController::class, 'getProdukTerlarisData']);

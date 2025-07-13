@@ -51,6 +51,21 @@
 
                 <h3 class="text-2xl font-bold">{{ $produk->nama_produk }}</h3>
 
+                <div class="flex items-center my-3">
+                    @if($produk->approved_testimonis_count > 0)
+                        <span class="flex items-center">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <svg class="w-5 h-5 {{ $i <= round($produk->approved_testimonis_avg_rating) ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.92 8.72c-.783-.57-.381-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                            @endfor
+                            <span class="text-gray-600 ml-3">{{ number_format($produk->approved_testimonis_avg_rating, 1) }} dari 5</span>
+                        </span>
+                        <span class="text-gray-400 mx-2">|</span>
+                        <span class="text-gray-600">{{ $produk->approved_testimonis_count }} Ulasan</span>
+                    @else
+                        <span class="flex items-center text-gray-500">Belum ada ulasan</span>
+                    @endif
+                </div>
+
                 <p class="text-orange-500 text-2xl font-bold mt-2">
                     Rp {{ number_format($produk->harga_produk, 0, ',', '.') }}
                 </p>
@@ -96,22 +111,26 @@
 
         <h3 class="text-xl font-bold mb-4">Testimoni Pelanggan</h3>
 
-        @if($produk->testimonis->isEmpty())
-            <p class="text-gray-500 text-center py-8">Belum ada testimoni untuk produk ini.</p>
+        @if($testimonis->isEmpty())
+            <p class="text-gray-500 text-center py-8">Belum ada testimoni yang disetujui untuk produk ini.</p>
         @else
             <div class="space-y-6">
-                @foreach($produk->testimonis as $testimoni)
+                @foreach($testimonis as $testimoni)
                     <div class="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200 relative">
                         <!-- Tombol hapus testimoni (hanya untuk user yang membuat testimoni) -->
                         @auth
-                            @if(auth()->user()->id === $testimoni->user_id)
-                                <button onclick="confirmDeleteTestimoni({{ $testimoni->id }})" 
-                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full p-1 transition-all duration-200"
-                                    title="Hapus testimoni">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
+                            @if(Auth::id() === $testimoni->user_id || Auth::user()->role === 'admin')
+                                <form action="{{ route('testimoni.destroy', $testimoni->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus ulasan ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button 
+                                        class="absolute top-2 right-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full p-1 transition-all duration-200"
+                                        title="Hapus testimoni">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                </form>
                             @endif
                         @endauth
 
