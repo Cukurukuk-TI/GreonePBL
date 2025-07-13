@@ -135,7 +135,7 @@
                 </a>
 
                 <a href="/profile" class="flex items-center py-2 hover:text-green-200" @click="mobileMenuOpen = false">
-                    <i class="fas fa-user mr-2"></i> 
+                    <i class="fas fa-user mr-2"></i>
                     <span>Profil</span>
                 </a>
             </div>
