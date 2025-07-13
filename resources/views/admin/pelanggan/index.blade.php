@@ -81,15 +81,17 @@
                             {{ $user->created_at->isoFormat('D MMMM YYYY') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
-                            <form action="{{ route('admin.pelanggan.destroy', $user->id) }}" 
-                                method="POST">
+                            {{-- Form ini sekarang memiliki ID dinamis yang dicari oleh Javascript --}}
+                            <form id="delete-form-{{ $user->id }}" action="{{ route('admin.pelanggan.destroy', $user->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
-                            </form>
-                            <button onclick="confirmDelete({{ $user->id }})" type="submit" 
-                            class="text-red-600 hover:text-red-900 transition duration-150 ease-in-out">
+
+                                {{-- Tombol "Hapus" sekarang menjadi bagian dari form --}}
+                                <button type="button" onclick="confirmDelete({{ $user->id }})"
+                                class="text-red-600 hover:text-red-900 transition duration-150 ease-in-out">
                                     Hapus
-                            </button>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     @empty
