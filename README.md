@@ -29,6 +29,7 @@ Website ini dirancang untuk menyediakan layanan penjualan produk secara online d
 
 ```bash
 git clone https://github.com/Cukurukuk-TI/GreonePBL.git
+cd GreonePBL
 ```
 
 ### 2. Konfigurasi `.env`
@@ -42,26 +43,50 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-### 3. Jalankan Perintah Laravel
+### 3. Jalankan Perintah untuk Inisiasi Laravel
 
 ```bash
 php artisan migrate
 php artisan db:seed
 rm public/storage
 php artisan storage:link
+npm install
+```
+
+### 4. Jalankan Perintah untuk menjalankan project Laravel
+
+Buka 2 terminal untuk menjalankan 2 kode yang berbeda
+```bash
+npm run dev
 php artisan serve
 ```
 
 ---
 
+## 🔑 Akun untuk Login
+
+Setelah menjalankan db:seed, Anda dapat menggunakan akun berikut untuk masuk ke dalam sistem:
+
+- Akun User:
+Email: user@gmail.com
+Password: user
+
+- Akun Admin:
+Email: admin@gmail.com
+Password: admin
+
+---
+
 ## 🧠 Teknologi yang Digunakan
 
--   **Laravel 10+**
--   **PHP 8+**
+-   **Laravel 12**
+-   **PHP 8.2+**
 -   **MySQL/MariaDB**
 -   **Midtrans Payment Gateway**
+-   **OpenStreetMap API**
 -   **Blade Templating**
 -   **Bootstrap / CSS Custom**
+-   **TailwindCSS**
 
 ---
 
