@@ -196,18 +196,23 @@ class PesananController extends Controller
             abort(403, 'Akses Ditolak.');
         }
 
-        // 2. Validasi: Hanya pesanan dengan status 'pending' yang bisa dibatalkan
-        if ($pesanan->status !== 'pending') {
+        // 2. Validasi: Hanya pesanan dengan status 'unpaid' atau 'pending' yang bisa dibatalkan
+        if (!in_array($pesanan->status, ['unpaid', 'pending'])) {
             return back()->with('error', 'Pesanan ini sudah diproses dan tidak dapat dibatalkan.');
         }
 
         try {
             // 3. Mulai Transaksi Database untuk menjaga konsistensi data
             DB::transaction(function () use ($pesanan) {
-                // 4. Kembalikan stok untuk setiap item detail pesanan
-                foreach ($pesanan->details as $detail) {
-                    if ($detail->produk) {
-                        $detail->produk->increment('stok_produk', $detail->jumlah);
+
+                // 4. Kembalikan stok HANYA JIKA pesanan adalah COD (status 'pending')
+                // Untuk pesanan 'unpaid' (transfer), stok belum pernah dikurangi.
+                if ($pesanan->status === 'pending') {
+                    foreach ($pesanan->details as $detail) {
+                        if ($detail->produk) {
+                            // Gunakan increment untuk menambah stok kembali
+                            $detail->produk->increment('stok_produk', $detail->jumlah);
+                        }
                     }
                 }
 
@@ -218,7 +223,7 @@ class PesananController extends Controller
             return redirect()->route('user.pesanan')->with('success', 'Pesanan dengan kode ' . $pesanan->kode_pesanan . ' berhasil dibatalkan.');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat membatalkan pesanan. Silakan coba lagi.');
+            return back()->with('error', 'Terjadi kesalahan saat membatalkan pesanan: ' . $e->getMessage());
         }
     }
 

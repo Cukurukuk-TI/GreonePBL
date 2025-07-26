@@ -146,7 +146,7 @@
                                         <i class="fas fa-eye mr-1"></i> Detail
                                     </button>
 
-                                    @if ($pesanan->status == 'pending')
+                                    @if (in_array($pesanan->status, ['unpaid', 'pending']))
                                         <form action="{{ route('pesanan.user.cancel', $pesanan->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
                                             @csrf
                                             <button type="submit" class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition duration-200">
