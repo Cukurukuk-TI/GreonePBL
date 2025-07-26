@@ -77,7 +77,7 @@ class PesananController extends Controller
                         return back()->with('error', 'Stok produk "' . $detail->produk->nama_produk . '" tidak mencukupi untuk mengaktifkan kembali pesanan ini!');
                     }
                 }
-                
+
                 // Jika semua stok mencukupi, kurangi stok
                 foreach ($pesanan->details as $detail) {
                     if ($detail->produk) {
@@ -160,7 +160,7 @@ class PesananController extends Controller
 
             // Hapus detail pesanan terlebih dahulu
             $pesanan->details()->delete();
-            
+
             // Hapus pesanan
             $pesanan->delete();
 
@@ -270,7 +270,7 @@ class PesananController extends Controller
     public function show($id)
     {
         $pesanan = Pesanan::with(['user', 'details.produk', 'promo'])->findOrFail($id);
-        
+
         return view('pesanans.show', compact('pesanan'));
     }
 
@@ -283,20 +283,20 @@ class PesananController extends Controller
         $totalDikirim = Pesanan::where('status', 'dikirim')->count();
         $totalComplete = Pesanan::where('status', 'complete')->count();
         $totalCancelled = Pesanan::where('status', 'cancelled')->count();
-        
+
         $totalRevenue = Pesanan::where('status', 'complete')->sum('total_harga');
         $revenueToday = Pesanan::where('status', 'complete')
             ->whereDate('updated_at', today())
             ->sum('total_harga');
-        
+
         $revenueThisMonth = Pesanan::where('status', 'complete')
             ->whereMonth('updated_at', now()->month)
             ->whereYear('updated_at', now()->year)
             ->sum('total_harga');
 
         return view('pesanans.statistics', compact(
-            'totalPesanan', 'totalPending', 'totalProses', 'totalDikirim', 
-            'totalComplete', 'totalCancelled', 'totalRevenue', 
+            'totalPesanan', 'totalPending', 'totalProses', 'totalDikirim',
+            'totalComplete', 'totalCancelled', 'totalRevenue',
             'revenueToday', 'revenueThisMonth'
         ));
     }
@@ -337,4 +337,21 @@ class PesananController extends Controller
 
         return view('admin.dashboard', compact('pesananBaru'));
     }
+
+    public function showConfirmationPage(Pesanan $pesanan)
+    {
+        // Keamanan: Pastikan hanya pemilik pesanan yang bisa melihat halaman ini
+        if (auth()->id() !== $pesanan->user_id) {
+            abort(403, 'ANDA TIDAK MEMILIKI AKSES KE HALAMAN INI.');
+        }
+
+        // Hanya tampilkan jika statusnya 'unpaid' atau 'pending' dari Midtrans
+        if ($pesanan->status !== 'unpaid' && $pesanan->status !== 'pending') {
+             return redirect()->route('user.pesanan')->with('error', 'Pesanan ini sudah diproses atau dibayar.');
+        }
+
+        // Kirim data pesanan ke view
+        return view('pesanans.konfirmasi', compact('pesanan'));
+    }
+
 }

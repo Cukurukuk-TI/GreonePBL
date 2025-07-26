@@ -91,6 +91,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan-detail/{pesanan}', [App\Http\Controllers\PesananController::class, 'showAjax'])->name('pesanan.detail.ajax');
     Route::patch('/pesanans/{id}/restore', [PesananController::class, 'restore'])->name('pesanans.restore');
     Route::delete('/pesanans/{id}/force-delete', [PesananController::class, 'forceDelete'])->name('pesanans.force-delete');
+    Route::get('/pesanan/{pesanan}/konfirmasi', [PesananController::class, 'showConfirmationPage'])->name('pesanan.konfirmasi');
 
     // Testimoni routes for user
     Route::get('/testimoni/create/{pesanan_id}', [TestimoniController::class, 'create'])->name('testimoni.create');
