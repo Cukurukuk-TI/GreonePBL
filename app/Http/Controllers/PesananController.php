@@ -49,7 +49,7 @@ class PesananController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,proses,dikirim,complete,cancelled'
+            'status' => 'required|in:unpaid,paid,pending,proses,dikirim,complete,cancelled'
         ]);
 
         try {
@@ -59,45 +59,44 @@ class PesananController extends Controller
             $statusLama = $pesanan->status;
             $statusBaru = $request->status;
 
-            // Jika status berubah dari non-cancelled ke cancelled, kembalikan stok
-            if ($statusLama !== 'cancelled' && $statusBaru === 'cancelled') {
-                foreach ($pesanan->details as $detail) {
-                    if ($detail->produk) {
-                        $detail->produk->increment('stok_produk', $detail->jumlah);
-                    }
-                }
+            if ($statusLama === $statusBaru) {
+                return back();
             }
 
-            // Jika status berubah dari cancelled ke non-cancelled, kurangi stok
-            if ($statusLama === 'cancelled' && $statusBaru !== 'cancelled') {
-                // Cek stok terlebih dahulu untuk semua produk
+            if ($statusLama === 'unpaid' && $statusBaru === 'paid') {
                 foreach ($pesanan->details as $detail) {
-                    if ($detail->produk && $detail->produk->stok_produk < $detail->jumlah) {
+                    $produk = $detail->produk;
+                    if ($produk && $produk->stok_produk < $detail->jumlah) {
                         DB::rollback();
-                        return back()->with('error', 'Stok produk "' . $detail->produk->nama_produk . '" tidak mencukupi untuk mengaktifkan kembali pesanan ini!');
+                        return back()->with('error', 'Stok produk "' . $produk->nama_produk . '" tidak mencukupi!');
                     }
+                    // Kurangi stok jika cukup
+                    $produk->decrement('stok_produk', $detail->jumlah);
                 }
+            }
 
-                // Jika semua stok mencukupi, kurangi stok
-                foreach ($pesanan->details as $detail) {
-                    if ($detail->produk) {
-                        $detail->produk->decrement('stok_produk', $detail->jumlah);
+            if ($statusBaru === 'cancelled') {
+                // Cek apakah status sebelumnya adalah status di mana stok sudah dipotong
+                // Stok dipotong saat 'pending' (COD) atau 'paid' (Transfer)
+                if (in_array($statusLama, ['pending', 'paid', 'proses', 'dikirim'])) {
+                    foreach ($pesanan->details as $detail) {
+                        if ($detail->produk) {
+                            $detail->produk->increment('stok_produk', $detail->jumlah);
+                        }
                     }
                 }
             }
 
-            // Update status
             $pesanan->update(['status' => $statusBaru]);
 
             DB::commit();
 
-            // Redirect yang tepat berdasarkan status baru
             if ($statusBaru === 'cancelled') {
                 return redirect()->route('admin.pesanans.index')
-                    ->with('success', 'Pesanan berhasil dibatalkan dan dipindahkan ke daftar pesanan yang dibatalkan!');
-            } else {
-                return back()->with('success', 'Status pesanan berhasil diupdate!');
+                    ->with('success', 'Pesanan berhasil dibatalkan dan dipindahkan ke arsip!');
             }
+
+            return back()->with('success', 'Status pesanan berhasil diupdate!');
 
         } catch (\Exception $e) {
             DB::rollback();

@@ -130,11 +130,28 @@
                                     @method('PATCH')
                                     <select name="status" onchange="confirmStatusChange(this, '{{ $pesanan->status }}')"
                                             class="text-xs font-semibold border-gray-300 rounded-md shadow-sm focus:border-brand-green focus:ring-2 focus:ring-brand-green-light transition {{ $statusClasses[$pesanan->status] ?? 'bg-gray-100' }}">
-                                        <option value="pending" {{ $pesanan->status == 'pending' ? 'selected' : '' }}>Menunggu</option>
-                                        <option value="proses" {{ $pesanan->status == 'proses' ? 'selected' : '' }}>Di Proses</option>
-                                        <option value="dikirim" {{ $pesanan->status == 'dikirim' ? 'selected' : '' }}>Di Kirim</option>
-                                        <option value="complete" {{ $pesanan->status == 'complete' ? 'selected' : '' }}>Selesai</option>
-                                        <option value="cancelled" {{ $pesanan->status == 'cancelled' ? 'selected' : '' }}>Batalkan</option>
+                                        @if($pesanan->status == 'unpaid')
+                                            <option value="unpaid" selected>Unpaid</option>
+                                            <option value="paid">Tandai Sudah Dibayar</option>
+                                            <option value="cancelled">Batalkan</option>
+                                        @elseif($pesanan->status == 'pending')
+                                            <option value="pending" selected>Pending (COD)</option>
+                                            <option value="proses">Proses Pesanan</option>
+                                            <option value="cancelled">Batalkan</option>
+                                        @elseif($pesanan->status == 'paid')
+                                            <option value="paid" selected>Paid</option>
+                                            <option value="proses">Proses Pesanan</option>
+                                            <option value="cancelled">Batalkan</option>
+                                        @elseif($pesanan->status == 'proses')
+                                            <option value="proses" selected>Diproses</option>
+                                            <option value="dikirim">Kirim Pesanan</option>
+                                            <option value="cancelled">Batalkan</option>
+                                        @elseif($pesanan->status == 'dikirim')
+                                            <option value="dikirim" selected>Dikirim</option>
+                                            <option value="complete">Selesaikan Pesanan</option>
+                                        @elseif($pesanan->status == 'complete')
+                                            <option value="complete" selected>Selesai</option>
+                                        @endif
                                     </select>
                                 </form>
                             </td>
